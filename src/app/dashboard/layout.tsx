@@ -73,24 +73,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="min-h-screen">
             <aside className="sidebar-layout">
-                <div className="p-8 pb-10 flex items-center gap-4">
+                <div className="p-8 pb-10 flex items-center gap-5">
                     <div className="relative group">
-                        {/* Soft Glow Layer */}
-                        <div className="absolute inset-0 bg-[#00F5FF]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        {/* Stronger Glow Layer */}
+                        <div className="absolute inset-0 bg-[#00F5FF]/30 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                        {/* Logo Container */}
-                        <div className="relative w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-[0_0_20px_rgba(0,245,255,0.15)] overflow-hidden">
+                        {/* Larger Logo Container */}
+                        <div className="relative w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-[0_0_25px_rgba(0,245,255,0.25)] overflow-hidden">
                             <Image
                                 src="https://i.imgur.com/ltQPsHi.png"
                                 alt="Logo AutoDrive"
-                                width={40}
-                                height={40}
+                                width={56}
+                                height={56}
                                 priority
-                                className="object-contain p-1.5"
+                                className="object-cover"
                             />
                         </div>
                     </div>
-                    <h1 className="text-xl font-bold text-white tracking-tight uppercase">
+                    <h1 className="text-2xl font-black text-white tracking-tighter uppercase italic">
                         AutoDrive
                     </h1>
                 </div>
