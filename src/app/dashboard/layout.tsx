@@ -80,7 +80,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                         {/* Logo without container */}
                         <Image
-                            src="/logo-autodrive-removebg-preview.png"
+                            src="https://i.imgur.com/ZvGdbPc.png"
                             alt="Logo AutoDrive"
                             width={64}
                             height={64}
