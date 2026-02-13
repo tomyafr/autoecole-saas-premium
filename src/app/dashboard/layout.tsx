@@ -73,22 +73,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="min-h-screen">
             <aside className="sidebar-layout">
-                <div className="p-8 pb-10 flex items-center gap-5">
+                <div className="p-8 pb-10 flex items-center gap-4">
                     <div className="relative group">
-                        {/* Stronger Glow Layer */}
-                        <div className="absolute inset-0 bg-[#00F5FF]/30 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        {/* Subtle Glow Layer */}
+                        <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                        {/* Larger Logo Container */}
-                        <div className="relative w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-[0_0_25px_rgba(0,245,255,0.25)] overflow-hidden">
-                            <Image
-                                src="https://i.imgur.com/ltQPsHi.png"
-                                alt="Logo AutoDrive"
-                                width={56}
-                                height={56}
-                                priority
-                                className="object-cover"
-                            />
-                        </div>
+                        {/* Logo without container */}
+                        <Image
+                            src="/logo-autodrive-removebg-preview.png"
+                            alt="Logo AutoDrive"
+                            width={64}
+                            height={64}
+                            priority
+                            className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110"
+                        />
                     </div>
                     <h1 className="text-2xl font-black text-white tracking-tighter uppercase italic">
                         AutoDrive
