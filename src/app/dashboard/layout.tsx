@@ -82,20 +82,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="min-h-screen">
             <aside className="sidebar-layout">
-                <div className="p-8 pb-10 flex items-center gap-4">
+                <div className="p-8 pb-10 flex items-center gap-x-3">
                     <div className="relative group">
                         <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <Image
                             src="https://i.imgur.com/ZvGdbPc.png"
                             alt="Logo AutoDrive"
-                            width={56}
-                            height={56}
+                            width={48}
+                            height={48}
                             priority
                             className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110"
                         />
                     </div>
                     <h1 className="text-xl font-black text-white tracking-tighter uppercase italic leading-none">
-                        AutoDrive
+                        AUTODRIVE
                     </h1>
                 </div>
 
