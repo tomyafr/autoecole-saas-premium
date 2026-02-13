@@ -73,33 +73,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="min-h-screen">
             <aside className="sidebar-layout">
-                <div className="p-10 pb-12 flex flex-col items-start gap-8">
+                <div className="p-8 pb-10 flex items-center gap-4">
                     <div className="relative group">
-                        {/* Subtle Glow Layer */}
-                        <div className="absolute inset-0 bg-[#00F5FF]/15 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                        {/* Massive Logo */}
+                        <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <Image
                             src="https://i.imgur.com/ZvGdbPc.png"
                             alt="Logo AutoDrive"
-                            width={128}
-                            height={128}
+                            width={56}
+                            height={56}
                             priority
-                            className="relative z-10 object-contain transition-transform duration-500 group-hover:scale-105"
+                            className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110"
                         />
                     </div>
-                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">
+                    <h1 className="text-xl font-black text-white tracking-tighter uppercase italic leading-none">
                         AutoDrive
                     </h1>
                 </div>
 
-                <nav className="flex-1 px-4 space-y-1.5">
+                <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
                     <p className="text-[10px] font-semibold text-[#5F6B7A] uppercase tracking-[0.2em] px-4 mb-4">Principal</p>
                     {navItems.map((item) => (
                         <button
                             key={item.href}
-                            onClick={() => router.push(item.href)}
-                            className={`nav-item w-full ${pathname === item.href ? 'active' : ''}`}
+                            type="button"
+                            onClick={() => {
+                                console.log('Navigating to:', item.href);
+                                router.push(item.href);
+                            }}
+                            className={`nav-item w-full cursor-pointer relative z-20 ${pathname === item.href ? 'active' : ''}`}
                         >
                             {item.icon}
                             <span className="text-sm font-medium">{item.label}</span>
