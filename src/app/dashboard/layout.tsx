@@ -14,6 +14,7 @@ import {
     UserCircle,
     Hexagon
 } from 'lucide-react';
+import Image from 'next/image';
 import { getUser, logout, type User, type UserRole } from '@/lib/auth';
 
 interface NavItem {
@@ -72,10 +73,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="min-h-screen">
             <aside className="sidebar-layout">
-                <div className="p-8 pb-10 flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00F5FF] to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(0,245,255,0.2)]">
-                        <Hexagon size={18} className="text-black" fill="currentColor" />
-                    </div>
+                <div className="p-8 pb-10 flex items-center gap-3">
+                    <Image
+                        src="/logo Autodrive fictif.png"
+                        alt="Logo AutoDrive"
+                        width={32}
+                        height={32}
+                        priority
+                        className="rounded-lg shadow-[0_0_15px_rgba(0,245,255,0.2)] object-contain"
+                    />
                     <h1 className="text-lg font-bold text-white tracking-tight uppercase">
                         AutoDrive
                     </h1>
