@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <aside className="sidebar-layout">
                 <div className="p-8 pb-10 flex items-center gap-3">
                     <Image
-                        src="/logo Autodrive fictif.png"
+                        src="/logo-autodrive.png"
                         alt="Logo AutoDrive"
                         width={32}
                         height={32}
