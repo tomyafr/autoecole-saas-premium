@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import {
     CreditCard,
     DollarSign,
@@ -14,6 +16,7 @@ import {
     ArrowUpRight,
     Search
 } from 'lucide-react';
+import { getUser, type User as UserType } from '@/lib/auth';
 
 /* ======= DATA ======= */
 const INVOICES = [
@@ -23,6 +26,28 @@ const INVOICES = [
 ];
 
 export default function ElevePaiementsPage() {
+    const router = useRouter();
+    const [user, setUser] = useState<UserType | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const u = getUser();
+        if (u) {
+            setUser(u);
+            setLoading(false);
+        } else {
+            router.replace('/login');
+        }
+    }, [router]);
+
+    if (loading || !user) {
+        return (
+            <div className="h-[60vh] flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-10 group/paiements">
             {/* Page Header */}

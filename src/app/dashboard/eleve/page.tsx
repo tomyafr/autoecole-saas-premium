@@ -13,9 +13,31 @@ import {
     Hexagon
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { getUser, type User } from '@/lib/auth';
 
 export default function EleveDashboard() {
     const router = useRouter();
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const u = getUser();
+        if (u) {
+            setUser(u);
+            setLoading(false);
+        } else {
+            router.replace('/login');
+        }
+    }, [router]);
+
+    if (loading || !user) {
+        return (
+            <div className="h-[60vh] flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     const stats = [
         { label: 'Heures effectuées', value: '24/35h', sub: 'Formation à 68%', icon: <Timer size={18} />, color: 'text-[#00F5FF]' },

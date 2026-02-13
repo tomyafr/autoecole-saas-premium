@@ -26,12 +26,20 @@ import { useRouter } from 'next/navigation';
 export default function SettingsPage() {
     const router = useRouter();
     const [user, setUser] = useState<UserType | null>(null);
+    const [loading, setLoading] = useState(true);
     const [activeSection, setActiveSection] = useState('profile');
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        setUser(getUser());
-    }, []);
+        const u = getUser();
+        if (u) {
+            setUser(u);
+            setLoading(false);
+        } else {
+            // If No user found in Settings, layout will handle logout but let's be safe
+            router.replace('/login');
+        }
+    }, [router]);
 
     const handleLogout = () => {
         logout();
@@ -43,7 +51,13 @@ export default function SettingsPage() {
         setTimeout(() => setIsSaving(false), 1500);
     };
 
-    if (!user) return null;
+    if (loading || !user) {
+        return (
+            <div className="h-[60vh] flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     const sections = [
         { id: 'profile', label: 'Profil Personnel', icon: <User size={18} />, desc: 'Identité et préférences publiques' },

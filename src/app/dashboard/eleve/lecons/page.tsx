@@ -15,6 +15,9 @@ import {
     Download
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getUser, type User as UserType } from '@/lib/auth';
 
 const LESSONS = [
     { id: 'CITY-101', date: '10 Fév 2026', time: '09:00', moniteur: 'Marc Dupont', vehicule: 'Renault Clio 5', score: '18/20', status: 'Effectué' },
@@ -24,6 +27,27 @@ const LESSONS = [
 ];
 
 export default function LeconsPage() {
+    const router = useRouter();
+    const [user, setUser] = useState<UserType | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const u = getUser();
+        if (u) {
+            setUser(u);
+            setLoading(false);
+        } else {
+            router.replace('/login');
+        }
+    }, [router]);
+
+    if (loading || !user) {
+        return (
+            <div className="h-[60vh] flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
     return (
         <div className="space-y-10 group/lecons">
             {/* Page Header with Controls */}

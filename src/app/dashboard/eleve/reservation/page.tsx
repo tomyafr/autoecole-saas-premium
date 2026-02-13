@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import {
     Calendar as CalendarIcon,
     Clock,
@@ -13,6 +14,7 @@ import {
     ArrowRight,
     Car
 } from 'lucide-react';
+import { getUser, type User as UserType } from '@/lib/auth';
 
 const SLOTS = [
     { id: 1, time: '08:00', type: 'Conduite urbaine', moniteur: 'Marc Dupont', exp: 'Senior', rating: 4.9 },
@@ -24,8 +26,21 @@ const SLOTS = [
 ];
 
 export default function ReservationPage() {
+    const router = useRouter();
+    const [user, setUser] = useState<UserType | null>(null);
+    const [loading, setLoading] = useState(true);
     const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
+
+    useEffect(() => {
+        const u = getUser();
+        if (u) {
+            setUser(u);
+            setLoading(false);
+        } else {
+            router.replace('/login');
+        }
+    }, [router]);
 
     const handleConfirm = () => {
         setIsConfirmed(true);
@@ -34,6 +49,14 @@ export default function ReservationPage() {
             setSelectedSlot(null);
         }, 3000);
     };
+
+    if (loading || !user) {
+        return (
+            <div className="h-[60vh] flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-10 group/reservation">
