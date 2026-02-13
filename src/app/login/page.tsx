@@ -134,6 +134,18 @@ export default function LoginPage() {
                     </div>
                 </div>
 
+                <div className="mt-6 text-center">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-700">
+                        Pas encore de compte ?{' '}
+                        <button
+                            onClick={() => router.push('/register')}
+                            className="text-cyan-500 hover:text-cyan-400 transition-colors"
+                        >
+                            S'inscrire
+                        </button>
+                    </p>
+                </div>
+
                 <p className="text-center mt-10 text-[10px] text-slate-700 font-bold uppercase tracking-widest">
                     &copy; 2026 AutoDrive Pro — All rights reserved
                 </p>

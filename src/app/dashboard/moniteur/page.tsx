@@ -41,11 +41,17 @@ export default function MoniteurDashboard() {
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Gestion tactique de vos sessions d'apprentissage.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="btn-secondary">
+                    <button
+                        onClick={() => router.push('/dashboard/moniteur/planning')}
+                        className="btn-secondary"
+                    >
                         <Calendar size={18} />
                         Planning Complet
                     </button>
-                    <button className="btn-primary">
+                    <button
+                        onClick={() => router.push('/dashboard/moniteur/planning')}
+                        className="btn-primary"
+                    >
                         <Zap size={18} />
                         Lancer Session
                     </button>
@@ -125,7 +131,10 @@ export default function MoniteurDashboard() {
                                                 )}
                                             </td>
                                             <td>
-                                                <button className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${session.status === 'done' ? 'text-emerald-400 bg-emerald-400/5' : 'text-[#8A94A6] bg-white/5 hover:bg-[#00F5FF]/10 hover:text-[#00F5FF]'}`}>
+                                                <button
+                                                    onClick={() => router.push('/dashboard/moniteur/planning')}
+                                                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${session.status === 'done' ? 'text-emerald-400 bg-emerald-400/5' : 'text-[#8A94A6] bg-white/5 hover:bg-[#00F5FF]/10 hover:text-[#00F5FF]'}`}
+                                                >
                                                     {session.status === 'done' ? <CheckCircle2 size={18} /> : <ChevronRight size={18} />}
                                                 </button>
                                             </td>
@@ -147,7 +156,10 @@ export default function MoniteurDashboard() {
                             </div>
                         </div>
                         <div className="space-y-4">
-                            <div className="p-6 rounded-2xl bg-white/[0.01] border border-white/5 hover:border-[#00F5FF]/20 transition-all group">
+                            <div
+                                onClick={() => router.push('/dashboard/moniteur/evaluations')}
+                                className="p-6 rounded-2xl bg-white/[0.01] border border-white/5 hover:border-[#00F5FF]/20 transition-all group cursor-pointer"
+                            >
                                 <p className="text-sm text-gray-300 leading-relaxed font-medium group-hover:text-white transition-colors">
                                     "Excellente maîtrise de l'embrayage pour Lucas. Nous allons passer à l'autoroute la semaine prochaine. Focus sur les angles morts."
                                 </p>
@@ -184,7 +196,10 @@ export default function MoniteurDashboard() {
                                 </div>
                             ))}
                         </div>
-                        <button className="w-full btn-primary mt-8 py-4">
+                        <button
+                            onClick={() => router.push('/dashboard/moniteur/planning')}
+                            className="w-full btn-primary mt-8 py-4"
+                        >
                             Optimizer Planning
                             <ChevronRight size={16} />
                         </button>

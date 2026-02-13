@@ -12,6 +12,10 @@ import {
     LogOut,
     Bell,
     UserCircle,
+    Users,
+    Activity,
+    MapPin,
+    ClipboardCheck,
     Hexagon
 } from 'lucide-react';
 import Image from 'next/image';
@@ -31,11 +35,16 @@ const NAV_CONFIG: Record<UserRole, NavItem[]> = {
         { label: 'Facturation', href: '/dashboard/eleve/paiements', icon: <CreditCard size={18} /> },
     ],
     moniteur: [
-        { label: 'Tableau de bord', href: '/dashboard/moniteur', icon: <LayoutDashboard size={18} /> },
-        { label: 'Gestion élèves', href: '/dashboard/moniteur/eleves', icon: <UserCircle size={18} /> },
+        { label: 'Console Instructeur', href: '/dashboard/moniteur', icon: <LayoutDashboard size={18} /> },
+        { label: 'Planning de Vol', href: '/dashboard/moniteur/planning', icon: <Calendar size={18} /> },
+        { label: 'Pilotage Élèves', href: '/dashboard/moniteur/eleves', icon: <UserCircle size={18} /> },
+        { label: 'Journal d\'Audit', href: '/dashboard/moniteur/evaluations', icon: <ClipboardCheck size={18} /> },
     ],
     admin: [
-        { label: 'Tableau de bord', href: '/dashboard/admin', icon: <LayoutDashboard size={18} /> },
+        { label: 'Quartier Général', href: '/dashboard/admin', icon: <LayoutDashboard size={18} /> },
+        { label: 'Management Nodes', href: '/dashboard/admin/centres', icon: <MapPin size={18} /> },
+        { label: 'Flux Utilisateurs', href: '/dashboard/admin/utilisateurs', icon: <Users size={18} /> },
+        { label: 'Analyse Tactique', href: '/dashboard/admin/stats', icon: <Activity size={18} /> },
     ],
 };
 

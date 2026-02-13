@@ -14,8 +14,10 @@ import {
     Hexagon,
     Target
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function AdminDashboard() {
+    const router = useRouter();
     const stats = [
         { label: 'Chiffre d\'Affaires', value: '42,850€', sub: '+12.5% vs mois dernier', icon: <CreditCard size={18} />, color: 'text-emerald-400' },
         { label: 'Nouveaux Élèves', value: '128', sub: 'Semaine en cours', icon: <Users size={18} />, color: 'text-[#00F5FF]' },
@@ -39,11 +41,17 @@ export default function AdminDashboard() {
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Analyse globale de la performance du réseau AutoDrive.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="btn-secondary">
+                    <button
+                        onClick={() => router.push('/dashboard/admin/stats')}
+                        className="btn-secondary"
+                    >
                         <Activity size={16} />
                         Flux système
                     </button>
-                    <button className="btn-primary">
+                    <button
+                        onClick={() => router.push('/dashboard/admin/centres')}
+                        className="btn-primary"
+                    >
                         <Hexagon size={16} />
                         Nouveau centre
                     </button>
@@ -117,7 +125,12 @@ export default function AdminDashboard() {
                     <div className="premium-card overflow-hidden">
                         <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
                             <h3 className="section-title">Contrôle des Centres</h3>
-                            <button className="text-[10px] font-black text-[#00F5FF] hover:underline uppercase tracking-wider">Audit Global</button>
+                            <button
+                                onClick={() => router.push('/dashboard/admin/stats')}
+                                className="text-[10px] font-black text-[#00F5FF] hover:underline uppercase tracking-wider"
+                            >
+                                Audit Global
+                            </button>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="premium-table">
@@ -138,7 +151,10 @@ export default function AdminDashboard() {
                                             <td className="font-medium text-[#8A94A6]">{center.moniteurs} moniteurs</td>
                                             <td className="font-bold text-emerald-400 font-mono tracking-tighter">{center.revenue}</td>
                                             <td className="text-right">
-                                                <button className="p-2 text-[#5F6B7A] hover:text-white transition-colors">
+                                                <button
+                                                    onClick={() => router.push('/dashboard/admin/centres')}
+                                                    className="p-2 text-[#5F6B7A] hover:text-white transition-colors"
+                                                >
                                                     <ChevronRight size={18} />
                                                 </button>
                                             </td>
@@ -201,7 +217,10 @@ export default function AdminDashboard() {
                                 </div>
                             ))}
                         </div>
-                        <button className="w-full mt-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#5F6B7A] hover:text-white transition-colors">
+                        <button
+                            onClick={() => router.push('/dashboard/admin/utilisateurs')}
+                            className="w-full mt-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#5F6B7A] hover:text-white transition-colors"
+                        >
                             Voir tout l'effectif
                         </button>
                     </div>

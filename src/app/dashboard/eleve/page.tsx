@@ -33,7 +33,10 @@ export default function EleveDashboard() {
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Bon retour parmi nous, Lucas. Voici votre progression en temps réel.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="btn-secondary">
+                    <button
+                        onClick={() => router.push('/dashboard/eleve/lecons')}
+                        className="btn-secondary"
+                    >
                         <Hexagon size={16} />
                         Rapport complet
                     </button>
@@ -119,7 +122,12 @@ export default function EleveDashboard() {
                     <div className="premium-card overflow-hidden">
                         <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
                             <h3 className="section-title">Dernières missions</h3>
-                            <button className="text-xs font-bold text-[#00F5FF] hover:underline uppercase tracking-wider">Archives</button>
+                            <button
+                                onClick={() => router.push('/dashboard/eleve/lecons')}
+                                className="text-xs font-bold text-[#00F5FF] hover:underline uppercase tracking-wider"
+                            >
+                                Archives
+                            </button>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="premium-table">
@@ -179,7 +187,10 @@ export default function EleveDashboard() {
                                     <p className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mt-0.5">Examinatrice Senior</p>
                                 </div>
                             </div>
-                            <button className="w-full btn-primary">
+                            <button
+                                onClick={() => router.push('/dashboard/eleve/lecons')}
+                                className="w-full btn-primary"
+                            >
                                 Détails de la mission
                                 <ArrowUpRight size={16} />
                             </button>

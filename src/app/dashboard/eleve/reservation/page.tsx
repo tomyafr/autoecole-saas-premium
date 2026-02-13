@@ -25,6 +25,15 @@ const SLOTS = [
 
 export default function ReservationPage() {
     const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+    const [isConfirmed, setIsConfirmed] = useState(false);
+
+    const handleConfirm = () => {
+        setIsConfirmed(true);
+        setTimeout(() => {
+            setIsConfirmed(false);
+            setSelectedSlot(null);
+        }, 3000);
+    };
 
     return (
         <div className="space-y-10 group/reservation">
@@ -108,8 +117,25 @@ export default function ReservationPage() {
                 {/* Right Context & Confirmation */}
                 <div className="space-y-6">
                     <AnimatePresence mode="wait">
-                        {selectedSlot ? (
+                        {isConfirmed ? (
                             <motion.div
+                                key="success"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                className="premium-card p-12 flex flex-col items-center justify-center text-center space-y-6 min-h-[400px] border-[#00F5FF]/20"
+                            >
+                                <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                    <CheckCircle2 size={40} />
+                                </div>
+                                <div>
+                                    <h3 className="section-title mb-2">Session Confirmée</h3>
+                                    <p className="secondary-info max-w-[200px] mx-auto">Votre mission a été enregistrée avec succès dans votre planning.</p>
+                                </div>
+                            </motion.div>
+                        ) : selectedSlot ? (
+                            <motion.div
+                                key="selection"
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 20 }}
@@ -155,7 +181,10 @@ export default function ReservationPage() {
                                 </div>
 
                                 <div className="space-y-3">
-                                    <button className="w-full btn-primary py-4">
+                                    <button
+                                        onClick={handleConfirm}
+                                        className="w-full btn-primary py-4"
+                                    >
                                         Confirmer la session
                                         <ArrowRight size={18} />
                                     </button>
