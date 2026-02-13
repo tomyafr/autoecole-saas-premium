@@ -73,22 +73,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="min-h-screen">
             <aside className="sidebar-layout">
-                <div className="p-8 pb-10 flex items-center gap-4">
+                <div className="p-10 pb-12 flex flex-col items-start gap-8">
                     <div className="relative group">
                         {/* Subtle Glow Layer */}
-                        <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-[#00F5FF]/15 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                        {/* Logo without container */}
+                        {/* Massive Logo */}
                         <Image
                             src="https://i.imgur.com/ZvGdbPc.png"
                             alt="Logo AutoDrive"
-                            width={64}
-                            height={64}
+                            width={128}
+                            height={128}
                             priority
-                            className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110"
+                            className="relative z-10 object-contain transition-transform duration-500 group-hover:scale-105"
                         />
                     </div>
-                    <h1 className="text-2xl font-black text-white tracking-tighter uppercase italic">
+                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none">
                         AutoDrive
                     </h1>
                 </div>
