@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { getUser, logout, type User as UserType } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function SettingsPage() {
     const router = useRouter();
@@ -75,9 +76,9 @@ export default function SettingsPage() {
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Configuration de votre terminal opérationnel AutoDrive Pro.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/5 text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest flex items-center gap-3">
+                    <div className="px-4 py-2 rounded-xl bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest flex items-center gap-3">
                         <Monitor size={12} className="text-[#00F5FF]" />
-                        Dernière synchro: <span className="text-white">Aujourd&#39;hui, 14:20</span>
+                        Dernière synchro: <span className="text-[var(--color-text-primary)]">Aujourd&#39;hui, 14:20</span>
                     </div>
                 </div>
             </div>
@@ -93,7 +94,7 @@ export default function SettingsPage() {
                                 w-full flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 cursor-pointer group
                                 ${activeSection === section.id
                                     ? 'bg-[#00F5FF]/[0.05] border-[#00F5FF]/20 text-[#00F5FF] shadow-[0_15px_30px_-10px_rgba(0,245,255,0.1)]'
-                                    : 'bg-white/[0.01] border-white/5 text-[#5F6B7A] hover:text-white hover:bg-white/[0.03]'}
+                                    : 'bg-[var(--color-card)] border-[var(--color-border-subtle)] text-[#5F6B7A] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-sidebar)]'}
                             `}
                         >
                             <div className="flex items-center gap-4 text-left">
@@ -140,7 +141,7 @@ export default function SettingsPage() {
                                     <div className="flex flex-col sm:flex-row items-center gap-10">
                                         <div className="relative group">
                                             <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-tr from-blue-600 to-[#00F5FF] p-1 shadow-2xl transition-transform duration-700 group-hover:rotate-6">
-                                                <div className="w-full h-full rounded-[2.3rem] bg-[#0E1319] flex items-center justify-center text-4xl font-black text-white">
+                                                <div className="w-full h-full rounded-[2.3rem] bg-[#0E1319] flex items-center justify-center text-4xl font-black text-[var(--color-text-primary)]">
                                                     {user.avatar}
                                                 </div>
                                             </div>
@@ -149,8 +150,8 @@ export default function SettingsPage() {
                                             </button>
                                         </div>
                                         <div className="text-center sm:text-left flex-1 min-w-0">
-                                            <h3 className="text-3xl font-black text-white tracking-tighter uppercase">{user.name}</h3>
-                                            <p className="text-[#8A94A6] text-xs font-bold mt-1">UUID: <span className="text-white font-mono tracking-tighter">{user.id}</span></p>
+                                            <h3 className="text-3xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase">{user.name}</h3>
+                                            <p className="text-[#8A94A6] text-xs font-bold mt-1">UUID: <span className="text-[var(--color-text-primary)] font-mono tracking-tighter">{user.id}</span></p>
                                             <div className="flex flex-wrap justify-center sm:justify-start gap-4 mt-8">
                                                 <div className="px-4 py-2 rounded-xl bg-[#00F5FF]/10 border border-[#00F5FF]/20 text-[#00F5FF] text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                                                     <Hexagon size={12} fill="currentColor" />
@@ -172,7 +173,7 @@ export default function SettingsPage() {
                                                 <input
                                                     type="text"
                                                     defaultValue={user.name}
-                                                    className="w-full pl-14 pr-6 py-5 bg-white/[0.01] border border-white/5 rounded-2xl text-sm font-bold text-white focus:outline-none focus:border-[#00F5FF]/20 transition-all focus:bg-white/[0.03]"
+                                                    className="w-full pl-14 pr-6 py-5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-2xl text-sm font-bold text-[var(--color-text-primary)] focus:outline-none focus:border-[#00F5FF]/20 transition-all focus:bg-[var(--color-sidebar)]"
                                                 />
                                             </div>
                                         </div>
@@ -183,7 +184,7 @@ export default function SettingsPage() {
                                                 <input
                                                     type="email"
                                                     placeholder="lucas.b@autodrive.pro"
-                                                    className="w-full pl-14 pr-6 py-5 bg-white/[0.01] border border-white/5 rounded-2xl text-sm font-bold text-white focus:outline-none focus:border-[#00F5FF]/20 transition-all focus:bg-white/[0.03]"
+                                                    className="w-full pl-14 pr-6 py-5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-2xl text-sm font-bold text-[var(--color-text-primary)] focus:outline-none focus:border-[#00F5FF]/20 transition-all focus:bg-[var(--color-sidebar)]"
                                                 />
                                             </div>
                                         </div>
@@ -194,7 +195,7 @@ export default function SettingsPage() {
                                                 <input
                                                     type="tel"
                                                     placeholder="+33 6 00 00 00 00"
-                                                    className="w-full pl-14 pr-6 py-5 bg-white/[0.01] border border-white/5 rounded-2xl text-sm font-bold text-white focus:outline-none focus:border-[#00F5FF]/20 transition-all focus:bg-white/[0.03]"
+                                                    className="w-full pl-14 pr-6 py-5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-2xl text-sm font-bold text-[var(--color-text-primary)] focus:outline-none focus:border-[#00F5FF]/20 transition-all focus:bg-[var(--color-sidebar)]"
                                                 />
                                             </div>
                                         </div>
@@ -202,7 +203,7 @@ export default function SettingsPage() {
                                             <label className="text-[10px] text-[#5F6B7A] uppercase font-black tracking-[0.2em] ml-1">Région Opérationnelle</label>
                                             <div className="relative group/input">
                                                 <Globe className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] transition-colors group-focus-within/input:text-[#00F5FF]" size={18} />
-                                                <select className="w-full pl-14 pr-6 py-5 bg-white/[0.01] border border-white/5 rounded-2xl text-sm font-bold text-white focus:outline-none focus:border-[#00F5FF]/20 transition-all appearance-none cursor-pointer">
+                                                <select className="w-full pl-14 pr-6 py-5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-2xl text-sm font-bold text-[var(--color-text-primary)] focus:outline-none focus:border-[#00F5FF]/20 transition-all appearance-none cursor-pointer">
                                                     <option>Île-de-France (HQ)</option>
                                                     <option>Lyon (Secteur B)</option>
                                                     <option>Marseille (Secteur C)</option>
@@ -212,7 +213,7 @@ export default function SettingsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="pt-10 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+                                    <div className="pt-10 border-t border-[var(--color-border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-6">
                                         <div className="flex items-center gap-3 text-[#5F6B7A]">
                                             <Lock size={14} className="text-[#00F5FF]/50" />
                                             <span className="text-[10px] font-black uppercase tracking-widest">Protocoles de Chiffrement Actifs</span>
@@ -238,7 +239,46 @@ export default function SettingsPage() {
                                 </div>
                             )}
 
-                            {activeSection !== 'profile' && (
+                            {activeSection === 'preferences' && (
+                                <div className="space-y-12">
+                                    <div className="flex items-center gap-6">
+                                        <div className="p-4 rounded-2xl bg-[#00F5FF]/10 text-[#00F5FF]">
+                                            <Monitor size={32} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-2xl font-black text-[var(--color-text-primary)] uppercase tracking-tighter">Interface Tactique</h3>
+                                            <p className="text-[#8A94A6] text-xs font-bold mt-1">Personnalisation de l'environnement visuel</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-8">
+                                        <div className="p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] space-y-6">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h4 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">Mode d'affichage</h4>
+                                                    <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">Choisissez entre le mode Tactique (Sombre) et le mode Opérationnel (Clair)</p>
+                                                </div>
+                                                <ThemeToggle />
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] space-y-6 opacity-50 pointer-events-none filter grayscale">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h4 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">Densité d'Information</h4>
+                                                    <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">Compact ou Aéré</p>
+                                                </div>
+                                                <div className="flex bg-white/[0.03] border border-white/5 p-1 rounded-lg">
+                                                    <div className="px-3 py-1 bg-white text-black rounded text-[10px] font-bold uppercase">Standard</div>
+                                                    <div className="px-3 py-1 text-[#5F6B7A] rounded text-[10px] font-bold uppercase">Compact</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeSection !== 'profile' && activeSection !== 'preferences' && (
                                 <div className="py-24 text-center space-y-8 flex flex-col items-center">
                                     <div className="w-24 h-24 rounded-[2rem] bg-white/[0.01] border border-white/5 flex items-center justify-center text-[#5F6B7A] group/icon">
                                         {sections.find(s => s.id === activeSection) &&
