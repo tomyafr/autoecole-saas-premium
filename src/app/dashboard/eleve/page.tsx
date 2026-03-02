@@ -280,7 +280,7 @@ export default function EleveDashboard() {
                                 </div>
                             )}
                             <button
-                                onClick={() => router.push('/dashboard/eleve/reservation')}
+                                onClick={() => router.push(nextLesson ? '/dashboard/eleve/lecons' : '/dashboard/eleve/reservation')}
                                 className="w-full btn-primary"
                             >
                                 {nextLesson ? 'Détails de la mission' : 'Réserver maintenant'}

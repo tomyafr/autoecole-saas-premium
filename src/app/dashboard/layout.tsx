@@ -59,10 +59,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (!u) {
             router.replace('/login');
         } else {
+            // Apply Route Guards
+            if (pathname.startsWith('/dashboard/admin') && u.role !== 'admin') {
+                router.replace('/dashboard/eleve');
+                return;
+            }
+            if (pathname.startsWith('/dashboard/moniteur') && u.role !== 'moniteur') {
+                router.replace('/dashboard/eleve');
+                return;
+            }
             setUser(u);
             setLoading(false);
         }
-    }, [router]);
+    }, [pathname, router]);
 
     const handleLogout = () => {
         logout();

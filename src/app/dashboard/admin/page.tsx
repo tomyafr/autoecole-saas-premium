@@ -108,7 +108,7 @@ export default function AdminDashboard() {
                         <div className="h-48 mt-12 flex items-end justify-between gap-4">
                             {[40, 65, 45, 90, 75, 100, 85, 95].map((h, i) => (
                                 <div key={i} className="flex-1 flex flex-col items-center gap-4 group cursor-pointer">
-                                    <div className="w-full relative">
+                                    <div className="w-full h-full relative">
                                         <motion.div
                                             initial={{ height: 0 }}
                                             animate={{ height: `${h}%` }}

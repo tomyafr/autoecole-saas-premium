@@ -16,7 +16,8 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (getUser()) router.replace('/dashboard/eleve');
+        const u = getUser();
+        if (u) router.replace(getDashboardPath(u.role));
     }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {
