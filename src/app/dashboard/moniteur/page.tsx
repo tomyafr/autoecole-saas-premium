@@ -95,11 +95,16 @@ export default function MoniteurDashboard() {
     const studentsCount = dbData.totalStudents || 0;
     const hoursTotal = dbData.lessons?.length || 0;
 
+    const avgScoreInst = dbData.lessons?.length > 0
+        ? dbData.lessons.reduce((acc: number, l: any) => acc + (l.score || 0), 0) / dbData.lessons.length
+        : 0;
+    const successRate = avgScoreInst > 0 ? Math.round((avgScoreInst / 20) * 100) : 0;
+
     const stats = [
-        { label: 'Sessions du jour', value: `${studentsCount} Élèves`, sub: `${pendingToday} missions restantes`, icon: <Users size={18} />, color: 'text-[#00F5FF]' },
-        { label: 'Volume horaire', value: `${hoursTotal}h`, sub: 'Objectif: 32h/sem', icon: <Clock size={18} />, color: 'text-blue-400' },
-        { label: 'Taux Succès', value: '94%', sub: 'Moyenne de confiance', icon: <TrendingUp size={18} />, color: 'text-emerald-400' },
-        { label: 'Niveau Expertise', value: 'Expert', sub: 'Top 5 Moniteurs', icon: <Award size={18} />, color: 'text-amber-400' },
+        { label: 'Sessions du jour', value: `${todaySessionsAll.length} M.`, sub: `${pendingToday} restantes`, icon: <Users size={18} />, color: 'text-[#00F5FF]' },
+        { label: 'Volume horaire', value: `${hoursTotal}h`, sub: 'Heures effectuées', icon: <Clock size={18} />, color: 'text-blue-400' },
+        { label: 'Taux Succès', value: `${successRate}%`, sub: 'Moyenne de réussite', icon: <TrendingUp size={18} />, color: 'text-emerald-400' },
+        { label: 'Statut instructeur', value: 'Confirmé', sub: 'Certifié Autodrive', icon: <Award size={18} />, color: 'text-amber-400' },
     ];
 
     const todaySessions = todaySessionsAll.map((app: any) => ({
@@ -108,7 +113,7 @@ export default function MoniteurDashboard() {
         time: app.time,
         type: app.type,
         status: app.status === 'completed' ? 'done' : 'upcoming',
-        note: app.status === 'completed' ? '18/20' : 'Prévu' // Placeholder note for dynamic data
+        note: app.status === 'completed' ? 'Validé' : 'Prévu'
     })) || [];
 
     const doneToday = todaySessionsAll.length - pendingToday;
@@ -237,22 +242,26 @@ export default function MoniteurDashboard() {
                             </div>
                         </div>
                         <div className="space-y-4">
-                            <div
-                                onClick={() => router.push('/dashboard/moniteur/evaluations')}
-                                className="p-6 rounded-2xl bg-white/[0.01] border border-white/5 hover:border-[#00F5FF]/20 transition-all group cursor-pointer"
-                            >
-                                <p className="text-sm text-gray-300 leading-relaxed font-medium group-hover:text-white transition-colors">
-                                    "Excellente maîtrise de l'embrayage pour Lucas. Nous allons passer à l'autoroute la semaine prochaine. Focus sur les angles morts."
-                                </p>
-                                <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest">Élève ID: LB_2026</span>
-                                        <div className="w-1 h-1 rounded-full bg-white/10" />
-                                        <span className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest">Lucas Bernard</span>
+                            {dbData.lessons?.length > 0 ? (
+                                <div
+                                    onClick={() => router.push('/dashboard/moniteur/evaluations')}
+                                    className="p-6 rounded-2xl bg-white/[0.01] border border-white/5 hover:border-[#00F5FF]/20 transition-all group cursor-pointer"
+                                >
+                                    <p className="text-sm text-gray-300 leading-relaxed font-medium group-hover:text-white transition-colors">
+                                        Note: {dbData.lessons[0].score}/20 — Compétences validées sur la mission {dbData.lessons[0].title}.
+                                    </p>
+                                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest">Élève</span>
+                                            <div className="w-1 h-1 rounded-full bg-white/10" />
+                                            <span className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest">{dbData.lessons[0].student?.name || 'Inconnu'}</span>
+                                        </div>
+                                        <span className="text-[10px] font-black text-[#00F5FF] uppercase tracking-[0.2em]">Archivé</span>
                                     </div>
-                                    <span className="text-[10px] font-black text-[#00F5FF] uppercase tracking-[0.2em]">Archivé</span>
                                 </div>
-                            </div>
+                            ) : (
+                                <p className="text-xs text-[#5F6B7A]">Aucune leçon passée à afficher.</p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -265,17 +274,24 @@ export default function MoniteurDashboard() {
                             <h3 className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-[0.2em]">Engagement Hebdo</h3>
                         </div>
                         <div className="space-y-3">
-                            {['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'].map((day, i) => (
-                                <div key={day} className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300
-                                    ${i === 2 ? 'bg-[#00F5FF]/5 border-[#00F5FF]/20 shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'bg-white/[0.01] border-white/5 hover:border-white/10'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <span className={`text-xs font-bold ${i === 2 ? 'text-[#00F5FF]' : 'text-white/40'}`}>{day.slice(0, 3).toUpperCase()}</span>
-                                        <div className="w-1 h-3 rounded-full bg-white/5" />
-                                        <span className="text-sm font-semibold text-white">{8 - i} Missions</span>
+                            {[...Array(5)].map((_, i) => {
+                                const d = new Date();
+                                d.setDate(d.getDate() + i);
+                                const dayName = d.toLocaleDateString('fr-FR', { weekday: 'long' });
+                                const dateStr = d.toISOString().split('T')[0];
+                                const missionsCount = dbData.appointmentsAsInstructor?.filter((x: any) => x.date && new Date(x.date).toISOString().split('T')[0] === dateStr).length || 0;
+
+                                return (
+                                    <div key={i} className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300
+                                    ${i === 0 ? 'bg-[#00F5FF]/5 border-[#00F5FF]/20 shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'bg-white/[0.01] border-white/5 hover:border-white/10'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <span className={`text-xs font-bold ${i === 0 ? 'text-[#00F5FF]' : 'text-white/40'}`}>{dayName.slice(0, 3).toUpperCase()}</span>
+                                            <div className="w-1 h-3 rounded-full bg-white/5" />
+                                            <span className="text-sm font-semibold text-white">{missionsCount} Mission{missionsCount > 1 ? 's' : ''}</span>
+                                        </div>
                                     </div>
-                                    <span className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest">08h-19h</span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                         <button
                             onClick={() => router.push('/dashboard/moniteur/planning')}

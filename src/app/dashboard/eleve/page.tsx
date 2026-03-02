@@ -109,7 +109,7 @@ export default function EleveDashboard() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
                     <h1 className="page-title">Tableau de bord</h1>
-                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Bon retour parmi nous, Lucas. Voici votre progression en temps réel.</p>
+                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Bon retour parmi nous, {dbData.name?.split(' ')[0] || user.name}. Voici votre progression en temps réel.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
@@ -164,7 +164,7 @@ export default function EleveDashboard() {
                                 </div>
                             </div>
                             <div className="flex items-baseline gap-1.5">
-                                <span className="text-2xl font-semibold text-white">68</span>
+                                <span className="text-2xl font-semibold text-white">{Math.round((hoursDone / 35) * 100)}</span>
                                 <span className="text-xs font-bold text-[#5F6B7A] uppercase">%</span>
                             </div>
                         </div>
@@ -173,7 +173,7 @@ export default function EleveDashboard() {
                             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden flex">
                                 <motion.div
                                     initial={{ width: 0 }}
-                                    animate={{ width: '68%' }}
+                                    animate={{ width: `${Math.round((hoursDone / 35) * 100)}%` }}
                                     transition={{ duration: 1.5, ease: "easeOut" }}
                                     className="h-full bg-gradient-to-r from-[#00F5FF]/40 to-[#00F5FF] rounded-full shadow-[0_0_15px_rgba(0,245,255,0.4)]"
                                 />
@@ -231,8 +231,8 @@ export default function EleveDashboard() {
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="font-medium">Marc Dupont</td>
-                                            <td className="font-semibold text-emerald-400">{lesson.score}/20</td>
+                                            <td className="font-medium">{lesson.instructor?.name || 'Non assigné'}</td>
+                                            <td className="font-semibold text-emerald-400">{lesson.score != null ? `${lesson.score}/20` : '-'}</td>
                                             <td><span className="status-badge status-badge-cyan">{lesson.status === 'done' ? 'Opérationnel' : lesson.status}</span></td>
                                         </tr>
                                     ))}

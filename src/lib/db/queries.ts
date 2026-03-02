@@ -12,6 +12,9 @@ export async function getStudentDashboard(studentId: string) {
                 lessons: {
                     limit: 5,
                     orderBy: (l, { desc }) => [desc(l.date)],
+                    with: {
+                        instructor: true
+                    }
                 },
                 appointmentsAsStudent: {
                     where: (a, { eq }) => eq(a.status, 'pending'),
