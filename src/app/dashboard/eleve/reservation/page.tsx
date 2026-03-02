@@ -31,6 +31,8 @@ export default function ReservationPage() {
     const [user, setUser] = useState<UserType | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [availableDates, setAvailableDates] = useState<{ label: string, date: Date }[]>([]);
     const [isConfirmed, setIsConfirmed] = useState(false);
 
     useEffect(() => {
@@ -38,13 +40,35 @@ export default function ReservationPage() {
         if (u) {
             setUser(u);
             setLoading(false);
+
+            // Generate next 4 working days dynamically
+            const dates = [];
+            const today = new Date();
+            let daysAdded = 0;
+            let current = new Date(today);
+            current.setDate(current.getDate() + 1); // Start tomorrow
+
+            while (dates.length < 4) {
+                // Skip Sundays
+                if (current.getDay() !== 0) {
+                    const label = current.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }).replace('.', '');
+                    dates.push({
+                        label: label.charAt(0).toUpperCase() + label.slice(1),
+                        date: new Date(current)
+                    });
+                }
+                current.setDate(current.getDate() + 1);
+            }
+            setAvailableDates(dates);
+            setSelectedDate(dates[0].date);
+
         } else {
             router.replace('/login');
         }
     }, [router]);
 
     const handleConfirm = async () => {
-        if (!selectedSlot || !user) return;
+        if (!selectedSlot || !user || !selectedDate) return;
 
         const slot = SLOTS.find(s => s.id === selectedSlot);
         if (!slot) return;
@@ -53,7 +77,7 @@ export default function ReservationPage() {
         const result = await createAppointment(
             user.id,
             slot.moniteur,
-            new Date('2026-02-12'), // In a real app this would be dymamic from a date picker
+            selectedDate,
             slot.time,
             slot.type
         );
@@ -103,12 +127,19 @@ export default function ReservationPage() {
                             <span className="text-xs font-bold text-[var(--color-text-primary)]/40 uppercase tracking-[0.2em]">Sélectionner un module</span>
                             <div className="h-px w-12 bg-[var(--color-sidebar)]" />
                         </div>
-                        <div className="flex gap-2">
-                            {['Lun 12', 'Mar 13', 'Mer 14', 'Jeu 15'].map((day, idx) => (
-                                <button key={idx} className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest border transition-all ${idx === 0 ? 'bg-[var(--color-sidebar)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)]' : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}>
-                                    {day}
-                                </button>
-                            ))}
+                        <div className="flex gap-2 text-nowrap overflow-x-auto pb-2">
+                            {availableDates.map((dayItem, idx) => {
+                                const isSelected = selectedDate.getDate() === dayItem.date.getDate();
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setSelectedDate(dayItem.date)}
+                                        className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest border transition-all ${isSelected ? 'bg-[var(--color-sidebar)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)]' : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
+                                    >
+                                        {dayItem.label}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -198,7 +229,9 @@ export default function ReservationPage() {
                                             </div>
                                             <div>
                                                 <p className="secondary-info font-medium uppercase tracking-widest text-[10px]">Date & Heure</p>
-                                                <p className="text-lg font-semibold text-[var(--color-text-primary)]">Jeudi 12 Fév • 09:30</p>
+                                                <p className="text-lg font-semibold text-[var(--color-text-primary)]">
+                                                    {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' }).replace(/^\w/, (c) => c.toUpperCase())} • {SLOTS.find(s => s.id === selectedSlot)?.time}
+                                                </p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
