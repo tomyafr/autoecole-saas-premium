@@ -37,7 +37,17 @@ export default function MoniteurDashboard() {
 
     const fetchDashboardData = async (userId: string) => {
         try {
-            const data = await getInstructorDashboard(userId);
+            const rawData = await getInstructorDashboard(userId);
+            const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+
+            if (parsed && !parsed.success) {
+                setErrorMsg(`Erreur Interne: ${parsed.error}`);
+                console.error("Dashboard error:", parsed.error);
+                return;
+            }
+
+            const data = parsed.data;
+
             if (!data) {
                 localStorage.removeItem('autodrive_user');
                 router.replace('/login');

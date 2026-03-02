@@ -36,7 +36,17 @@ export default function EleveDashboard() {
 
     const fetchDashboardData = async (userId: string) => {
         try {
-            const data = await getStudentDashboard(userId);
+            const rawData = await getStudentDashboard(userId);
+            const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+
+            if (parsed && !parsed.success) {
+                setErrorMsg(`Erreur Interne: ${parsed.error}`);
+                console.error("Dashboard error:", parsed.error);
+                return;
+            }
+
+            const data = parsed.data;
+
             if (!data) {
                 // This means the user ID in localStorage does not exist in the DB (like after a DB reset/seed)
                 // Force logout to re-authenticate with the correct Database IDs.
