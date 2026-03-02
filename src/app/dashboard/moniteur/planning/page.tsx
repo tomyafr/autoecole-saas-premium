@@ -68,12 +68,14 @@ export default function MoniteurPlanningPage() {
     const SESSIONS = dbData?.appointmentsAsInstructor?.filter((app: any) => app.date && new Date(app.date).toISOString().split('T')[0] === dateStr).map((app: any) => ({
         id: app.id,
         time: app.time,
-        duration: '1.5h', // Mock duration as it's not in DB schema right now
+        duration: app.type && app.type.includes('2H') ? '2h' : '1h',
         student: app.student?.name || 'Inconnu',
-        type: app.type,
+        type: 'Leçon de conduite',
         status: app.status === 'completed' ? 'confirmé' : app.status === 'pending' ? 'en attente' : 'annulé',
         location: 'Centre AutoDrive' // Mock location
     })) || [];
+
+    const totalHours = SESSIONS.reduce((sum: number, s: any) => sum + (s.duration === '2h' ? 2 : 1), 0);
 
     return (
         <div className="space-y-10 group/planning">
@@ -135,7 +137,7 @@ export default function MoniteurPlanningPage() {
                         <h3 className="card-title text-[#00F5FF]/60 italic font-black">Résumé du Jour</h3>
                         <div className="space-y-4">
                             {[
-                                { label: 'Charge Totale', value: `${SESSIONS.length * 1.5}h`, color: 'text-white' },
+                                { label: 'Charge Totale', value: `${totalHours}h`, color: 'text-white' },
                                 { label: 'Sessions Actives', value: `${SESSIONS.filter((s: any) => s.status !== 'annulé').length}`, color: 'text-[#00F5FF]' },
                                 { label: 'Flux Moyen', value: SESSIONS.length > 0 ? '88%' : '0%', color: 'text-emerald-400' },
                             ].map((stat, i) => (

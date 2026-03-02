@@ -60,9 +60,20 @@ export async function getBookedSlots(instructorName: string, date: Date) {
         });
 
         const dateStr = new Date(date).toISOString().split('T')[0];
-        return all
-            .filter(a => a.date && new Date(a.date).toISOString().split('T')[0] === dateStr)
-            .map(a => a.time);
+        const booked: string[] = [];
+
+        all.forEach(a => {
+            if (a.date && new Date(a.date).toISOString().split('T')[0] === dateStr) {
+                booked.push(a.time);
+                if (a.type && a.type.includes('2H')) {
+                    const hour = parseInt(a.time.split(':')[0], 10);
+                    const nextTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+                    booked.push(nextTime);
+                }
+            }
+        });
+
+        return booked;
     } catch (e) {
         console.error(e);
         return [];

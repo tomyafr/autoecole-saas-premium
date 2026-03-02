@@ -23,13 +23,9 @@ const INSTRUCTORS = [
     { id: '3', name: 'Jean Roche', exp: 'Instructeur Ville', rating: 4.7, avatar: 'JR', color: 'amber' },
 ];
 
-const BASE_SLOTS = [
-    { time: '08:00', type: 'Conduite urbaine', duration: '2H' },
-    { time: '09:30', type: 'Code accéléré', duration: '1H' },
-    { time: '11:00', type: 'Conduite urbaine', duration: '2H' },
-    { time: '14:00', type: 'Insertion autoroute', duration: '2H' },
-    { time: '15:30', type: 'Manoeuvres parking', duration: '1H' },
-    { time: '17:00', type: 'Conduite de nuit', duration: '2H' },
+const ALL_HOURS = [
+    '08:00', '09:00', '10:00', '11:00',
+    '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
 ];
 
 export default function ReservationPage() {
@@ -42,6 +38,7 @@ export default function ReservationPage() {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [availableDates, setAvailableDates] = useState<{ label: string, date: Date }[]>([]);
 
+    const [selectedDuration, setSelectedDuration] = useState<number>(1);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [bookedSlots, setBookedSlots] = useState<string[]>([]);
@@ -83,17 +80,22 @@ export default function ReservationPage() {
         }
     }, [router]);
 
-    // Dynamic slot generation based on instructor and date to feel real
+    // Generate available slots based on duration
     const getSlotsForSelection = () => {
-        const hash = selectedInstructorId.charCodeAt(0) + selectedDate.getDate();
-        return BASE_SLOTS.filter((_, idx) => (hash + idx) % 2 === 0);
+        return ALL_HOURS.filter((time, idx) => {
+            if (selectedDuration === 2) {
+                // To book 2 hours, this hour and the next hour must be available
+                const nextHour = ALL_HOURS[idx + 1];
+                if (!nextHour || bookedSlots.includes(nextHour)) return false;
+            }
+            return !bookedSlots.includes(time);
+        });
     };
 
     const currentSlots = getSlotsForSelection();
-    const selectedSlotData = currentSlots.find(s => s.time === selectedTime);
 
     const handleConfirm = async () => {
-        if (!selectedTime || !user || !selectedDate || !selectedInstructor || !selectedSlotData) return;
+        if (!selectedTime || !user || !selectedDate || !selectedInstructor) return;
 
         setLoading(true);
         const result = await createAppointment(
@@ -101,7 +103,7 @@ export default function ReservationPage() {
             selectedInstructor.name,
             selectedDate,
             selectedTime,
-            selectedSlotData.type
+            `Leçon de conduite (${selectedDuration}H)`
         );
 
         if (result.success) {
@@ -194,7 +196,7 @@ export default function ReservationPage() {
                         </div>
                     </div>
 
-                    {/* STEP 3: Slots */}
+                    {/* STEP 3: Duration & Slots */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-4">
                             <span className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-[0.2em]">Étape 3</span>
@@ -202,20 +204,35 @@ export default function ReservationPage() {
                             <div className="h-px flex-1 bg-[var(--color-sidebar)]" />
                         </div>
 
+                        <div className="flex gap-4 mb-4">
+                            <button
+                                onClick={() => { setSelectedDuration(1); setSelectedTime(null); }}
+                                className={`flex-1 py-3 rounded-xl border text-xs font-bold uppercase tracking-widest transition-all ${selectedDuration === 1 ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/[0.05] text-[var(--color-text-primary)] shadow-[0_0_15px_rgba(0,245,255,0.1)]' : 'border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:border-white/20'}`}
+                            >
+                                1 Heure
+                            </button>
+                            <button
+                                onClick={() => { setSelectedDuration(2); setSelectedTime(null); }}
+                                className={`flex-1 py-3 rounded-xl border text-xs font-bold uppercase tracking-widest transition-all ${selectedDuration === 2 ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/[0.05] text-[var(--color-text-primary)] shadow-[0_0_15px_rgba(0,245,255,0.1)]' : 'border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:border-white/20'}`}
+                            >
+                                2 Heures
+                            </button>
+                        </div>
+
                         {currentSlots.length > 0 ? (
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {currentSlots.map((slot, idx) => {
-                                    const isBooked = bookedSlots.includes(slot.time);
+                                {currentSlots.map((time, idx) => {
+                                    const isBooked = bookedSlots.includes(time);
                                     return (
                                         <button
                                             key={idx}
                                             disabled={isBooked}
-                                            onClick={() => !isBooked && setSelectedTime(slot.time)}
-                                            className={`premium-card p-4 flex flex-col gap-2 text-left transition-all ${isBooked ? 'opacity-40 cursor-not-allowed bg-[var(--color-card)]' : selectedTime === slot.time ? 'border-[var(--color-accent)] ring-1 ring-[var(--color-accent)] bg-[var(--color-accent)]/[0.03] shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'hover:border-white/20'}`}
+                                            onClick={() => !isBooked && setSelectedTime(time)}
+                                            className={`premium-card p-4 flex flex-col gap-2 text-left transition-all ${isBooked ? 'opacity-40 cursor-not-allowed bg-[var(--color-card)]' : selectedTime === time ? 'border-[var(--color-accent)] ring-1 ring-[var(--color-accent)] bg-[var(--color-accent)]/[0.03] shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'hover:border-white/20'}`}
                                         >
                                             <div className="flex items-center justify-between">
-                                                <span className={`text-xl font-semibold ${isBooked ? 'text-[var(--color-text-muted)] line-through' : 'text-[var(--color-text-primary)]'}`}>{slot.time}</span>
-                                                {selectedTime === slot.time ? (
+                                                <span className={`text-xl font-semibold ${isBooked ? 'text-[var(--color-text-muted)] line-through' : 'text-[var(--color-text-primary)]'}`}>{time}</span>
+                                                {selectedTime === time ? (
                                                     <CheckCircle2 size={16} className="text-[var(--color-accent)]" />
                                                 ) : isBooked ? (
                                                     <span className="text-[10px] font-bold text-red-500 text-right uppercase tracking-[0.2em] bg-red-500/10 px-1 py-0.5 rounded">Réservé</span>
@@ -223,14 +240,14 @@ export default function ReservationPage() {
                                                     <Clock size={14} className="text-[var(--color-text-muted)]" />
                                                 )}
                                             </div>
-                                            <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{slot.type} • {slot.duration}</span>
+                                            <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Leçon de conduite</span>
                                         </button>
                                     )
                                 })}
                             </div>
                         ) : (
                             <div className="p-8 text-center rounded-2xl border border-dashed border-[var(--color-border-subtle)]">
-                                <p className="text-sm font-medium text-[var(--color-text-secondary)]">Aucun créneau disponible pour ce jour avec ce formateur.</p>
+                                <p className="text-sm font-medium text-[var(--color-text-secondary)]">Aucun créneau de {selectedDuration}H n'est disponible pour ce jour avec ce formateur.</p>
                             </div>
                         )}
                     </div>
@@ -296,7 +313,7 @@ export default function ReservationPage() {
                                             </div>
                                             <div>
                                                 <p className="secondary-info font-medium uppercase tracking-widest text-[10px]">Type de mission</p>
-                                                <p className="text-lg font-semibold text-[var(--color-text-primary)]">{selectedSlotData?.type}</p>
+                                                <p className="text-lg font-semibold text-[var(--color-text-primary)]">Leçon de conduite</p>
                                             </div>
                                         </div>
                                     </div>
@@ -308,7 +325,7 @@ export default function ReservationPage() {
                                         </div>
                                         <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
                                             <span>Temps estimé</span>
-                                            <span className="text-[var(--color-text-primary)]">{selectedSlotData?.duration || '1H'}</span>
+                                            <span className="text-[var(--color-text-primary)]">{selectedDuration === 1 ? '60' : '120'} min</span>
                                         </div>
                                     </div>
                                 </div>
