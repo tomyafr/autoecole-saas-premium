@@ -43,9 +43,20 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen bg-[#000000] flex items-center justify-center p-6 relative overflow-hidden">
+            {/* Video Background */}
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover z-0 opacity-40 pointer-events-none"
+            >
+                <source src="/animation_voiture.mp4" type="video/mp4" />
+            </video>
+
             {/* Subtle background effects */}
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,_rgba(0,229,255,0.07)_0%,_transparent_50%)]" />
-            <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.05)_0%,_transparent_40%)]" />
+            <div className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(0,229,255,0.15)_0%,_transparent_50%)]" />
+            <div className="absolute bottom-0 right-0 w-full h-full z-0 pointer-events-none bg-[radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.1)_0%,_transparent_40%)]" />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
