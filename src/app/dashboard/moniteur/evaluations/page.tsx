@@ -38,11 +38,11 @@ export default function MoniteurEvaluationsPage() {
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Audit de performance et archivage des évaluations tactiques.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="btn-secondary">
+                    <button onClick={() => alert("Chargement exhaustif de l'historique...")} className="btn-secondary">
                         <History size={16} />
                         Historique Global
                     </button>
-                    <button className="btn-primary">
+                    <button onClick={() => alert("Formulaire de nouvel audit en cours d'intégration.")} className="btn-primary">
                         <Plus size={16} />
                         Nouvel Audit
                     </button>
@@ -112,7 +112,7 @@ export default function MoniteurEvaluationsPage() {
                                     </div>
                                     <div className="flex flex-col items-end gap-3 min-w-[120px]">
                                         <span className="text-[10px] font-bold text-[#5F6B7A] uppercase tracking-widest">{evalItem.date}</span>
-                                        <button className="flex items-center gap-2 text-[10px] font-black text-[#00F5FF] uppercase tracking-widest hover:translate-x-1 transition-transform">
+                                        <button onClick={(e) => { e.stopPropagation(); alert(`Affichage du rapport complet de ${evalItem.student}...`); }} className="flex items-center gap-2 text-[10px] font-black text-[#00F5FF] uppercase tracking-widest hover:translate-x-1 transition-transform">
                                             Rapport Full
                                             <ChevronRight size={14} />
                                         </button>

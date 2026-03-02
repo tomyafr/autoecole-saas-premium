@@ -40,6 +40,7 @@ export default function ReservationPage() {
         d.setHours(12, 0, 0, 0);
         return d;
     });
+    const [weekOffset, setWeekOffset] = useState(0);
     const [availableDates, setAvailableDates] = useState<{ label: string, date: Date }[]>([]);
 
     const [selectedDuration, setSelectedDuration] = useState<number>(1);
@@ -64,6 +65,7 @@ export default function ReservationPage() {
             const dates = [];
             const today = new Date();
             today.setHours(12, 0, 0, 0);
+            today.setDate(today.getDate() + (weekOffset * 7));
             let current = new Date(today);
             current.setDate(current.getDate() + 1);
 
@@ -78,12 +80,14 @@ export default function ReservationPage() {
                 current.setDate(current.getDate() + 1);
             }
             setAvailableDates(dates);
-            setSelectedDate(dates[0].date);
+            if (weekOffset !== 0 || !selectedDate || dates.findIndex(d => d.date.toDateString() === selectedDate.toDateString()) === -1) {
+                setSelectedDate(dates[0].date);
+            }
 
         } else {
             router.replace('/login');
         }
-    }, [router]);
+    }, [router, weekOffset]);
 
     // Return ALL_HOURS so we can render booked ones as disabled blocks
     const currentSlots = ALL_HOURS;
@@ -182,6 +186,14 @@ export default function ReservationPage() {
                             <span className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-[0.2em]">Étape 2</span>
                             <span className="text-sm font-bold text-[var(--color-text-primary)]">Choisir la date</span>
                             <div className="h-px flex-1 bg-[var(--color-sidebar)]" />
+                            <div className="flex gap-2">
+                                <button disabled={weekOffset === 0} onClick={() => setWeekOffset(prev => Math.max(0, prev - 1))} className={`p-1.5 rounded-lg border ${weekOffset === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/5 border-[var(--color-border-subtle)] hover:text-[#00F5FF]'}`}>
+                                    <ChevronRight size={16} className="rotate-180" />
+                                </button>
+                                <button onClick={() => setWeekOffset(prev => prev + 1)} className="p-1.5 rounded-lg border border-[var(--color-border-subtle)] hover:bg-white/5 hover:text-[#00F5FF]">
+                                    <ChevronRight size={16} />
+                                </button>
+                            </div>
                         </div>
                         <div className="flex gap-3 overflow-x-auto pb-2">
                             {availableDates.map((dayItem, idx) => {

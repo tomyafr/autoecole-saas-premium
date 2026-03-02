@@ -92,11 +92,11 @@ export default function MoniteurPlanningPage() {
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Gestion temps-réel de votre déploiement sur le terrain.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="btn-secondary">
+                    <button onClick={() => alert("Module de filtrage à venir")} className="btn-secondary">
                         <Filter size={16} />
                         Filtrer
                     </button>
-                    <button className="btn-primary">
+                    <button onClick={() => alert("Ouverture du modal de création de créneau...")} className="btn-primary">
                         <Plus size={16} />
                         Ouvrir Créneau
                     </button>
@@ -221,8 +221,8 @@ export default function MoniteurPlanningPage() {
 
                                     {/* Action Block */}
                                     <div className="flex items-center gap-3">
-                                        <button className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black text-[#8A94A6] hover:text-white transition-all uppercase tracking-widest">Modifier</button>
-                                        <button className="w-10 h-10 rounded-xl bg-[#00F5FF]/10 border border-[#00F5FF]/20 text-[#00F5FF] flex items-center justify-center transition-all hover:bg-[#00F5FF] hover:text-black">
+                                        <button onClick={() => alert(`Édition de la session de ${session.student}`)} className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black text-[#8A94A6] hover:text-white transition-all uppercase tracking-widest">Modifier</button>
+                                        <button onClick={() => alert(`Détails complets de la session avec ${session.student}`)} className="w-10 h-10 rounded-xl bg-[#00F5FF]/10 border border-[#00F5FF]/20 text-[#00F5FF] flex items-center justify-center transition-all hover:bg-[#00F5FF] hover:text-black">
                                             <ArrowRight size={18} />
                                         </button>
                                     </div>

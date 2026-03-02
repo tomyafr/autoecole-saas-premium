@@ -82,11 +82,11 @@ export default function ElevePaiementsPage() {
                     <p className="text-sm text-[var(--color-text-secondary)] mt-1 font-medium">Gestion de vos transactions et crédits de formation.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="btn-secondary">
+                    <button onClick={() => alert("Exportation PDF en cours d'intégration.")} className="btn-secondary">
                         <Download size={16} />
                         Télécharger tout
                     </button>
-                    <button className="btn-primary">
+                    <button onClick={() => alert("Tunnel de paiement Stripe en cours d'intégration.")} className="btn-primary">
                         <Plus size={16} />
                         Ajouter Crédits
                     </button>
@@ -164,7 +164,7 @@ export default function ElevePaiementsPage() {
                                                 </div>
                                             </td>
                                             <td className="text-right">
-                                                <button className="p-2.5 rounded-xl bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all">
+                                                <button onClick={() => alert("Génération de la facture en cours...")} className="p-2.5 rounded-xl bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all">
                                                     <FileText size={18} />
                                                 </button>
                                             </td>
@@ -197,10 +197,10 @@ export default function ElevePaiementsPage() {
                                         <span className="text-[9px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">Expire 08/28</span>
                                     </div>
                                 </div>
-                                <button className="text-[9px] font-black text-[var(--color-accent)] uppercase tracking-widest border-b border-[var(--color-accent)]/20">Editer</button>
+                                <button onClick={() => alert("Édition des moyens de paiement à venir.")} className="text-[9px] font-black text-[var(--color-accent)] uppercase tracking-widest border-b border-[var(--color-accent)]/20">Editer</button>
                             </div>
                         </div>
-                        <button className="w-full btn-primary mt-8">
+                        <button onClick={() => alert("Gestion de l'abonnement à venir")} className="w-full btn-primary mt-8">
                             Actualiser Abonnement
                             <ArrowUpRight size={16} />
                         </button>
@@ -208,7 +208,7 @@ export default function ElevePaiementsPage() {
 
                     <div className="premium-card p-8 space-y-6">
                         <h3 className="card-title text-[var(--color-text-muted)] italic font-black">Support Facturation</h3>
-                        <div className="p-5 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] group hover:bg-[var(--color-sidebar)] transition-all cursor-pointer">
+                        <div onClick={() => alert("Ouverture du module de chat IA...")} className="p-5 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] group hover:bg-[var(--color-sidebar)] transition-all cursor-pointer">
                             <p className="text-xs font-bold text-[var(--color-text-primary)] mb-2">Besoin d'un échéancier ?</p>
                             <p className="text-[10px] text-[var(--color-text-muted)] font-medium leading-relaxed">
                                 Contactez notre service financier pour étaler vos paiements sans frais.

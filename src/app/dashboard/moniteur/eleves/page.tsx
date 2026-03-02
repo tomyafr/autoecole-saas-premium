@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { getUser, type User } from '@/lib/auth';
+import { getInstructorDashboard } from '@/lib/db/queries';
 import {
     Users,
     Search,
     Filter,
-    MoreHorizontal,
     TrendingUp,
     Clock,
     CheckCircle2,
@@ -18,17 +20,82 @@ import {
     FileText
 } from 'lucide-react';
 
-/* ======= DATA ======= */
-const STUDENTS = [
-    { id: 1, name: 'Lucas Bernard', progress: 68, hours: '24/35h', lastSession: 'Hier', status: 'À l\'heure', score: 8.5 },
-    { id: 2, name: 'Emma Petit', progress: 42, hours: '15/35h', lastSession: 'Il y a 2j', status: 'En retard', score: 7.2 },
-    { id: 3, name: 'Hugo Roux', progress: 95, hours: '33/35h', lastSession: 'Aujourd\'hui', status: 'Prêt examen', score: 9.8 },
-    { id: 4, name: 'Chloé Moreau', progress: 12, hours: '4/35h', lastSession: 'Il y a 5j', status: 'Débutant', score: 6.5 },
-    { id: 5, name: 'Marc Simon', progress: 55, hours: '19/35h', lastSession: 'Hier', status: 'À l\'heure', score: 8.0 },
-];
-
 export default function MoniteurStudentsPage() {
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [students, setStudents] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            const u = getUser();
+            if (!u) {
+                router.replace('/login');
+                return;
+            }
+            try {
+                const res = await getInstructorDashboard(u.id);
+                const parsed = typeof res === 'string' ? JSON.parse(res) : res;
+                if (parsed.success && parsed.data) {
+                    const lessons = parsed.data.lessons || [];
+                    const apps = parsed.data.appointmentsAsInstructor || [];
+
+                    // Deduplicate students
+                    const stuMap = new Map();
+                    [...lessons, ...apps].forEach((item: any) => {
+                        if (item.student) {
+                            if (!stuMap.has(item.student.id)) {
+                                stuMap.set(item.student.id, {
+                                    id: item.student.id,
+                                    name: item.student.name,
+                                    lessonsCount: 0,
+                                    totalScore: 0,
+                                    lastSession: null,
+                                });
+                            }
+                            const s = stuMap.get(item.student.id);
+                            if (item.score !== undefined) {
+                                s.lessonsCount++;
+                                s.totalScore += item.score;
+                                if (!s.lastSession || new Date(item.date) > new Date(s.lastSession)) {
+                                    s.lastSession = new Date(item.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                                }
+                            }
+                        }
+                    });
+
+                    const finalStudents = Array.from(stuMap.values()).map(s => {
+                        const score = s.lessonsCount > 0 ? (s.totalScore / s.lessonsCount).toFixed(1) : '-';
+                        const progress = Math.min(Math.round((s.lessonsCount / 35) * 100), 100);
+                        return {
+                            ...s,
+                            score,
+                            progress,
+                            hours: `${s.lessonsCount}/35h`,
+                            status: progress > 80 ? 'Prêt examen' : (progress < 20 ? 'Débutant' : 'En cours')
+                        };
+                    });
+                    setStudents(finalStudents);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+            setLoading(false);
+        };
+        fetchStudents();
+    }, [router]);
+
+    const handleAction = (msg: string) => {
+        alert(msg);
+    };
+
+    if (loading) {
+        return (
+            <div className="h-[60vh] flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-10 group/students">
@@ -39,11 +106,11 @@ export default function MoniteurStudentsPage() {
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Suivi tactique et pilotage de la progression de vos élèves.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="btn-secondary">
+                    <button onClick={() => handleAction("Exportation du rapport en cours d'intégration.")} className="btn-secondary">
                         <FileText size={16} />
                         Exporter Rapport
                     </button>
-                    <button className="btn-primary">
+                    <button onClick={() => handleAction("Formulaire d'inscription en cours d'intégration.")} className="btn-primary">
                         <Plus size={16} />
                         Inscrire Élève
                     </button>
@@ -60,7 +127,7 @@ export default function MoniteurStudentsPage() {
                         <span className="card-title">Formation Active</span>
                     </div>
                     <div>
-                        <div className="primary-value">42 Élèves</div>
+                        <div className="primary-value">{students.length} Élèves</div>
                         <p className="secondary-info mt-1 font-medium italic">Sous votre supervision directe</p>
                     </div>
                 </div>
@@ -129,12 +196,12 @@ export default function MoniteurStudentsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {STUDENTS.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())).map((student) => (
+                            {students.filter((s: any) => s.name.toLowerCase().includes(searchQuery.toLowerCase())).map((student: any) => (
                                 <tr key={student.id} className="group cursor-pointer">
                                     <td>
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#8A94A6] group-hover:text-[#00F5FF] transition-colors">
-                                                {student.name.split(' ').map(n => n[0]).join('')}
+                                                {student.name.split(' ').map((n: string) => n[0]).join('')}
                                             </div>
                                             <div className="flex flex-col min-w-0">
                                                 <span className="text-sm font-semibold text-white truncate">{student.name}</span>
@@ -161,13 +228,13 @@ export default function MoniteurStudentsPage() {
                                     <td>
                                         <div className="flex items-center gap-2">
                                             <Calendar size={14} className="text-[#5F6B7A]" />
-                                            <span className="text-xs font-medium text-[#8A94A6]">{student.lastSession}</span>
+                                            <span className="text-xs font-medium text-[#8A94A6]">{student.lastSession || '-'}</span>
                                         </div>
                                     </td>
                                     <td>
                                         <span className={`status-badge ${student.status === 'En retard' ? 'bg-red-500/10 text-red-400' :
-                                                student.status === 'Prêt examen' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                                    'status-badge-gray'
+                                            student.status === 'Prêt examen' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                                'status-badge-gray'
                                             }`}>
                                             {student.status}
                                         </span>
@@ -175,24 +242,29 @@ export default function MoniteurStudentsPage() {
                                     <td>
                                         <div className="flex items-center gap-1.5">
                                             <div className="p-1 rounded bg-white/5">
-                                                <TrendingUp size={10} className={student.score >= 8 ? 'text-emerald-400' : 'text-amber-400'} />
+                                                <TrendingUp size={10} className={student.score !== '-' && student.score >= 8 ? 'text-emerald-400' : 'text-amber-400'} />
                                             </div>
                                             <span className="text-xs font-bold text-white font-mono">{student.score}</span>
                                         </div>
                                     </td>
                                     <td className="text-right">
-                                        <button className="w-9 h-9 rounded-lg flex items-center justify-center text-[#5F6B7A] hover:bg-[#00F5FF]/10 hover:text-[#00F5FF] transition-all">
+                                        <button onClick={() => handleAction(`Ouverture du profil complet de ${student.name}`)} className="w-9 h-9 rounded-lg flex items-center justify-center text-[#5F6B7A] hover:bg-[#00F5FF]/10 hover:text-[#00F5FF] transition-all">
                                             <ChevronRight size={18} />
                                         </button>
                                     </td>
                                 </tr>
                             ))}
+                            {students.length === 0 && (
+                                <tr>
+                                    <td colSpan={6} className="text-center py-10 text-xs text-[#5F6B7A]">Aucun élève identifié</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
 
                 <div className="px-8 py-4 border-t border-white/5 bg-white/[0.01] flex items-center justify-between">
-                    <p className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest">Affichage de {STUDENTS.length} profils élites</p>
+                    <p className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest">Affichage de {students.length} profils élites</p>
                     <div className="flex gap-2">
                         <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] font-black text-[#5F6B7A] hover:text-white transition-colors">PREC</button>
                         <button className="px-3 py-1.5 rounded-lg bg-[#00F5FF]/10 border border-[#00F5FF]/20 text-[10px] font-black text-[#00F5FF]">SUIV</button>

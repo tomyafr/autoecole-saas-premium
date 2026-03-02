@@ -181,13 +181,13 @@ export default function EleveDashboard() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-8 pt-4">
                                 {[
-                                    { label: 'Démarrage & Embrayage', status: 'Expertise acquise' },
-                                    { label: 'Contrôle en milieu urbain', status: 'En cours d\'acquisition' },
-                                    { label: 'Manoeuvres & Stationnement', status: 'Perfectionnement' },
-                                    { label: 'Circulation voies rapides', status: 'Phase initiale' }
+                                    { label: 'Démarrage & Embrayage', status: 'Expertise acquise', color: 'bg-emerald-500' },
+                                    { label: 'Contrôle en milieu urbain', status: 'En cours d\'acquisition', color: 'bg-amber-500' },
+                                    { label: 'Manoeuvres & Stationnement', status: 'Perfectionnement', color: 'bg-amber-500' },
+                                    { label: 'Circulation voies rapides', status: 'Phase initiale', color: 'bg-red-500' }
                                 ].map((step, idx) => (
                                     <div key={idx} className="flex items-center gap-4 group/item">
-                                        <div className="w-2 h-2 rounded-full bg-white/10 group-hover/item:bg-[#00F5FF] transition-colors duration-300" />
+                                        <div className={`w-2 h-2 rounded-full ${step.color} shadow-[0_0_8px_currentColor] opacity-80 group-hover/item:opacity-100 transition-opacity duration-300`} />
                                         <div>
                                             <p className="text-sm font-medium text-white group-hover/item:text-[#00F5FF] transition-colors">{step.label}</p>
                                             <p className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-wider mt-1">{step.status}</p>

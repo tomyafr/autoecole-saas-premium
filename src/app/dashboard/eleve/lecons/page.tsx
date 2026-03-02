@@ -69,10 +69,10 @@ export default function LeconsPage() {
                             className="w-full pl-12 pr-6 py-3.5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-xl text-xs font-bold uppercase tracking-widest text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]/40 transition-all placeholder:text-[var(--color-text-muted)]"
                         />
                     </div>
-                    <button className="btn-secondary h-[46px] w-[46px] p-0 flex items-center justify-center">
+                    <button onClick={() => alert("Génération du filtre multicritères (En cours d'intégration).")} className="btn-secondary h-[46px] w-[46px] p-0 flex items-center justify-center">
                         <Filter size={18} />
                     </button>
-                    <button className="btn-primary h-[46px]">
+                    <button onClick={() => alert("Module d'exportation PDF en cours de finalisation.")} className="btn-primary h-[46px]">
                         <Download size={18} />
                         Exporter
                     </button>
@@ -201,7 +201,7 @@ export default function LeconsPage() {
                                         </span>
                                     </td>
                                     <td className="text-right">
-                                        <button className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">
+                                        <button onClick={() => alert(`Ouverture détaillée de la session ${lesson.id}`)} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">
                                             <ArrowUpRight size={18} />
                                         </button>
                                     </td>
@@ -228,7 +228,7 @@ export default function LeconsPage() {
                         </p>
                     </div>
                 </div>
-                <button className="btn-secondary py-4 px-8 border-[var(--color-accent)]/20 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 uppercase text-[10px] font-black tracking-[0.2em]">
+                <button onClick={() => alert("Génération du rapport IA détaillé en cours d'intégration...")} className="btn-secondary py-4 px-8 border-[var(--color-accent)]/20 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/5 uppercase text-[10px] font-black tracking-[0.2em]">
                     Voir Rapport IA Complet
                 </button>
             </div>

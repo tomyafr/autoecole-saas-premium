@@ -45,11 +45,11 @@ export default function AdminCentresPage() {
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Administration des centres de formation et déploiement stratégique.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="btn-secondary">
+                    <button onClick={() => alert("Affichage de la carte réseau (API Google Maps en cours de connexion).")} className="btn-secondary">
                         <Map size={16} />
                         Vue Map Flux
                     </button>
-                    <button className="btn-primary">
+                    <button onClick={() => alert("Ouverture du formulaire de déploiement d'un nouveau centre.")} className="btn-primary">
                         <Plus size={16} />
                         Déployer Node
                     </button>
@@ -137,7 +137,7 @@ export default function AdminCentresPage() {
                                     <Mail size={16} />
                                 </button>
                             </div>
-                            <button className="flex items-center gap-2 text-[10px] font-black text-[#00F5FF] uppercase tracking-widest group-hover:translate-x-1 transition-transform">
+                            <button onClick={() => alert(`Accès aux paramètres du centre : ${centre.name}`)} className="flex items-center gap-2 text-[10px] font-black text-[#00F5FF] uppercase tracking-widest group-hover:translate-x-1 transition-transform">
                                 Manager Node
                                 <ChevronRight size={14} />
                             </button>
@@ -146,7 +146,7 @@ export default function AdminCentresPage() {
                 ))}
 
                 {/* Add New Centre Placeholder */}
-                <div className="border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center p-12 group cursor-pointer hover:border-[#00F5FF]/20 transition-all">
+                <div onClick={() => alert("Ouverture du formulaire de déploiement d'un nouveau centre.")} className="border-2 border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center p-12 group cursor-pointer hover:border-[#00F5FF]/20 transition-all">
                     <div className="w-16 h-16 rounded-2xl bg-white/[0.02] flex items-center justify-center text-[#5F6B7A] group-hover:text-[#00F5FF] group-hover:scale-110 transition-all mb-4">
                         <Plus size={32} />
                     </div>
