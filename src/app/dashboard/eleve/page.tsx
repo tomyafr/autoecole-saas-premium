@@ -22,6 +22,7 @@ export default function EleveDashboard() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [dbData, setDbData] = useState<any>(null);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     useEffect(() => {
         const u = getUser();
@@ -36,18 +37,44 @@ export default function EleveDashboard() {
     const fetchDashboardData = async (userId: string) => {
         try {
             const data = await getStudentDashboard(userId);
+            if (!data) {
+                // This means the user ID in localStorage does not exist in the DB (like after a DB reset/seed)
+                // Force logout to re-authenticate with the correct Database IDs.
+                localStorage.removeItem('autodrive_user');
+                router.replace('/login');
+                return;
+            }
             setDbData(data);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to fetch dashboard data:', error);
+            setErrorMsg(error.message || 'Erreur lors du chargement des données.');
         } finally {
             setLoading(false);
         }
     };
 
-    if (loading || !user || !dbData) {
+    if (loading) {
+        return (
+            <div className="h-[60vh] flex items-center justify-center flex-col gap-4">
+                <div className="w-8 h-8 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-xs text-[#5F6B7A] font-medium tracking-widest uppercase">Connexion à la base de données...</p>
+            </div>
+        );
+    }
+
+    if (errorMsg || !user || !dbData) {
         return (
             <div className="h-[60vh] flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+                <div className="premium-card p-8 max-w-md text-center">
+                    <div className="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <Target size={24} />
+                    </div>
+                    <h2 className="text-lg font-bold text-white mb-2">Impossible de charger le tableau de bord</h2>
+                    <p className="text-sm text-[#8A94A6] mb-6">{errorMsg || 'Vos données ne sont plus synchronisées.'}</p>
+                    <button onClick={() => { localStorage.removeItem('autodrive_user'); router.replace('/login'); }} className="btn-primary w-full justify-center">
+                        Se reconnecter
+                    </button>
+                </div>
             </div>
         );
     }
