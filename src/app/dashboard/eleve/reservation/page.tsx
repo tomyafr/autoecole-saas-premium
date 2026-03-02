@@ -35,7 +35,11 @@ export default function ReservationPage() {
 
     // Multi-step state
     const [selectedInstructorId, setSelectedInstructorId] = useState<string>(INSTRUCTORS[0].id);
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date>(() => {
+        const d = new Date();
+        d.setHours(12, 0, 0, 0);
+        return d;
+    });
     const [availableDates, setAvailableDates] = useState<{ label: string, date: Date }[]>([]);
 
     const [selectedDuration, setSelectedDuration] = useState<number>(1);
@@ -59,6 +63,7 @@ export default function ReservationPage() {
 
             const dates = [];
             const today = new Date();
+            today.setHours(12, 0, 0, 0);
             let current = new Date(today);
             current.setDate(current.getDate() + 1);
 
@@ -80,19 +85,8 @@ export default function ReservationPage() {
         }
     }, [router]);
 
-    // Generate available slots based on duration
-    const getSlotsForSelection = () => {
-        return ALL_HOURS.filter((time, idx) => {
-            if (selectedDuration === 2) {
-                // To book 2 hours, this hour and the next hour must be available
-                const nextHour = ALL_HOURS[idx + 1];
-                if (!nextHour || bookedSlots.includes(nextHour)) return false;
-            }
-            return !bookedSlots.includes(time);
-        });
-    };
-
-    const currentSlots = getSlotsForSelection();
+    // Return ALL_HOURS so we can render booked ones as disabled blocks
+    const currentSlots = ALL_HOURS;
 
     const handleConfirm = async () => {
         if (!selectedTime || !user || !selectedDate || !selectedInstructor) return;
@@ -232,7 +226,15 @@ export default function ReservationPage() {
                         {currentSlots.length > 0 ? (
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                 {currentSlots.map((time, idx) => {
-                                    const isBooked = bookedSlots.includes(time);
+                                    // A slot is effectively booked if it's natively booked, OR if we need 2H and the next slot is unavailable
+                                    let isBooked = bookedSlots.includes(time);
+                                    if (!isBooked && selectedDuration === 2) {
+                                        const nextHour = currentSlots[idx + 1];
+                                        if (!nextHour || bookedSlots.includes(nextHour)) {
+                                            isBooked = true;
+                                        }
+                                    }
+
                                     return (
                                         <button
                                             key={idx}
@@ -250,7 +252,7 @@ export default function ReservationPage() {
                                                     <Clock size={14} className="text-[var(--color-text-muted)]" />
                                                 )}
                                             </div>
-                                            <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Leçon de conduite</span>
+                                            <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{selectedDuration === 1 ? '1 Heure' : '2 Heures'}</span>
                                         </button>
                                     )
                                 })}

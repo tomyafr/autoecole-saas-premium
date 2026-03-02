@@ -27,7 +27,11 @@ export default function MoniteurPlanningPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [dbData, setDbData] = useState<any>(null);
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(() => {
+        const d = new Date();
+        d.setHours(12, 0, 0, 0);
+        return d;
+    });
 
     useEffect(() => {
         const u = getUser();
@@ -104,10 +108,10 @@ export default function MoniteurPlanningPage() {
                 <div className="space-y-6">
                     <div className="premium-card p-6">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="section-title">Calendrier</h3>
+                            <h3 className="section-title capitalize">{selectedDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</h3>
                             <div className="flex gap-1">
-                                <button className="p-1.5 rounded-lg hover:bg-white/5 text-[#5F6B7A] transition-colors"><ChevronLeft size={16} /></button>
-                                <button className="p-1.5 rounded-lg hover:bg-white/5 text-[#5F6B7A] transition-colors"><ChevronRight size={16} /></button>
+                                <button onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1, 12))} className="p-1.5 rounded-lg hover:bg-white/5 text-[#5F6B7A] transition-colors"><ChevronLeft size={16} /></button>
+                                <button onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1, 12))} className="p-1.5 rounded-lg hover:bg-white/5 text-[#5F6B7A] transition-colors"><ChevronRight size={16} /></button>
                             </div>
                         </div>
                         <div className="grid grid-cols-7 gap-1 mb-2">
@@ -125,7 +129,7 @@ export default function MoniteurPlanningPage() {
                                 return (
                                     <button
                                         key={i}
-                                        onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), dayNum))}
+                                        onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), dayNum, 12, 0, 0))}
                                         className={`aspect-square rounded-lg flex items-center justify-center text-[10px] font-bold transition-all ${isSelected
                                             ? 'bg-[#00F5FF] text-black shadow-[0_0_15px_rgba(0,245,255,0.3)]'
                                             : 'text-[#8A94A6] hover:bg-white/5 hover:text-white'
