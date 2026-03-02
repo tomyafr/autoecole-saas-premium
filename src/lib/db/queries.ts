@@ -44,7 +44,7 @@ export async function getInstructorDashboard(instructorId: string) {
                         student: true,
                     }
                 },
-                lessons: {
+                instructorLessons: {
                     limit: 10,
                     orderBy: (l, { desc }) => [desc(l.date)],
                     with: {
@@ -58,7 +58,7 @@ export async function getInstructorDashboard(instructorId: string) {
             where: (u, { eq }) => eq(u.role, 'eleve')
         }).then(res => res.length);
 
-        const result = { ...instructor, totalStudents: studentsCount };
+        const result = { ...instructor, lessons: instructor?.instructorLessons, totalStudents: studentsCount };
         return JSON.stringify({ success: true, data: result });
     } catch (err: any) {
         console.error("Erreur BD Moniteur:", err);

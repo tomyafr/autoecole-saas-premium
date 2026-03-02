@@ -29,7 +29,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     }),
     appointmentsAsStudent: many(appointments, { relationName: 'student' }),
     appointmentsAsInstructor: many(appointments, { relationName: 'instructor' }),
-    lessons: many(lessons),
+    lessons: many(lessons, { relationName: 'student_lesson' }),
+    instructorLessons: many(lessons, { relationName: 'instructor_lesson' }),
     payments: many(payments),
 }));
 
@@ -72,10 +73,12 @@ export const lessonsRelations = relations(lessons, ({ one }) => ({
     student: one(users, {
         fields: [lessons.studentId],
         references: [users.id],
+        relationName: 'student_lesson'
     }),
     instructor: one(users, {
         fields: [lessons.instructorId],
         references: [users.id],
+        relationName: 'instructor_lesson'
     }),
 }));
 
