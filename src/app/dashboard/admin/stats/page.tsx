@@ -34,7 +34,7 @@ export default function AdminStatsPage() {
                     </button>
                     <button className="btn-primary">
                         <Calendar size={16} />
-                        Mars 2026
+                        {new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase())}
                     </button>
                 </div>
             </div>

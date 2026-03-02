@@ -24,11 +24,12 @@ import {
 } from 'lucide-react';
 
 /* ======= DATA ======= */
+const currentYear = new Date().getFullYear();
 const USERS = [
-    { id: 1, name: 'Lucas Bernard', role: 'eleve', email: 'lucas.b@gmail.com', status: 'actif', joined: '12 Jan 2026', center: 'Paris - République' },
-    { id: 2, name: 'Marc Dupont', role: 'moniteur', email: 'm.dupont@autodrive.pro', status: 'actif', joined: '05 Nov 2025', center: 'Versailles' },
-    { id: 3, name: 'Sophie Martin', role: 'moniteur', email: 's.martin@autodrive.pro', status: 'actif', joined: '20 Déc 2025', center: 'Paris - République' },
-    { id: 4, name: 'Emma Petit', role: 'eleve', email: 'emma.p@yahoo.fr', status: 'suspendu', joined: '02 Fév 2026', center: 'Nanterre' },
+    { id: 1, name: 'Lucas Bernard', role: 'eleve', email: 'lucas.b@gmail.com', status: 'actif', joined: `12 Jan ${currentYear}`, center: 'Paris - République' },
+    { id: 2, name: 'Marc Dupont', role: 'moniteur', email: 'm.dupont@autodrive.pro', status: 'actif', joined: '05 Nov 2023', center: 'Versailles' },
+    { id: 3, name: 'Sophie Martin', role: 'moniteur', email: 's.martin@autodrive.pro', status: 'actif', joined: '20 Déc 2023', center: 'Paris - République' },
+    { id: 4, name: 'Emma Petit', role: 'eleve', email: 'emma.p@yahoo.fr', status: 'suspendu', joined: `02 Fév ${currentYear}`, center: 'Nanterre' },
     { id: 5, name: 'Admin Core', role: 'admin', email: 'admin@autodrive.io', status: 'actif', joined: '01 Jan 2025', center: 'HQ Paris' },
 ];
 
@@ -180,7 +181,7 @@ export default function AdminUsersPage() {
                         Session Chiffrée
                     </div>
                 </div>
-                <p className="text-[10px] text-[#5F6B7A] font-black uppercase tracking-[0.2em]">Système de Management Pro © 2026</p>
+                <p className="text-[10px] text-[#5F6B7A] font-black uppercase tracking-[0.2em]">Système de Management Pro © {new Date().getFullYear()}</p>
             </div>
         </div>
     );

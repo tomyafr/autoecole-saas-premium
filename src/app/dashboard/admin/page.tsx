@@ -176,7 +176,7 @@ export default function AdminDashboard() {
                         <div className="space-y-6">
                             {[
                                 { action: "Nouveau centre - Boulogne", time: "2h", status: "Terminé" },
-                                { action: "Mise à jour tarifs 2026", time: "4h", status: "Terminé" },
+                                { action: `Mise à jour tarifs ${new Date().getFullYear()}`, time: "4h", status: "Terminé" },
                                 { action: "Maintenance infrastructure", time: "12h", status: "En cours" }
                             ].map((item, i) => (
                                 <div key={i} className="flex gap-4 items-start group">

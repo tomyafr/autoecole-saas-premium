@@ -152,9 +152,9 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <p className="text-center mt-10 text-[10px] text-slate-700 font-bold uppercase tracking-widest">
-                    &copy; 2026 AutoDrive Pro — All rights reserved
-                </p>
+                <div className="absolute bottom-8 text-[10px] text-gray-500 font-medium tracking-widest uppercase">
+                    &copy; {new Date().getFullYear()} AutoDrive Pro — All rights reserved
+                </div>
             </motion.div>
         </div>
     );

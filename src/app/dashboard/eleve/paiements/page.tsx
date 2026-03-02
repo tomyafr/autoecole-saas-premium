@@ -19,10 +19,11 @@ import {
 import { getUser, type User as UserType } from '@/lib/auth';
 
 /* ======= DATA ======= */
+const currentYear = new Date().getFullYear();
 const INVOICES = [
-    { id: '#INV-2026-001', date: '05 Mars 2026', amount: '450.00€', status: 'Payé', type: 'Pack Sérénité 20h' },
-    { id: '#INV-2026-002', date: '12 Fév 2026', amount: '120.00€', status: 'Payé', type: 'Heures supplémentaires (2h)' },
-    { id: '#INV-2026-003', date: '15 Jan 2026', amount: '890.00€', status: 'Payé', type: 'Pack Initial Code+20h' },
+    { id: `#INV-${currentYear}-001`, date: `05 Mars ${currentYear}`, amount: '450.00€', status: 'Payé', type: 'Pack Sérénité 20h' },
+    { id: `#INV-${currentYear}-002`, date: `12 Fév ${currentYear}`, amount: '120.00€', status: 'Payé', type: 'Heures supplémentaires (2h)' },
+    { id: `#INV-${currentYear}-003`, date: `15 Jan ${currentYear}`, amount: '890.00€', status: 'Payé', type: 'Pack Initial Code+20h' },
 ];
 
 import { getStudentDashboard } from '@/lib/db/queries';

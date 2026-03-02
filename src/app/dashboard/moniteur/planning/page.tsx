@@ -1,13 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { getUser, type User } from '@/lib/auth';
+import { getInstructorDashboard } from '@/lib/db/queries';
 import {
     Calendar as CalendarIcon,
     ChevronLeft,
     ChevronRight,
     Clock,
-    User,
+    User as UserIcon,
     MapPin,
     AlertCircle,
     CheckCircle2,
@@ -17,18 +20,60 @@ import {
     ArrowRight
 } from 'lucide-react';
 
-/* ======= DATA ======= */
-const SESSIONS = [
-    { id: 1, time: '08:00', duration: '2h', student: 'Lucas Bernard', type: 'Conduite', status: 'confirmé', location: 'Point Ralliement A' },
-    { id: 2, time: '10:30', duration: '1.5h', student: 'Emma Petit', type: 'Circuit', status: 'en attente', location: 'Centre Technique' },
-    { id: 3, time: '14:00', duration: '2h', student: 'Hugo Roux', type: 'Examen Blanc', status: 'confirmé', location: 'Parcours Officiel' },
-    { id: 4, time: '16:30', duration: '1h', student: 'Chloé Moreau', type: 'Evaluation', status: 'annulé', location: 'Point Ralliement B' },
-];
-
 const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
 export default function MoniteurPlanningPage() {
+    const router = useRouter();
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [dbData, setDbData] = useState<any>(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
+
+    useEffect(() => {
+        const u = getUser();
+        if (u) {
+            setUser(u);
+            fetchDashboardData(u.id);
+        } else {
+            router.replace('/login');
+        }
+    }, [router]);
+
+    const fetchDashboardData = async (userId: string) => {
+        try {
+            const rawData = await getInstructorDashboard(userId);
+            const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+            if (parsed && parsed.success) {
+                setDbData(parsed.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch planning data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="h-[60vh] flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    const currentMonthDays = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
+
+    // Filter DB appointments by selectedDate
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    const SESSIONS = dbData?.appointmentsAsInstructor?.filter((app: any) => app.date && new Date(app.date).toISOString().split('T')[0] === dateStr).map((app: any) => ({
+        id: app.id,
+        time: app.time,
+        duration: '1.5h', // Mock duration as it's not in DB schema right now
+        student: app.student?.name || 'Inconnu',
+        type: app.type,
+        status: app.status === 'completed' ? 'confirmé' : app.status === 'pending' ? 'en attente' : 'annulé',
+        location: 'Centre AutoDrive' // Mock location
+    })) || [];
 
     return (
         <div className="space-y-10 group/planning">
@@ -67,17 +112,22 @@ export default function MoniteurPlanningPage() {
                             ))}
                         </div>
                         <div className="grid grid-cols-7 gap-1">
-                            {Array.from({ length: 31 }).map((_, i) => (
-                                <button
-                                    key={i}
-                                    className={`aspect-square rounded-lg flex items-center justify-center text-[10px] font-bold transition-all ${i + 1 === 13
+                            {Array.from({ length: currentMonthDays }).map((_, i) => {
+                                const dayNum = i + 1;
+                                const isSelected = dayNum === selectedDate.getDate();
+                                return (
+                                    <button
+                                        key={i}
+                                        onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), dayNum))}
+                                        className={`aspect-square rounded-lg flex items-center justify-center text-[10px] font-bold transition-all ${isSelected
                                             ? 'bg-[#00F5FF] text-black shadow-[0_0_15px_rgba(0,245,255,0.3)]'
                                             : 'text-[#8A94A6] hover:bg-white/5 hover:text-white'
-                                        }`}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
+                                            }`}
+                                    >
+                                        {dayNum}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -85,9 +135,9 @@ export default function MoniteurPlanningPage() {
                         <h3 className="card-title text-[#00F5FF]/60 italic font-black">Résumé du Jour</h3>
                         <div className="space-y-4">
                             {[
-                                { label: 'Charge Totale', value: '6.5h', color: 'text-white' },
-                                { label: 'Sessions Actives', value: '3', color: 'text-[#00F5FF]' },
-                                { label: 'Flux Moyen', value: '88%', color: 'text-emerald-400' },
+                                { label: 'Charge Totale', value: `${SESSIONS.length * 1.5}h`, color: 'text-white' },
+                                { label: 'Sessions Actives', value: `${SESSIONS.filter((s: any) => s.status !== 'annulé').length}`, color: 'text-[#00F5FF]' },
+                                { label: 'Flux Moyen', value: SESSIONS.length > 0 ? '88%' : '0%', color: 'text-emerald-400' },
                             ].map((stat, i) => (
                                 <div key={i} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0">
                                     <span className="text-[10px] font-bold text-[#5F6B7A] uppercase tracking-wider">{stat.label}</span>
@@ -106,14 +156,16 @@ export default function MoniteurPlanningPage() {
                                 <CalendarDays size={20} />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black text-white uppercase italic tracking-tight">Jeudi, 13 Février 2026</h2>
+                                <h2 className="text-xl font-black text-white uppercase italic tracking-tight">
+                                    {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                </h2>
                                 <p className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-0.5">Lutte contre les imprévus opérationnels</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="space-y-4">
-                        {SESSIONS.map((session, i) => (
+                        {SESSIONS.length > 0 ? SESSIONS.map((session: any, i: number) => (
                             <motion.div
                                 key={session.id}
                                 initial={{ opacity: 0, x: 20 }}
@@ -135,8 +187,8 @@ export default function MoniteurPlanningPage() {
                                     <div className="flex-1 space-y-3">
                                         <div className="flex items-center gap-3">
                                             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-[0.2em] border ${session.status === 'confirmé' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                                    session.status === 'en attente' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                                        'bg-red-500/10 text-red-500 border-red-500/20'
+                                                session.status === 'en attente' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                                    'bg-red-500/10 text-red-500 border-red-500/20'
                                                 }`}>
                                                 {session.status}
                                             </span>
@@ -144,7 +196,7 @@ export default function MoniteurPlanningPage() {
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-[#8A94A6]">
-                                                {session.student.split(' ').map(n => n[0]).join('')}
+                                                {session.student.split(' ').map((n: string) => n[0]).join('')}
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="text-base font-bold text-white leading-none">{session.student}</span>
@@ -165,7 +217,11 @@ export default function MoniteurPlanningPage() {
                                     </div>
                                 </div>
                             </motion.div>
-                        ))}
+                        )) : (
+                            <div className="p-8 text-center rounded-2xl border border-dashed border-white/10">
+                                <p className="text-sm font-medium text-[#5F6B7A]">Aucune mission planifiée pour ce jour.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

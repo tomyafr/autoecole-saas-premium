@@ -17,22 +17,32 @@ import {
 import { getUser, type User as UserType } from '@/lib/auth';
 import { createAppointment } from '@/app/actions/appointment';
 
-const SLOTS = [
-    { id: 1, time: '08:00', type: 'Conduite urbaine', moniteur: 'Marc Dupont', exp: 'Senior', rating: 4.9 },
-    { id: 2, time: '09:30', type: 'Code accéléré', moniteur: 'Sophie Martin', exp: 'Expert', rating: 5.0 },
-    { id: 3, time: '11:00', type: 'Conduite urbaine', moniteur: 'Marc Dupont', exp: 'Senior', rating: 4.9 },
-    { id: 4, time: '14:00', type: 'Insertion autoroute', moniteur: 'Sophie Martin', exp: 'Expert', rating: 5.0 },
-    { id: 5, time: '15:30', type: 'Manoeuvres parking', moniteur: 'Jean Roche', exp: 'Junior', rating: 4.7 },
-    { id: 6, time: '17:00', type: 'Conduite de nuit', moniteur: 'Marc Dupont', exp: 'Senior', rating: 4.9 },
+const INSTRUCTORS = [
+    { id: '1', name: 'Marc Dupont', exp: 'Senior - 15 ans exp.', rating: 4.9, avatar: 'MD', color: 'emerald' },
+    { id: '2', name: 'Sophie Martin', exp: 'Expert - Examen', rating: 5.0, avatar: 'SM', color: 'blue' },
+    { id: '3', name: 'Jean Roche', exp: 'Instructeur Ville', rating: 4.7, avatar: 'JR', color: 'amber' },
+];
+
+const BASE_SLOTS = [
+    { time: '08:00', type: 'Conduite urbaine' },
+    { time: '09:30', type: 'Code accéléré' },
+    { time: '11:00', type: 'Conduite urbaine' },
+    { time: '14:00', type: 'Insertion autoroute' },
+    { time: '15:30', type: 'Manoeuvres parking' },
+    { time: '17:00', type: 'Conduite de nuit' },
 ];
 
 export default function ReservationPage() {
     const router = useRouter();
     const [user, setUser] = useState<UserType | null>(null);
     const [loading, setLoading] = useState(true);
-    const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+
+    // Multi-step state
+    const [selectedInstructorId, setSelectedInstructorId] = useState<string>(INSTRUCTORS[0].id);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [availableDates, setAvailableDates] = useState<{ label: string, date: Date }[]>([]);
+
+    const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
 
     useEffect(() => {
@@ -41,15 +51,12 @@ export default function ReservationPage() {
             setUser(u);
             setLoading(false);
 
-            // Generate next 4 working days dynamically
             const dates = [];
             const today = new Date();
-            let daysAdded = 0;
             let current = new Date(today);
-            current.setDate(current.getDate() + 1); // Start tomorrow
+            current.setDate(current.getDate() + 1);
 
-            while (dates.length < 4) {
-                // Skip Sundays
+            while (dates.length < 5) {
                 if (current.getDay() !== 0) {
                     const label = current.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }).replace('.', '');
                     dates.push({
@@ -67,26 +74,33 @@ export default function ReservationPage() {
         }
     }, [router]);
 
-    const handleConfirm = async () => {
-        if (!selectedSlot || !user || !selectedDate) return;
+    // Dynamic slot generation based on instructor and date to feel real
+    const getSlotsForSelection = () => {
+        const hash = selectedInstructorId.charCodeAt(0) + selectedDate.getDate();
+        return BASE_SLOTS.filter((_, idx) => (hash + idx) % 2 === 0);
+    };
 
-        const slot = SLOTS.find(s => s.id === selectedSlot);
-        if (!slot) return;
+    const currentSlots = getSlotsForSelection();
+    const selectedInstructor = INSTRUCTORS.find(i => i.id === selectedInstructorId);
+    const selectedSlotData = currentSlots.find(s => s.time === selectedTime);
+
+    const handleConfirm = async () => {
+        if (!selectedTime || !user || !selectedDate || !selectedInstructor || !selectedSlotData) return;
 
         setLoading(true);
         const result = await createAppointment(
             user.id,
-            slot.moniteur,
+            selectedInstructor.name,
             selectedDate,
-            slot.time,
-            slot.type
+            selectedTime,
+            selectedSlotData.type
         );
 
         if (result.success) {
             setIsConfirmed(true);
             setTimeout(() => {
                 setIsConfirmed(false);
-                setSelectedSlot(null);
+                setSelectedTime(null);
                 setLoading(false);
             }, 3000);
         } else {
@@ -108,84 +122,102 @@ export default function ReservationPage() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
-                    <h1 className="page-title">Sessions de conduite</h1>
-                    <p className="text-sm text-[var(--color-text-secondary)] mt-1 font-medium">Planifiez vos prochaines missions de formation stratégique.</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="px-4 py-2 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Disponibilité temps réel
-                    </div>
+                    <h1 className="page-title">Réserver une mission</h1>
+                    <p className="text-sm text-[var(--color-text-secondary)] mt-1 font-medium">Configurez votre prochaine session d'apprentissage sur-mesure.</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                {/* Tactical Selection Grid */}
-                <div className="lg:col-span-3">
-                    <div className="mb-6 flex items-center justify-between">
+                {/* Tactical Selection Column */}
+                <div className="lg:col-span-3 space-y-8">
+
+                    {/* STEP 1: Instructor */}
+                    <div className="space-y-4">
                         <div className="flex items-center gap-4">
-                            <span className="text-xs font-bold text-[var(--color-text-primary)]/40 uppercase tracking-[0.2em]">Sélectionner un module</span>
-                            <div className="h-px w-12 bg-[var(--color-sidebar)]" />
+                            <span className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-[0.2em]">Étape 1</span>
+                            <span className="text-sm font-bold text-[var(--color-text-primary)]">Choisir un Formateur</span>
+                            <div className="h-px flex-1 bg-[var(--color-sidebar)]" />
                         </div>
-                        <div className="flex gap-2 text-nowrap overflow-x-auto pb-2">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {INSTRUCTORS.map(inst => (
+                                <button
+                                    key={inst.id}
+                                    onClick={() => { setSelectedInstructorId(inst.id); setSelectedTime(null); }}
+                                    className={`premium-card p-4 flex items-center gap-4 transition-all ${selectedInstructorId === inst.id ? 'border-[var(--color-accent)]/50 bg-[var(--color-accent)]/[0.03] shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'hover:border-white/20'}`}
+                                >
+                                    <div className="w-12 h-12 rounded-xl bg-[var(--color-sidebar)] flex items-center justify-center text-xs font-bold text-[var(--color-text-secondary)]">
+                                        {inst.avatar}
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-sm font-semibold text-[var(--color-text-primary)]">{inst.name}</p>
+                                        <div className="flex items-center gap-1 mt-0.5">
+                                            <Star size={10} className="text-amber-500 fill-amber-500" />
+                                            <span className="text-[10px] font-bold text-[var(--color-text-primary)]">{inst.rating}</span>
+                                            <span className="text-[9px] text-[var(--color-text-muted)] ml-1 uppercase tracking-wider">{inst.exp}</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* STEP 2: Date */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <span className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-[0.2em]">Étape 2</span>
+                            <span className="text-sm font-bold text-[var(--color-text-primary)]">Choisir la date</span>
+                            <div className="h-px flex-1 bg-[var(--color-sidebar)]" />
+                        </div>
+                        <div className="flex gap-3 overflow-x-auto pb-2">
                             {availableDates.map((dayItem, idx) => {
                                 const isSelected = selectedDate.getDate() === dayItem.date.getDate();
                                 return (
                                     <button
                                         key={idx}
-                                        onClick={() => setSelectedDate(dayItem.date)}
-                                        className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest border transition-all ${isSelected ? 'bg-[var(--color-sidebar)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)]' : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'}`}
+                                        onClick={() => { setSelectedDate(dayItem.date); setSelectedTime(null); }}
+                                        className={`flex-1 min-w-[100px] p-4 rounded-xl text-center border transition-all ${isSelected ? 'bg-[var(--color-sidebar)] border-[var(--color-border-subtle)] text-[var(--color-accent)]' : 'border-transparent text-[var(--color-text-muted)] bg-[var(--color-card)] hover:text-[var(--color-text-primary)]'}`}
                                     >
-                                        {dayItem.label}
+                                        <p className="text-xs font-bold uppercase tracking-widest">{dayItem.label.split(' ')[0]}</p>
+                                        <p className={`text-xl font-black mt-1 ${isSelected ? 'text-[var(--color-text-primary)]' : ''}`}>{dayItem.label.split(' ')[1]}</p>
                                     </button>
                                 );
                             })}
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {SLOTS.map((slot) => (
-                            <button
-                                key={slot.id}
-                                onClick={() => setSelectedSlot(slot.id)}
-                                className={`premium-card p-6 flex flex-col justify-between space-y-6 text-left group transition-all duration-300 min-h-[220px] ${selectedSlot === slot.id ? 'border-[var(--color-accent)]/40 bg-[var(--color-accent)]/[0.02] shadow-[0_0_30px_rgba(0,245,255,0.05)]' : 'hover:border-white/20'}`}
-                            >
-                                <div className="flex justify-between items-start">
-                                    <div className="flex flex-col">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-2xl font-semibold text-[var(--color-text-primary)] tracking-tight">{slot.time}</span>
-                                            {selectedSlot === slot.id && (
-                                                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-[var(--color-accent)]">
-                                                    <CheckCircle2 size={18} fill="currentColor" className="text-[#0B0F14]" />
-                                                </motion.div>
+                    {/* STEP 3: Slots */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <span className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-[0.2em]">Étape 3</span>
+                            <span className="text-sm font-bold text-[var(--color-text-primary)]">Disponibilités de {selectedInstructor?.name.split(' ')[0]}</span>
+                            <div className="h-px flex-1 bg-[var(--color-sidebar)]" />
+                        </div>
+
+                        {currentSlots.length > 0 ? (
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {currentSlots.map((slot, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setSelectedTime(slot.time)}
+                                        className={`premium-card p-4 flex flex-col gap-2 text-left transition-all ${selectedTime === slot.time ? 'border-[var(--color-accent)]/50 bg-[var(--color-accent)]/[0.03] shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'hover:border-white/20'}`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xl font-semibold text-[var(--color-text-primary)]">{slot.time}</span>
+                                            {selectedTime === slot.time ? (
+                                                <CheckCircle2 size={16} className="text-[var(--color-accent)]" />
+                                            ) : (
+                                                <Clock size={14} className="text-[var(--color-text-muted)]" />
                                             )}
                                         </div>
-                                        <span className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] tracking-wider">{slot.type}</span>
-                                    </div>
-                                    <div className={`p-2 rounded-lg bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] transition-colors ${selectedSlot === slot.id ? 'text-[var(--color-accent)] border-[var(--color-accent)]/20' : 'text-[var(--color-text-secondary)]'}`}>
-                                        <Clock size={16} />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4 pt-4 border-t border-[var(--color-border-subtle)]">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-[var(--color-sidebar)] flex items-center justify-center text-[10px] font-bold text-[var(--color-text-secondary)]">
-                                                {slot.moniteur.split(' ').map(n => n[0]).join('')}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors">{slot.moniteur}</span>
-                                                <span className="text-[9px] text-[var(--color-text-muted)] uppercase font-bold tracking-widest">{slot.exp}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-[var(--color-card)] border border-[var(--color-border-subtle)]">
-                                            <Star size={10} className="text-amber-500 fill-amber-500" />
-                                            <span className="text-[10px] font-bold text-[var(--color-text-primary)]">{slot.rating}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </button>
-                        ))}
+                                        <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{slot.type}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-8 text-center rounded-2xl border border-dashed border-[var(--color-border-subtle)]">
+                                <p className="text-sm font-medium text-[var(--color-text-secondary)]">Aucun créneau disponible pour ce jour avec ce formateur.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -208,7 +240,7 @@ export default function ReservationPage() {
                                     <p className="secondary-info max-w-[200px] mx-auto">Votre mission a été enregistrée avec succès dans votre planning.</p>
                                 </div>
                             </motion.div>
-                        ) : selectedSlot ? (
+                        ) : selectedTime ? (
                             <motion.div
                                 key="selection"
                                 initial={{ opacity: 0, x: 20 }}
@@ -230,7 +262,7 @@ export default function ReservationPage() {
                                             <div>
                                                 <p className="secondary-info font-medium uppercase tracking-widest text-[10px]">Date & Heure</p>
                                                 <p className="text-lg font-semibold text-[var(--color-text-primary)]">
-                                                    {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' }).replace(/^\w/, (c) => c.toUpperCase())} • {SLOTS.find(s => s.id === selectedSlot)?.time}
+                                                    {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' }).replace(/^\w/, (c) => c.toUpperCase())} • {selectedTime}
                                                 </p>
                                             </div>
                                         </div>
@@ -240,7 +272,7 @@ export default function ReservationPage() {
                                             </div>
                                             <div>
                                                 <p className="secondary-info font-medium uppercase tracking-widest text-[10px]">Type de mission</p>
-                                                <p className="text-lg font-semibold text-[var(--color-text-primary)]">{SLOTS.find(s => s.id === selectedSlot)?.type}</p>
+                                                <p className="text-lg font-semibold text-[var(--color-text-primary)]">{selectedSlotData?.type}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -266,7 +298,7 @@ export default function ReservationPage() {
                                         <ArrowRight size={18} />
                                     </button>
                                     <button
-                                        onClick={() => setSelectedSlot(null)}
+                                        onClick={() => setSelectedTime(null)}
                                         className="w-full btn-secondary py-4 text-xs font-bold uppercase tracking-widest bg-transparent border-none text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                                     >
                                         Annuler la sélection
