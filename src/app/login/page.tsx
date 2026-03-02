@@ -34,9 +34,9 @@ export default function LoginPage() {
                 setError('Identifiants invalides');
                 setLoading(false);
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            setError('Une erreur réseau est survenue. Veuillez réessayer.');
+            setError(err.message || 'Une erreur réseau est survenue. Veuillez réessayer.');
             setLoading(false);
         }
     };

@@ -8,7 +8,11 @@ import type { User, UserRole } from '@/lib/auth';
 export async function authenticateServer(
     username: string,
     password: string
-): Promise<User | null> {
+) {
+    if (!process.env.POSTGRES_URL) {
+        throw new Error("Vercel n'arrive pas à se connecter à la base de données : la variable POSTGRES_URL n'est pas configurée dans les paramètres (Settings) de ton projet Vercel.");
+    }
+
     try {
         const found = await db.query.users.findFirst({
             where: and(
