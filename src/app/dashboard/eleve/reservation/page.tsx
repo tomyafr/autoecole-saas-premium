@@ -115,12 +115,7 @@ export default function ReservationPage() {
                 newBooked.push(nextTime);
             }
             setBookedSlots(newBooked);
-
-            setTimeout(() => {
-                setIsConfirmed(false);
-                setSelectedTime(null);
-                setLoading(false);
-            }, 3000);
+            setLoading(false);
         } else {
             alert('Erreur lors de la réservation');
             setLoading(false);
@@ -286,14 +281,25 @@ export default function ReservationPage() {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                className="premium-card p-12 flex flex-col items-center justify-center text-center space-y-6 min-h-[400px] border-[var(--color-accent)]/20"
+                                className="premium-card p-10 flex flex-col justify-center space-y-6 min-h-[400px] border-[var(--color-accent)]/20 shadow-[0_0_40px_rgba(0,245,255,0.05)]"
                             >
-                                <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                                    <CheckCircle2 size={40} />
-                                </div>
-                                <div>
+                                <div className="flex flex-col items-center text-center">
+                                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6">
+                                        <CheckCircle2 size={32} />
+                                    </div>
                                     <h3 className="section-title mb-2">Session Confirmée</h3>
                                     <p className="secondary-info max-w-[200px] mx-auto">Votre mission a été enregistrée avec succès dans votre planning.</p>
+                                </div>
+                                <div className="space-y-3 mt-8">
+                                    <button onClick={() => alert("Ajout au calendrier (Google/Apple) en cours d'intégration.")} className="w-full flex items-center justify-center gap-2 btn-secondary py-3 text-xs font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20">
+                                        <CalendarIcon size={14} /> Ajouter au calendrier
+                                    </button>
+                                    <button onClick={() => router.push('/dashboard/eleve')} className="w-full btn-primary py-3 flex items-center justify-center gap-2">
+                                        Retour au tableau de bord <ArrowRight size={14} />
+                                    </button>
+                                    <button onClick={() => { setIsConfirmed(false); setSelectedTime(null); }} className="w-full btn-secondary py-3 text-xs font-bold uppercase tracking-widest bg-transparent border-none text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+                                        Nouvelle réservation
+                                    </button>
                                 </div>
                             </motion.div>
                         ) : selectedTime ? (

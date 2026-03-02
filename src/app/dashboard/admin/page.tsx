@@ -218,7 +218,7 @@ export default function AdminDashboard() {
                             ))}
                         </div>
                         <button
-                            onClick={() => router.push('/dashboard/admin/utilisateurs')}
+                            onClick={() => alert("Le module de gestion des effectifs est en cours de déploiement.")}
                             className="w-full mt-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#5F6B7A] hover:text-white transition-colors"
                         >
                             Voir tout l'effectif

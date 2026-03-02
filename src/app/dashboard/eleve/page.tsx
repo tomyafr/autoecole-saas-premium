@@ -186,7 +186,7 @@ export default function EleveDashboard() {
                                     { label: 'Manoeuvres & Stationnement', status: 'Perfectionnement', color: 'bg-amber-500' },
                                     { label: 'Circulation voies rapides', status: 'Phase initiale', color: 'bg-red-500' }
                                 ].map((step, idx) => (
-                                    <div key={idx} className="flex items-center gap-4 group/item">
+                                    <div key={idx} onClick={() => alert(`Détails de l'objectif : ${step.label}`)} className="flex items-center gap-4 group/item cursor-pointer">
                                         <div className={`w-2 h-2 rounded-full ${step.color} shadow-[0_0_8px_currentColor] opacity-80 group-hover/item:opacity-100 transition-opacity duration-300`} />
                                         <div>
                                             <p className="text-sm font-medium text-white group-hover/item:text-[#00F5FF] transition-colors">{step.label}</p>
@@ -293,7 +293,7 @@ export default function EleveDashboard() {
                         <h3 className="card-title mb-6">Centre de ressources</h3>
                         <div className="space-y-2">
                             {['Règlementation Autoroute', 'Les contrôles visuels', 'Mécanique & Sécurité'].map((item, i) => (
-                                <button key={i} className="w-full flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-xs font-medium text-[#8A94A6] hover:text-white group border border-transparent hover:border-white/5">
+                                <button key={i} onClick={() => alert(`Ouverture du PDF réglementaire : ${item}`)} className="w-full flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-xs font-medium text-[#8A94A6] hover:text-white group border border-transparent hover:border-white/5">
                                     <span>{item}</span>
                                     <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-[#00F5FF]" />
                                 </button>
@@ -301,7 +301,7 @@ export default function EleveDashboard() {
                         </div>
                     </div>
 
-                    <div className="p-6 rounded-2xl bg-[#00F5FF]/[0.02] border border-[#00F5FF]/10 flex items-center gap-4">
+                    <div onClick={() => alert("Paramétrage du Mode Booster (bientôt disponible)")} className="p-6 rounded-2xl bg-[#00F5FF]/[0.02] border border-[#00F5FF]/10 flex items-center gap-4 cursor-pointer hover:bg-[#00F5FF]/[0.05] transition-colors">
                         <div className="w-10 h-10 rounded-xl bg-[#00F5FF]/10 flex items-center justify-center text-[#00F5FF]">
                             <Zap size={20} fill="currentColor" />
                         </div>

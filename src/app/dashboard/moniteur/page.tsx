@@ -294,7 +294,7 @@ export default function MoniteurDashboard() {
                             })}
                         </div>
                         <button
-                            onClick={() => router.push('/dashboard/moniteur/planning')}
+                            onClick={() => alert("Module IA d'optimisation de planning à venir.")}
                             className="w-full btn-primary mt-8 py-4"
                         >
                             Optimizer Planning

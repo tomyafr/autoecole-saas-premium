@@ -170,7 +170,9 @@ export default function MoniteurPlanningPage() {
                                 <h2 className="text-xl font-black text-white uppercase italic tracking-tight">
                                     {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                 </h2>
-                                <p className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-0.5">Lutte contre les imprévus opérationnels</p>
+                                <p className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-0.5">
+                                    {SESSIONS.length === 0 ? "Journée de repos opérationnel" : SESSIONS.length >= 5 ? "Tension maximale : Déploiement intensif" : "Flux nominal d'encadrement"}
+                                </p>
                             </div>
                         </div>
                     </div>
