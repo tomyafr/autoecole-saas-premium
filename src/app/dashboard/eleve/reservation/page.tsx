@@ -15,7 +15,7 @@ import {
     Car
 } from 'lucide-react';
 import { getUser, type User as UserType } from '@/lib/auth';
-import { createAppointment } from '@/app/actions/appointment';
+import { createAppointment, getBookedSlots } from '@/app/actions/appointment';
 
 const INSTRUCTORS = [
     { id: '1', name: 'Marc Dupont', exp: 'Senior - 15 ans exp.', rating: 4.9, avatar: 'MD', color: 'emerald' },
@@ -24,12 +24,12 @@ const INSTRUCTORS = [
 ];
 
 const BASE_SLOTS = [
-    { time: '08:00', type: 'Conduite urbaine' },
-    { time: '09:30', type: 'Code accéléré' },
-    { time: '11:00', type: 'Conduite urbaine' },
-    { time: '14:00', type: 'Insertion autoroute' },
-    { time: '15:30', type: 'Manoeuvres parking' },
-    { time: '17:00', type: 'Conduite de nuit' },
+    { time: '08:00', type: 'Conduite urbaine', duration: '2H' },
+    { time: '09:30', type: 'Code accéléré', duration: '1H' },
+    { time: '11:00', type: 'Conduite urbaine', duration: '2H' },
+    { time: '14:00', type: 'Insertion autoroute', duration: '2H' },
+    { time: '15:30', type: 'Manoeuvres parking', duration: '1H' },
+    { time: '17:00', type: 'Conduite de nuit', duration: '2H' },
 ];
 
 export default function ReservationPage() {
@@ -44,6 +44,15 @@ export default function ReservationPage() {
 
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
+    const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+
+    const selectedInstructor = INSTRUCTORS.find(i => i.id === selectedInstructorId);
+
+    useEffect(() => {
+        if (selectedInstructor && selectedDate) {
+            getBookedSlots(selectedInstructor.name, selectedDate).then(slots => setBookedSlots(slots));
+        }
+    }, [selectedInstructor, selectedDate]);
 
     useEffect(() => {
         const u = getUser();
@@ -81,7 +90,6 @@ export default function ReservationPage() {
     };
 
     const currentSlots = getSlotsForSelection();
-    const selectedInstructor = INSTRUCTORS.find(i => i.id === selectedInstructorId);
     const selectedSlotData = currentSlots.find(s => s.time === selectedTime);
 
     const handleConfirm = async () => {
@@ -143,8 +151,9 @@ export default function ReservationPage() {
                                 <button
                                     key={inst.id}
                                     onClick={() => { setSelectedInstructorId(inst.id); setSelectedTime(null); }}
-                                    className={`premium-card p-4 flex items-center gap-4 transition-all ${selectedInstructorId === inst.id ? 'border-[var(--color-accent)]/50 bg-[var(--color-accent)]/[0.03] shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'hover:border-white/20'}`}
+                                    className={`premium-card p-4 flex items-center gap-4 transition-all relative overflow-hidden ${selectedInstructorId === inst.id ? 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-background)] bg-[var(--color-accent)]/[0.05] shadow-[0_0_20px_rgba(0,245,255,0.2)]' : 'hover:border-white/20'}`}
                                 >
+                                    {selectedInstructorId === inst.id && <div className="absolute top-2 right-2 text-[var(--color-accent)]"><CheckCircle2 size={16} /></div>}
                                     <div className="w-12 h-12 rounded-xl bg-[var(--color-sidebar)] flex items-center justify-center text-xs font-bold text-[var(--color-text-secondary)]">
                                         {inst.avatar}
                                     </div>
@@ -195,23 +204,29 @@ export default function ReservationPage() {
 
                         {currentSlots.length > 0 ? (
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {currentSlots.map((slot, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => setSelectedTime(slot.time)}
-                                        className={`premium-card p-4 flex flex-col gap-2 text-left transition-all ${selectedTime === slot.time ? 'border-[var(--color-accent)]/50 bg-[var(--color-accent)]/[0.03] shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'hover:border-white/20'}`}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xl font-semibold text-[var(--color-text-primary)]">{slot.time}</span>
-                                            {selectedTime === slot.time ? (
-                                                <CheckCircle2 size={16} className="text-[var(--color-accent)]" />
-                                            ) : (
-                                                <Clock size={14} className="text-[var(--color-text-muted)]" />
-                                            )}
-                                        </div>
-                                        <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{slot.type}</span>
-                                    </button>
-                                ))}
+                                {currentSlots.map((slot, idx) => {
+                                    const isBooked = bookedSlots.includes(slot.time);
+                                    return (
+                                        <button
+                                            key={idx}
+                                            disabled={isBooked}
+                                            onClick={() => !isBooked && setSelectedTime(slot.time)}
+                                            className={`premium-card p-4 flex flex-col gap-2 text-left transition-all ${isBooked ? 'opacity-40 cursor-not-allowed bg-[var(--color-card)]' : selectedTime === slot.time ? 'border-[var(--color-accent)] ring-1 ring-[var(--color-accent)] bg-[var(--color-accent)]/[0.03] shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'hover:border-white/20'}`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className={`text-xl font-semibold ${isBooked ? 'text-[var(--color-text-muted)] line-through' : 'text-[var(--color-text-primary)]'}`}>{slot.time}</span>
+                                                {selectedTime === slot.time ? (
+                                                    <CheckCircle2 size={16} className="text-[var(--color-accent)]" />
+                                                ) : isBooked ? (
+                                                    <span className="text-[10px] font-bold text-red-500 text-right uppercase tracking-[0.2em] bg-red-500/10 px-1 py-0.5 rounded">Réservé</span>
+                                                ) : (
+                                                    <Clock size={14} className="text-[var(--color-text-muted)]" />
+                                                )}
+                                            </div>
+                                            <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{slot.type} • {slot.duration}</span>
+                                        </button>
+                                    )
+                                })}
                             </div>
                         ) : (
                             <div className="p-8 text-center rounded-2xl border border-dashed border-[var(--color-border-subtle)]">
@@ -268,6 +283,15 @@ export default function ReservationPage() {
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 rounded-2xl bg-[var(--color-sidebar)] flex items-center justify-center text-[var(--color-text-secondary)]">
+                                                <User size={24} />
+                                            </div>
+                                            <div>
+                                                <p className="secondary-info font-medium uppercase tracking-widest text-[10px]">Formateur</p>
+                                                <p className="text-lg font-semibold text-[var(--color-text-primary)]">{selectedInstructor?.name}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-[var(--color-sidebar)] flex items-center justify-center text-[var(--color-text-secondary)]">
                                                 <Car size={24} />
                                             </div>
                                             <div>
@@ -284,7 +308,7 @@ export default function ReservationPage() {
                                         </div>
                                         <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
                                             <span>Temps estimé</span>
-                                            <span className="text-[var(--color-text-primary)]">90 min</span>
+                                            <span className="text-[var(--color-text-primary)]">{selectedSlotData?.duration || '1H'}</span>
                                         </div>
                                     </div>
                                 </div>

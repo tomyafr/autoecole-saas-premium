@@ -46,3 +46,25 @@ export async function getAppointmentsForStudent(studentId: string) {
         }
     });
 }
+
+export async function getBookedSlots(instructorName: string, date: Date) {
+    try {
+        const instructor = await db.query.users.findFirst({
+            where: eq(users.name, instructorName)
+        });
+
+        if (!instructor) return [];
+
+        const all = await db.query.appointments.findMany({
+            where: eq(appointments.instructorId, instructor.id)
+        });
+
+        const dateStr = new Date(date).toISOString().split('T')[0];
+        return all
+            .filter(a => a.date && new Date(a.date).toISOString().split('T')[0] === dateStr)
+            .map(a => a.time);
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+}
