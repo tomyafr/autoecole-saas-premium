@@ -1,5 +1,4 @@
-'use client';
-
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     Users,
@@ -14,23 +13,62 @@ import {
     Play
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { getUser, type User } from '@/lib/auth';
+import { getInstructorDashboard } from '@/lib/db/queries';
 
 export default function MoniteurDashboard() {
     const router = useRouter();
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [dbData, setDbData] = useState<any>(null);
+
+    useEffect(() => {
+        const u = getUser();
+        if (u) {
+            setUser(u);
+            fetchDashboardData(u.id);
+        } else {
+            router.replace('/login');
+        }
+    }, [router]);
+
+    const fetchDashboardData = async (userId: string) => {
+        try {
+            const data = await getInstructorDashboard(userId);
+            setDbData(data);
+        } catch (error) {
+            console.error('Failed to fetch dashboard data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading || !user || !dbData) {
+        return (
+            <div className="h-[60vh] flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    const sessionsCount = dbData.appointmentsAsInstructor?.length || 0;
+    const hoursTotal = dbData.lessons?.length || 0;
 
     const stats = [
-        { label: 'Sessions du jour', value: '6 Élèves', sub: '4 missions restantes', icon: <Users size={18} />, color: 'text-[#00F5FF]' },
-        { label: 'Volume horaire', value: '28h', sub: 'Objectif: 32h/sem', icon: <Clock size={18} />, color: 'text-blue-400' },
+        { label: 'Sessions à venir', value: `${sessionsCount} Missions`, sub: 'Prochaines 48h', icon: <Users size={18} />, color: 'text-[#00F5FF]' },
+        { label: 'Volume horaire', value: `${hoursTotal}h`, sub: 'Objectif: 32h/sem', icon: <Clock size={18} />, color: 'text-blue-400' },
         { label: 'Taux Succès', value: '94%', sub: 'Moyenne de confiance', icon: <TrendingUp size={18} />, color: 'text-emerald-400' },
         { label: 'Niveau Expertise', value: 'Expert', sub: 'Top 5 Moniteurs', icon: <Award size={18} />, color: 'text-amber-400' },
     ];
 
-    const todaySessions = [
-        { id: 1, name: 'Lucas Bernard', time: '09:00', type: 'Conduite Ville', status: 'done', note: '18/20' },
-        { id: 2, name: 'Emma Petit', time: '10:30', type: 'Autoroute A86', status: 'done', note: '17/20' },
-        { id: 3, name: 'Hugo Roux', time: '14:00', type: 'Manoeuvres', status: 'upcoming' },
-        { id: 4, name: 'Chloé Moreau', time: '15:30', type: 'Examen Blanc', status: 'upcoming' },
-    ];
+    const todaySessions = dbData.appointmentsAsInstructor?.map((app: any) => ({
+        id: app.id,
+        name: app.student?.name || 'Inconnu',
+        time: app.time,
+        type: app.type,
+        status: app.status === 'completed' ? 'done' : 'upcoming',
+        note: app.status === 'completed' ? 'Évalué' : 'Prévu'
+    })) || [];
 
     return (
         <div className="space-y-10 group/moniteur">
@@ -101,7 +139,7 @@ export default function MoniteurDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {todaySessions.map((session) => (
+                                    {todaySessions.map((session: any) => (
                                         <tr key={session.id} className="group">
                                             <td>
                                                 <div className="flex flex-col">
@@ -112,7 +150,7 @@ export default function MoniteurDashboard() {
                                             <td>
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#5F6B7A] group-hover:text-[#00F5FF] transition-colors">
-                                                        {session.name.split(' ').map(n => n[0]).join('')}
+                                                        {session.name.split(' ').map((n: string) => n[0]).join('')}
                                                     </div>
                                                     <div className="flex flex-col min-w-0">
                                                         <span className="text-sm font-semibold text-white truncate">{session.name}</span>

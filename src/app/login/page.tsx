@@ -23,8 +23,7 @@ export default function LoginPage() {
         setError('');
         setLoading(true);
 
-        await new Promise((r) => setTimeout(r, 1000));
-        const user = authenticate(username, password);
+        const user = await authenticate(username, password);
 
         if (user) {
             saveUser(user);

@@ -15,23 +15,36 @@ import {
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { getUser, type User } from '@/lib/auth';
+import { getStudentDashboard } from '@/lib/db/queries';
 
 export default function EleveDashboard() {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [dbData, setDbData] = useState<any>(null);
 
     useEffect(() => {
         const u = getUser();
         if (u) {
             setUser(u);
-            setLoading(false);
+            fetchDashboardData(u.id);
         } else {
             router.replace('/login');
         }
     }, [router]);
 
-    if (loading || !user) {
+    const fetchDashboardData = async (userId: string) => {
+        try {
+            const data = await getStudentDashboard(userId);
+            setDbData(data);
+        } catch (error) {
+            console.error('Failed to fetch dashboard data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading || !user || !dbData) {
         return (
             <div className="h-[60vh] flex items-center justify-center">
                 <div className="w-6 h-6 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
@@ -39,11 +52,18 @@ export default function EleveDashboard() {
         );
     }
 
+    // Derived stats from DB
+    const hoursDone = dbData.lessons?.length || 0;
+    const nextLesson = dbData.appointmentsAsStudent?.[0];
+    const avgScore = dbData.lessons?.length > 0
+        ? (dbData.lessons.reduce((acc: number, l: any) => acc + (l.score || 0), 0) / dbData.lessons.length).toFixed(1)
+        : '0.0';
+
     const stats = [
-        { label: 'Heures effectuées', value: '24/35h', sub: 'Formation à 68%', icon: <Timer size={18} />, color: 'text-[#00F5FF]' },
-        { label: 'Prochaine leçon', value: '12 Fév', sub: '11:00 — Examen blanc', icon: <Calendar size={18} />, color: 'text-blue-400' },
-        { label: 'Maîtrise estimée', value: '7.8/10', sub: 'Élite Performance', icon: <Star size={18} />, color: 'text-emerald-400' },
-        { label: 'Solde restant', value: '11h', sub: 'Pack Sérénité', icon: <CreditCard size={18} />, color: 'text-amber-400' },
+        { label: 'Heures effectuées', value: `${hoursDone}/35h`, sub: `Formation à ${Math.round(hoursDone / 35 * 100)}%`, icon: <Timer size={18} />, color: 'text-[#00F5FF]' },
+        { label: 'Prochaine leçon', value: nextLesson ? new Date(nextLesson.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : 'Aucune', sub: nextLesson ? `${nextLesson.time} — ${nextLesson.type}` : 'Planifiez votre leçon', icon: <Calendar size={18} />, color: 'text-blue-400' },
+        { label: 'Maîtrise estimée', value: `${avgScore}/20`, sub: 'Performance réelle', icon: <Star size={18} />, color: 'text-emerald-400' },
+        { label: 'Solde restant', value: `${35 - hoursDone}h`, sub: 'Pack Sérénité', icon: <CreditCard size={18} />, color: 'text-amber-400' },
     ];
 
     return (
@@ -162,28 +182,28 @@ export default function EleveDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr className="group">
-                                        <td>
-                                            <div className="flex flex-col">
-                                                <span className="font-semibold text-white">10 Fév 2026</span>
-                                                <span className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mt-1 group-hover:text-[#00F5FF] transition-colors">CONDUITE_REPUBLIQUE</span>
-                                            </div>
-                                        </td>
-                                        <td className="font-medium">Marc Dupont</td>
-                                        <td className="font-semibold text-emerald-400">18/20</td>
-                                        <td><span className="status-badge status-badge-cyan">Opérationnel</span></td>
-                                    </tr>
-                                    <tr className="group">
-                                        <td>
-                                            <div className="flex flex-col">
-                                                <span className="font-semibold text-white">08 Fév 2026</span>
-                                                <span className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mt-1 group-hover:text-[#00F5FF] transition-colors">PARKING_STUDIO</span>
-                                            </div>
-                                        </td>
-                                        <td className="font-medium">Sophie Martin</td>
-                                        <td className="font-semibold text-emerald-400">15/20</td>
-                                        <td><span className="status-badge status-badge-cyan">Opérationnel</span></td>
-                                    </tr>
+                                    {dbData.lessons.map((lesson: any) => (
+                                        <tr key={lesson.id} className="group">
+                                            <td>
+                                                <div className="flex flex-col">
+                                                    <span className="font-semibold text-white">
+                                                        {new Date(lesson.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                    </span>
+                                                    <span className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mt-1 group-hover:text-[#00F5FF] transition-colors">
+                                                        {lesson.title.replace(/\s+/g, '_').toUpperCase()}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="font-medium">Marc Dupont</td>
+                                            <td className="font-semibold text-emerald-400">{lesson.score}/20</td>
+                                            <td><span className="status-badge status-badge-cyan">{lesson.status === 'done' ? 'Opérationnel' : lesson.status}</span></td>
+                                        </tr>
+                                    ))}
+                                    {dbData.lessons.length === 0 && (
+                                        <tr>
+                                            <td colSpan={4} className="text-center py-10 text-xs text-[#5F6B7A]">Aucune leçon effectuée</td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
@@ -198,22 +218,35 @@ export default function EleveDashboard() {
                             <h3 className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-[0.2em]">Priorité actuelle</h3>
                         </div>
                         <div className="space-y-8">
-                            <div>
-                                <p className="text-3xl font-semibold text-white">12 Fév</p>
-                                <p className="secondary-info mt-1.5 font-medium">Demain à 11:00 — Examen Blanc N°1</p>
-                            </div>
-                            <div className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                                <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#8A94A6]">SM</div>
-                                <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-white truncate">Sophie Martin</p>
-                                    <p className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mt-0.5">Examinatrice Senior</p>
+                            {nextLesson ? (
+                                <>
+                                    <div>
+                                        <p className="text-3xl font-semibold text-white">
+                                            {new Date(nextLesson.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                                        </p>
+                                        <p className="secondary-info mt-1.5 font-medium">{nextLesson.time} — {nextLesson.type}</p>
+                                    </div>
+                                    <div className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                        <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#8A94A6]">
+                                            {nextLesson.instructor?.name.split(' ').map((n: any) => n[0]).join('')}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-semibold text-white truncate">{nextLesson.instructor?.name}</p>
+                                            <p className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mt-0.5">Formateur</p>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <div>
+                                    <p className="text-xl font-semibold text-white">Pas de leçon prévue</p>
+                                    <p className="secondary-info mt-1.5 font-medium">Réservez votre prochain créneau pour progresser.</p>
                                 </div>
-                            </div>
+                            )}
                             <button
-                                onClick={() => router.push('/dashboard/eleve/lecons')}
+                                onClick={() => router.push('/dashboard/eleve/reservation')}
                                 className="w-full btn-primary"
                             >
-                                Détails de la mission
+                                {nextLesson ? 'Détails de la mission' : 'Réserver maintenant'}
                                 <ArrowUpRight size={16} />
                             </button>
                         </div>
