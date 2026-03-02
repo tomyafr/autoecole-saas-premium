@@ -151,7 +151,6 @@ export default function SettingsPage() {
                                         </div>
                                         <div className="text-center sm:text-left flex-1 min-w-0">
                                             <h3 className="text-3xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase">{user.name}</h3>
-                                            <p className="text-[#8A94A6] text-xs font-bold mt-1">UUID: <span className="text-[var(--color-text-primary)] font-mono tracking-tighter">{user.id}</span></p>
                                             <div className="flex flex-wrap justify-center sm:justify-start gap-4 mt-8">
                                                 <div className="px-4 py-2 rounded-xl bg-[#00F5FF]/10 border border-[#00F5FF]/20 text-[#00F5FF] text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                                                     <Hexagon size={12} fill="currentColor" />
@@ -268,9 +267,9 @@ export default function SettingsPage() {
                                                     <h4 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">Densité d'Information</h4>
                                                     <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">Compact ou Aéré</p>
                                                 </div>
-                                                <div className="flex bg-white/[0.03] border border-white/5 p-1 rounded-lg">
-                                                    <div className="px-3 py-1 bg-white text-black rounded text-[10px] font-bold uppercase">Standard</div>
-                                                    <div className="px-3 py-1 text-[#5F6B7A] rounded text-[10px] font-bold uppercase">Compact</div>
+                                                <div className="flex bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] p-1 rounded-lg">
+                                                    <div className="px-3 py-1 bg-[var(--color-text-primary)] text-[var(--color-background)] shadow-sm rounded text-[10px] font-bold uppercase transition-colors">Standard</div>
+                                                    <div className="px-3 py-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] rounded text-[10px] font-bold uppercase transition-colors">Compact</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -288,14 +287,14 @@ export default function SettingsPage() {
                                         }
                                     </div>
                                     <div className="space-y-4 max-w-sm">
-                                        <h3 className="text-white font-black uppercase tracking-widest text-sm">Secteur en Optimisation</h3>
+                                        <h3 className="text-[var(--color-text-primary)] font-black uppercase tracking-widest text-sm">En développement</h3>
                                         <p className="text-[#8A94A6] text-[11px] font-bold leading-relaxed px-6">
-                                            Les segments de {sections.find(s => s.id === activeSection)?.label} sont en cours de calibrage pour votre terminal.
+                                            Les options de la section &quot;{sections.find(s => s.id === activeSection)?.label}&quot; arrivent bientôt.
                                         </p>
                                     </div>
-                                    <div className="flex items-center gap-3 px-6 py-2.5 rounded-xl bg-amber-500/5 border border-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest">
-                                        <AlertCircle size={12} fill="currentColor" className="opacity-50" />
-                                        Accès Prioritaire Prochainement
+                                    <div className="flex items-center gap-3 px-6 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[9px] font-black uppercase tracking-widest">
+                                        <AlertCircle size={12} fill="currentColor" className="opacity-80" />
+                                        Feature Incomplète
                                     </div>
                                 </div>
                             )}

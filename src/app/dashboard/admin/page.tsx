@@ -116,7 +116,9 @@ export default function AdminDashboard() {
                                             className="w-full bg-gradient-to-t from-blue-600/40 to-[#00F5FF]/60 rounded-t-lg group-hover:from-blue-600 group-hover:to-[#00F5FF] transition-all duration-300 shadow-[0_0_15px_rgba(0,245,255,0.05)] group-hover:shadow-[0_0_20px_rgba(0,245,255,0.2)]"
                                         />
                                     </div>
-                                    <span className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-tighter group-hover:text-white transition-colors">Oct {i + 1}</span>
+                                    <span className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-tighter group-hover:text-white transition-colors">
+                                        {new Date(new Date().setMonth(new Date().getMonth() - 7 + i)).toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')}
+                                    </span>
                                 </div>
                             ))}
                         </div>

@@ -101,8 +101,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             alt="Logo AutoDrive"
                             width={48}
                             height={48}
-                            priority
-                            className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110"
+                            className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110 dark:invert-0 invert opacity-90"
                         />
                     </div>
                     <h1 className="text-xl font-black text-white tracking-tighter uppercase italic leading-none">

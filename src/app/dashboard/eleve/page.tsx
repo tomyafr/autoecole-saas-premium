@@ -92,15 +92,16 @@ export default function EleveDashboard() {
     // Derived stats from DB
     const hoursDone = dbData.lessons?.length || 0;
     const nextLesson = dbData.appointmentsAsStudent?.[0];
-    const avgScore = dbData.lessons?.length > 0
-        ? (dbData.lessons.reduce((acc: number, l: any) => acc + (l.score || 0), 0) / dbData.lessons.length).toFixed(1)
-        : '0.0';
+    const rawAvgScore = dbData.lessons?.length > 0
+        ? (dbData.lessons.reduce((acc: number, l: any) => acc + (l.score || 0), 0) / dbData.lessons.length)
+        : 0;
+    const avgScore = rawAvgScore % 1 === 0 ? rawAvgScore.toFixed(0) : rawAvgScore.toFixed(1);
 
     const stats = [
         { label: 'Heures effectuées', value: `${hoursDone}/35h`, sub: `Formation à ${Math.round(hoursDone / 35 * 100)}%`, icon: <Timer size={18} />, color: 'text-[#00F5FF]' },
         { label: 'Prochaine leçon', value: nextLesson ? new Date(nextLesson.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : 'Aucune', sub: nextLesson ? `${nextLesson.time} — ${nextLesson.type}` : 'Planifiez votre leçon', icon: <Calendar size={18} />, color: 'text-blue-400' },
-        { label: 'Maîtrise estimée', value: `${avgScore}/20`, sub: 'Performance réelle', icon: <Star size={18} />, color: 'text-emerald-400' },
-        { label: 'Solde restant', value: `${35 - hoursDone}h`, sub: 'Pack Sérénité', icon: <CreditCard size={18} />, color: 'text-amber-400' },
+        { label: 'Maîtrise estimée', value: `${avgScore}/20`, sub: 'Performance moyenne constatée', icon: <Star size={18} />, color: 'text-emerald-400' },
+        { label: 'Solde restant', value: `${35 - hoursDone}h`, sub: 'Heures de conduite disponibles', icon: <CreditCard size={18} />, color: 'text-amber-400' },
     ];
 
     return (
@@ -159,8 +160,8 @@ export default function EleveDashboard() {
                                     <Target size={22} />
                                 </div>
                                 <div>
-                                    <h3 className="section-title">Objectifs de formation</h3>
-                                    <p className="secondary-info">Analyse granulaire de vos compétences techniques</p>
+                                    <h3 className="section-title">Progression du Pack</h3>
+                                    <p className="secondary-info">Suivi des heures de conduite réalisées sur le total</p>
                                 </div>
                             </div>
                             <div className="flex items-baseline gap-1.5">
@@ -233,7 +234,7 @@ export default function EleveDashboard() {
                                             </td>
                                             <td className="font-medium">{lesson.instructor?.name || 'Non assigné'}</td>
                                             <td className="font-semibold text-emerald-400">{lesson.score != null ? `${lesson.score}/20` : '-'}</td>
-                                            <td><span className="status-badge status-badge-cyan">{lesson.status === 'done' ? 'Opérationnel' : lesson.status}</span></td>
+                                            <td><span className={`status-badge ${lesson.status === 'done' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/10 text-white'}`}>{lesson.status === 'done' ? 'Effectué' : 'Prévu'}</span></td>
                                         </tr>
                                     ))}
                                     {dbData.lessons.length === 0 && (
@@ -259,7 +260,7 @@ export default function EleveDashboard() {
                                 <>
                                     <div>
                                         <p className="text-3xl font-semibold text-white">
-                                            {new Date(nextLesson.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                                            {new Date(nextLesson.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                                         </p>
                                         <p className="secondary-info mt-1.5 font-medium">{nextLesson.time} — {nextLesson.type}</p>
                                     </div>
