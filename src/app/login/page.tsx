@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogIn, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import { authenticate, saveUser, getUser, getDashboardPath } from '@/lib/auth';
+import { saveUser, getUser, getDashboardPath } from '@/lib/auth';
+import { authenticateServer } from '@/app/actions/auth';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -23,7 +24,7 @@ export default function LoginPage() {
         setError('');
         setLoading(true);
 
-        const user = await authenticate(username, password);
+        const user = await authenticateServer(username, password);
 
         if (user) {
             saveUser(user);
@@ -119,14 +120,14 @@ export default function LoginPage() {
 
                     <div className="mt-8 pt-8 border-t border-white/5">
                         <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter text-center mb-4">Accès rapide Démo</p>
-                        <div className="grid grid-cols-3 gap-2">
-                            {['eleve', 'moniteur', 'admin'].map(role => (
+                        <div className="grid grid-cols-4 gap-2">
+                            {['lina.d', 'eleve', 'moniteur', 'admin'].map(role => (
                                 <button
                                     key={role}
-                                    onClick={() => { setUsername(role); setPassword(`${role}54`); }}
+                                    onClick={() => { setUsername(role); setPassword(role.includes('.') ? 'eleve54' : `${role}54`); }}
                                     className="py-2 rounded-lg bg-white/[0.01] border border-white/5 text-[9px] font-bold text-slate-500 hover:border-cyan-500/30 hover:text-cyan-400 transition-all uppercase"
                                 >
-                                    {role}
+                                    {role.split('.')[0]}
                                 </button>
                             ))}
                         </div>

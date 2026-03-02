@@ -1,3 +1,5 @@
+'use server';
+
 import { db } from './index';
 import { users, appointments, lessons, payments } from './schema';
 import { eq, desc, and } from 'drizzle-orm';
@@ -36,7 +38,7 @@ export async function getInstructorDashboardData(instructorId: string) {
         where: eq(users.id, instructorId),
         with: {
             appointmentsAsInstructor: {
-                where: eq(appointments.status, 'pending'),
+                orderBy: [desc(appointments.date), desc(appointments.time)],
                 with: {
                     student: true,
                 }
@@ -51,7 +53,11 @@ export async function getInstructorDashboardData(instructorId: string) {
         }
     });
 
-    return instructor;
+    const studentsCount = await db.query.users.findMany({
+        where: eq(users.role, 'eleve')
+    }).then(res => res.length);
+
+    return { ...instructor, totalStudents: studentsCount };
 }
 
 export async function getInstructorDashboard(instructorId: string) {

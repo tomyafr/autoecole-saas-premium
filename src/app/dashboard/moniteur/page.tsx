@@ -51,24 +51,30 @@ export default function MoniteurDashboard() {
         );
     }
 
-    const sessionsCount = dbData.appointmentsAsInstructor?.length || 0;
+    const today = new Date().toISOString().split('T')[0];
+    const todaySessionsAll = dbData.appointmentsAsInstructor?.filter((app: any) => app.date && new Date(app.date).toISOString().split('T')[0] === today) || [];
+
+    const pendingToday = todaySessionsAll.filter((app: any) => app.status === 'pending').length;
+    const studentsCount = dbData.totalStudents || 0;
     const hoursTotal = dbData.lessons?.length || 0;
 
     const stats = [
-        { label: 'Sessions à venir', value: `${sessionsCount} Missions`, sub: 'Prochaines 48h', icon: <Users size={18} />, color: 'text-[#00F5FF]' },
+        { label: 'Sessions du jour', value: `${studentsCount} Élèves`, sub: `${pendingToday} missions restantes`, icon: <Users size={18} />, color: 'text-[#00F5FF]' },
         { label: 'Volume horaire', value: `${hoursTotal}h`, sub: 'Objectif: 32h/sem', icon: <Clock size={18} />, color: 'text-blue-400' },
         { label: 'Taux Succès', value: '94%', sub: 'Moyenne de confiance', icon: <TrendingUp size={18} />, color: 'text-emerald-400' },
         { label: 'Niveau Expertise', value: 'Expert', sub: 'Top 5 Moniteurs', icon: <Award size={18} />, color: 'text-amber-400' },
     ];
 
-    const todaySessions = dbData.appointmentsAsInstructor?.map((app: any) => ({
+    const todaySessions = todaySessionsAll.map((app: any) => ({
         id: app.id,
         name: app.student?.name || 'Inconnu',
         time: app.time,
         type: app.type,
         status: app.status === 'completed' ? 'done' : 'upcoming',
-        note: app.status === 'completed' ? 'Évalué' : 'Prévu'
+        note: app.status === 'completed' ? '18/20' : 'Prévu' // Placeholder note for dynamic data
     })) || [];
+
+    const doneToday = todaySessionsAll.length - pendingToday;
 
     return (
         <div className="space-y-10 group/moniteur">
@@ -124,8 +130,8 @@ export default function MoniteurDashboard() {
                         <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
                             <h3 className="section-title">Engagements du jour</h3>
                             <div className="flex gap-3">
-                                <span className="status-badge status-badge-cyan">2 Terminés</span>
-                                <span className="status-badge status-badge-gray">2 En attente</span>
+                                <span className="status-badge status-badge-cyan">{doneToday} Terminés</span>
+                                <span className="status-badge status-badge-gray">{pendingToday} En attente</span>
                             </div>
                         </div>
                         <div className="overflow-x-auto">
