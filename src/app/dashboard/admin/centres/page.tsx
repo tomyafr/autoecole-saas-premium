@@ -41,8 +41,8 @@ export default function AdminCentresPage() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
-                    <h1 className="page-title">Nodes Opérationnels</h1>
-                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Administration des centres de formation et déploiement stratégique.</p>
+                    <h1 className="page-title">Centres de formation</h1>
+                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Administration des centres et de la gestion du réseau.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button onClick={() => alert("Affichage de la carte réseau (API Google Maps en cours de connexion).")} className="btn-secondary">
@@ -51,7 +51,7 @@ export default function AdminCentresPage() {
                     </button>
                     <button onClick={() => alert("Ouverture du formulaire de déploiement d'un nouveau centre.")} className="btn-primary">
                         <Plus size={16} />
-                        Déployer Node
+                        Nouveau Centre
                     </button>
                 </div>
             </div>
@@ -59,9 +59,9 @@ export default function AdminCentresPage() {
             {/* Tactical Grid Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: 'Nodes Actifs', value: '4 Centres', icon: <Home size={18} />, color: 'text-[#00F5FF]' },
+                    { label: 'Centres Actifs', value: '4 Centres', icon: <Home size={18} />, color: 'text-[#00F5FF]' },
                     { label: 'Empreinte Réseau', value: '3 Villes', icon: <Navigation size={18} />, color: 'text-blue-400' },
-                    { label: 'Flux Moyen / Node', value: '71%', icon: <Activity size={18} />, color: 'text-emerald-400' },
+                    { label: 'Charge Moyenne', value: '71%', icon: <Activity size={18} />, color: 'text-emerald-400' },
                 ].map((stat, i) => (
                     <div key={i} className="premium-card p-6 flex flex-col justify-between space-y-4">
                         <div className="flex justify-between items-start">
@@ -138,7 +138,7 @@ export default function AdminCentresPage() {
                                 </button>
                             </div>
                             <button onClick={() => alert(`Accès aux paramètres du centre : ${centre.name}`)} className="flex items-center gap-2 text-[10px] font-black text-[#00F5FF] uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-                                Manager Node
+                                Gérer ce centre
                                 <ChevronRight size={14} />
                             </button>
                         </div>
@@ -150,7 +150,7 @@ export default function AdminCentresPage() {
                     <div className="w-16 h-16 rounded-2xl bg-white/[0.02] flex items-center justify-center text-[#5F6B7A] group-hover:text-[#00F5FF] group-hover:scale-110 transition-all mb-4">
                         <Plus size={32} />
                     </div>
-                    <span className="text-xs font-black text-[#5F6B7A] uppercase tracking-widest group-hover:text-white">Ajouter un Node Tactique</span>
+                    <span className="text-xs font-black text-[#5F6B7A] uppercase tracking-widest group-hover:text-white">Ajouter un Centre</span>
                 </div>
             </div>
         </div>

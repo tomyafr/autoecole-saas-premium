@@ -88,8 +88,8 @@ export default function MoniteurPlanningPage() {
             {/* Header section with Tactical Controls */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
-                    <h1 className="page-title">Planning Opérationnel</h1>
-                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Gestion temps-réel de votre déploiement sur le terrain.</p>
+                    <h1 className="page-title">Planning</h1>
+                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Gestion de vos disponibilités et élèves.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button onClick={() => alert("Module de filtrage à venir")} className="btn-secondary">
@@ -171,7 +171,7 @@ export default function MoniteurPlanningPage() {
                                     {selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                 </h2>
                                 <p className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-0.5">
-                                    {SESSIONS.length === 0 ? "Journée de repos opérationnel" : SESSIONS.length >= 5 ? "Tension maximale : Déploiement intensif" : "Flux nominal d'encadrement"}
+                                    {SESSIONS.length === 0 ? "Journée de repos" : SESSIONS.length >= 5 ? "Planning dense : Journée chargée" : "Rythme classique d'encadrement"}
                                 </p>
                             </div>
                         </div>
@@ -232,7 +232,7 @@ export default function MoniteurPlanningPage() {
                             </motion.div>
                         )) : (
                             <div className="p-8 text-center rounded-2xl border border-dashed border-white/10">
-                                <p className="text-sm font-medium text-[#5F6B7A]">Aucune mission planifiée pour ce jour.</p>
+                                <p className="text-sm font-medium text-[#5F6B7A]">Aucune leçon planifiée pour ce jour.</p>
                             </div>
                         )}
                     </div>

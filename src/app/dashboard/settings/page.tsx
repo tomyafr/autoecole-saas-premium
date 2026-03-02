@@ -62,9 +62,9 @@ export default function SettingsPage() {
 
     const sections = [
         { id: 'profile', label: 'Profil Personnel', icon: <User size={18} />, desc: 'Identité et préférences publiques' },
-        { id: 'notifications', label: 'Alertes & Emails', icon: <Bell size={18} />, desc: 'Flux de communication tactique' },
-        { id: 'security', label: 'Sécurité Avancée', icon: <Shield size={18} />, desc: 'Accréditations et persistances' },
-        { id: 'preferences', label: 'Interface & Langue', icon: <Globe size={18} />, desc: 'Configuration de l\'environnement' },
+        { id: 'notifications', label: 'Alertes & Emails', icon: <Bell size={18} />, desc: 'Gestion de vos communications' },
+        { id: 'security', label: 'Sécurité Avancée', icon: <Shield size={18} />, desc: 'Mots de passe et authentification' },
+        { id: 'preferences', label: 'Interface & Langue', icon: <Globe size={18} />, desc: 'Paramètres régionaux & visuels' },
     ];
 
     return (
@@ -72,8 +72,8 @@ export default function SettingsPage() {
             {/* Superior Breadcrumb Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
-                    <h1 className="page-title">Paramètres Système</h1>
-                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Configuration de votre terminal opérationnel AutoDrive Pro.</p>
+                    <h1 className="page-title">Mes Paramètres</h1>
+                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Personnalisation de votre espace AutoDrive Pro.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="px-4 py-2 rounded-xl bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest flex items-center gap-3">
@@ -155,7 +155,7 @@ export default function SettingsPage() {
                                             <div className="flex flex-wrap justify-center sm:justify-start gap-4 mt-8">
                                                 <div className="px-4 py-2 rounded-xl bg-[#00F5FF]/10 border border-[#00F5FF]/20 text-[#00F5FF] text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                                                     <Hexagon size={12} fill="currentColor" />
-                                                    {user.role} conductrice
+                                                    {user.role === 'eleve' ? 'Élève Conducteur/trice' : user.role}
                                                 </div>
                                                 <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -167,7 +167,7 @@ export default function SettingsPage() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
                                         <div className="space-y-3">
-                                            <label className="text-[10px] text-[#5F6B7A] uppercase font-black tracking-[0.2em] ml-1">Call Sign / Nom Complet</label>
+                                            <label className="text-[10px] text-[#5F6B7A] uppercase font-black tracking-[0.2em] ml-1">Prénom & Nom</label>
                                             <div className="relative group/input">
                                                 <User className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] transition-colors group-focus-within/input:text-[#00F5FF]" size={18} />
                                                 <input
@@ -178,7 +178,7 @@ export default function SettingsPage() {
                                             </div>
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-[10px] text-[#5F6B7A] uppercase font-black tracking-[0.2em] ml-1">Terminal de messagerie</label>
+                                            <label className="text-[10px] text-[#5F6B7A] uppercase font-black tracking-[0.2em] ml-1">Adresse Email</label>
                                             <div className="relative group/input">
                                                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] transition-colors group-focus-within/input:text-[#00F5FF]" size={18} />
                                                 <input
@@ -189,7 +189,7 @@ export default function SettingsPage() {
                                             </div>
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-[10px] text-[#5F6B7A] uppercase font-black tracking-[0.2em] ml-1">Liaison Mobile</label>
+                                            <label className="text-[10px] text-[#5F6B7A] uppercase font-black tracking-[0.2em] ml-1">Numéro de Téléphone</label>
                                             <div className="relative group/input">
                                                 <Smartphone className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] transition-colors group-focus-within/input:text-[#00F5FF]" size={18} />
                                                 <input
@@ -200,13 +200,13 @@ export default function SettingsPage() {
                                             </div>
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-[10px] text-[#5F6B7A] uppercase font-black tracking-[0.2em] ml-1">Région Opérationnelle</label>
+                                            <label className="text-[10px] text-[#5F6B7A] uppercase font-black tracking-[0.2em] ml-1">Centre de Rattachement</label>
                                             <div className="relative group/input">
                                                 <Globe className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] transition-colors group-focus-within/input:text-[#00F5FF]" size={18} />
                                                 <select className="w-full pl-14 pr-6 py-5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-2xl text-sm font-bold text-[var(--color-text-primary)] focus:outline-none focus:border-[#00F5FF]/20 transition-all appearance-none cursor-pointer">
-                                                    <option>Île-de-France (HQ)</option>
-                                                    <option>Lyon (Secteur B)</option>
-                                                    <option>Marseille (Secteur C)</option>
+                                                    <option>Île-de-France (Centre Principal)</option>
+                                                    <option>Lyon (Agence Sud)</option>
+                                                    <option>Marseille (Agence Mer)</option>
                                                 </select>
                                                 <ChevronRight className="absolute right-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] rotate-90" size={16} />
                                             </div>
@@ -216,7 +216,7 @@ export default function SettingsPage() {
                                     <div className="pt-10 border-t border-[var(--color-border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-6">
                                         <div className="flex items-center gap-3 text-[#5F6B7A]">
                                             <Lock size={14} className="text-[#00F5FF]/50" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest">Protocoles de Chiffrement Actifs</span>
+                                            <span className="text-[10px] font-black uppercase tracking-widest">Connexion sécurisée</span>
                                         </div>
                                         <button
                                             onClick={handleSave}
@@ -226,12 +226,12 @@ export default function SettingsPage() {
                                             {isSaving ? (
                                                 <div className="flex items-center gap-3">
                                                     <div className="spinner-elegant" style={{ width: 14, height: 14, borderWidth: 1 }} />
-                                                    Persistance...
+                                                    Enregistrement...
                                                 </div>
                                             ) : (
                                                 <>
                                                     <Save size={18} />
-                                                    Persister les Changements
+                                                    Enregistrer les modifications
                                                 </>
                                             )}
                                         </button>
@@ -246,7 +246,7 @@ export default function SettingsPage() {
                                             <Monitor size={32} />
                                         </div>
                                         <div>
-                                            <h3 className="text-2xl font-black text-[var(--color-text-primary)] uppercase tracking-tighter">Interface Tactique</h3>
+                                            <h3 className="text-2xl font-black text-[var(--color-text-primary)] uppercase tracking-tighter">Affichage de l'Interface</h3>
                                             <p className="text-[#8A94A6] text-xs font-bold mt-1">Personnalisation de l'environnement visuel</p>
                                         </div>
                                     </div>
@@ -256,7 +256,7 @@ export default function SettingsPage() {
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <h4 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">Mode d'affichage</h4>
-                                                    <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">Choisissez entre le mode Tactique (Sombre) et le mode Opérationnel (Clair)</p>
+                                                    <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">Choisissez entre le thème Clair et le Sombre</p>
                                                 </div>
                                                 <ThemeToggle />
                                             </div>

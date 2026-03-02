@@ -73,7 +73,7 @@ export default function LoginPage() {
                         <span className="text-black font-black text-xl italic">A</span>
                     </div>
                     <h1 className="text-2xl font-bold tracking-tight text-white">AutoDrive Pro</h1>
-                    <p className="text-slate-500 text-sm mt-1">Plateforme SaaS Haute Fidelité</p>
+                    <p className="text-slate-500 text-sm mt-1">Plateforme SaaS Haute Fidélité</p>
                 </div>
 
                 <div className="premium-card p-8 sm:p-10 border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">

@@ -227,7 +227,7 @@ export default function EleveDashboard() {
                                                         {new Date(lesson.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                     </span>
                                                     <span className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mt-1 group-hover:text-[#00F5FF] transition-colors">
-                                                        {lesson.title.replace(/\s+/g, '_').toUpperCase()}
+                                                        {lesson.title}
                                                     </span>
                                                 </div>
                                             </td>

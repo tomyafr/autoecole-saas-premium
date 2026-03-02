@@ -24,8 +24,8 @@ export default function AdminStatsPage() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
-                    <h1 className="page-title">Système d&#19;Analyse Globale</h1>
-                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Monitoring haute-fidélité des performances et de la santé du réseau.</p>
+                    <h1 className="page-title">Statistiques Globales</h1>
+                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Suivi des performances et de la santé du réseau d'auto-écoles.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="btn-secondary">
@@ -112,17 +112,17 @@ export default function AdminStatsPage() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Eye size={20} className="text-blue-400" />
-                            <h3 className="section-title">Segments en Observation</h3>
+                            <h3 className="section-title">Centres en Observation</h3>
                         </div>
                         <button className="text-[10px] font-black text-[#00F5FF] uppercase tracking-widest border-b border-[#00F5FF]/20 pb-0.5">Audit Full</button>
                     </div>
 
                     <div className="space-y-4">
                         {[
-                            { name: 'Région Paris-HQ', state: 'Stable', load: 88, health: 'Optimisé' },
-                            { name: 'Cluster Sud-East', state: 'Alerte', load: 94, health: 'Saturé' },
-                            { name: 'Node Versailles', state: 'Stable', load: 42, health: 'Nominal' },
-                            { name: 'Cloud Provider D', state: 'Latence', load: 12, health: 'Lent' },
+                            { name: 'Centre Paris Principal', state: 'Stable', load: 88, health: 'Optimisé' },
+                            { name: 'Agence Sud', state: 'Alerte', load: 94, health: 'Saturé' },
+                            { name: 'Centre Versailles', state: 'Stable', load: 42, health: 'Nominal' },
+                            { name: 'Réseau Logiciel', state: 'Latence', load: 12, health: 'Lent' },
                         ].map((seg, i) => (
                             <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between group hover:bg-white/[0.04] transition-colors">
                                 <div className="flex items-center gap-4">
@@ -147,7 +147,7 @@ export default function AdminStatsPage() {
                             <div className="p-2 rounded-lg bg-blue-600/10 text-blue-400">
                                 <Zap size={14} />
                             </div>
-                            <p className="text-[10px] font-bold text-blue-100 uppercase tracking-tight">Intelligence Artificielle en Observation active sur les segments instables.</p>
+                            <p className="text-[10px] font-bold text-blue-100 uppercase tracking-tight">L'IA surveille la disponibilité des instructeurs.</p>
                         </div>
                         <button className="whitespace-nowrap px-4 py-2 rounded-lg bg-blue-600/20 text-blue-400 text-[9px] font-black uppercase tracking-widest">Détails IA</button>
                     </div>

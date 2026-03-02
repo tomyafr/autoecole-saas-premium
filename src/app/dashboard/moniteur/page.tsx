@@ -123,8 +123,8 @@ export default function MoniteurDashboard() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
-                    <h1 className="page-title">Console Instructeur</h1>
-                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Gestion tactique de vos sessions d'apprentissage.</p>
+                    <h1 className="page-title">Espace Formateur</h1>
+                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Gestion de vos leçons de conduite.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
@@ -139,7 +139,7 @@ export default function MoniteurDashboard() {
                         className="btn-primary"
                     >
                         <Zap size={18} />
-                        Lancer Session
+                        Lancer Leçon
                     </button>
                 </div>
             </div>
@@ -181,9 +181,9 @@ export default function MoniteurDashboard() {
                                 <thead>
                                     <tr>
                                         <th>HORAIRE</th>
-                                        <th>ÉLÈVE / MISSION</th>
+                                        <th>ÉLÈVE / LEÇON</th>
                                         <th>ÉVALUATION</th>
-                                        <th>ACTION STADIA</th>
+                                        <th>ACTION</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -192,7 +192,7 @@ export default function MoniteurDashboard() {
                                             <td>
                                                 <div className="flex flex-col">
                                                     <span className="text-white font-semibold">{session.time}</span>
-                                                    <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-0.5">Slot ACTIF</span>
+                                                    <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-0.5">CRÉNEAU ACTIL</span>
                                                 </div>
                                             </td>
                                             <td>
@@ -238,7 +238,7 @@ export default function MoniteurDashboard() {
                             </div>
                             <div>
                                 <h3 className="section-title">Journal Pédagogique</h3>
-                                <p className="secondary-info">Dernières annotations stratégiques</p>
+                                <p className="secondary-info">Dernières évaluations et remarques</p>
                             </div>
                         </div>
                         <div className="space-y-4">
@@ -248,7 +248,7 @@ export default function MoniteurDashboard() {
                                     className="p-6 rounded-2xl bg-white/[0.01] border border-white/5 hover:border-[#00F5FF]/20 transition-all group cursor-pointer"
                                 >
                                     <p className="text-sm text-gray-300 leading-relaxed font-medium group-hover:text-white transition-colors">
-                                        Note: {dbData.lessons[0].score}/20 — Compétences validées sur la mission {dbData.lessons[0].title}.
+                                        Note: {dbData.lessons[0].score}/20 — Compétences validées sur la leçon {dbData.lessons[0].title}.
                                     </p>
                                     <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
@@ -271,7 +271,7 @@ export default function MoniteurDashboard() {
                     <div className="premium-card p-6 border-l-4 border-l-[#00F5FF] shadow-[0_0_40px_rgba(0,245,255,0.02)]">
                         <div className="flex items-center gap-2.5 mb-8">
                             <Play size={14} className="text-[#00F5FF] fill-[#00F5FF]" />
-                            <h3 className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-[0.2em]">Engagement Hebdo</h3>
+                            <h3 className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-[0.2em]">Planning Hebdo</h3>
                         </div>
                         <div className="space-y-3">
                             {[...Array(5)].map((_, i) => {
@@ -287,7 +287,7 @@ export default function MoniteurDashboard() {
                                         <div className="flex items-center gap-3">
                                             <span className={`text-xs font-bold ${i === 0 ? 'text-[#00F5FF]' : 'text-white/40'}`}>{dayName.slice(0, 3).toUpperCase()}</span>
                                             <div className="w-1 h-3 rounded-full bg-white/5" />
-                                            <span className="text-sm font-semibold text-white">{missionsCount} Mission{missionsCount > 1 ? 's' : ''}</span>
+                                            <span className="text-sm font-semibold text-white">{missionsCount} Leçon{missionsCount > 1 ? 's' : ''}</span>
                                         </div>
                                     </div>
                                 );
