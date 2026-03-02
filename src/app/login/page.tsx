@@ -24,13 +24,19 @@ export default function LoginPage() {
         setError('');
         setLoading(true);
 
-        const user = await authenticateServer(username, password);
+        try {
+            const user = await authenticateServer(username, password);
 
-        if (user) {
-            saveUser(user);
-            router.push(getDashboardPath(user.role));
-        } else {
-            setError('Identifiants invalides');
+            if (user) {
+                saveUser(user);
+                router.push(getDashboardPath(user.role));
+            } else {
+                setError('Identifiants invalides');
+                setLoading(false);
+            }
+        } catch (err) {
+            console.error(err);
+            setError('Une erreur réseau est survenue. Veuillez réessayer.');
             setLoading(false);
         }
     };
