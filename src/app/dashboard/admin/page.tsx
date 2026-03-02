@@ -1,6 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import {
     BarChart3,
     Building2,
@@ -12,12 +13,21 @@ import {
     CreditCard,
     Zap,
     Hexagon,
-    Target
+    Target,
+    CheckCircle2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminDashboard() {
     const router = useRouter();
+    const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+    const [timeFilter, setTimeFilter] = useState<'30J' | '90J' | '12M'>('12M');
+
+    const triggerFeedback = (msg: string) => {
+        setActionFeedback(msg);
+        setTimeout(() => setActionFeedback(null), 3000);
+    };
+
     const stats = [
         { label: 'Chiffre d\'Affaires', value: '42,850€', sub: '+12.5% vs mois dernier', icon: <CreditCard size={18} />, color: 'text-emerald-400' },
         { label: 'Nouveaux Élèves', value: '128', sub: 'Semaine en cours', icon: <Users size={18} />, color: 'text-[#00F5FF]' },
@@ -49,7 +59,7 @@ export default function AdminDashboard() {
                         Flux système
                     </button>
                     <button
-                        onClick={() => router.push('/dashboard/admin/centres')}
+                        onClick={() => triggerFeedback("Le module de déploiement de centre est en cours d'intégration.")}
                         className="btn-primary"
                     >
                         <Hexagon size={16} />
@@ -101,8 +111,12 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                             <div className="flex gap-2">
-                                {['30J', '90J', '12M'].map((period, idx) => (
-                                    <button key={idx} className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all ${idx === 2 ? 'bg-white/5 border-white/10 text-white' : 'border-transparent text-[#5F6B7A] hover:text-white'}`}>
+                                {(['30J', '90J', '12M'] as const).map((period) => (
+                                    <button
+                                        key={period}
+                                        onClick={() => setTimeFilter(period)}
+                                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all ${timeFilter === period ? 'bg-[var(--color-bg-secondary)] border-[var(--color-border-subtle)] text-[var(--color-text-primary)]' : 'border-transparent text-[#5F6B7A] hover:text-[var(--color-text-primary)]'}`}
+                                    >
                                         {period}
                                     </button>
                                 ))}
@@ -110,21 +124,23 @@ export default function AdminDashboard() {
                         </div>
 
                         <div className="h-48 mt-12 flex items-end justify-between gap-4">
-                            {[40, 65, 45, 90, 75, 100, 85, 95].map((h, i) => (
-                                <div key={i} className="flex-1 flex flex-col items-center gap-4 group cursor-pointer">
-                                    <div className="w-full h-full relative">
-                                        <motion.div
-                                            initial={{ height: 0 }}
-                                            animate={{ height: `${h}%` }}
-                                            transition={{ duration: 1, delay: i * 0.05 }}
-                                            className="w-full bg-gradient-to-t from-blue-600/40 to-[#00F5FF]/60 rounded-t-lg group-hover:from-blue-600 group-hover:to-[#00F5FF] transition-all duration-300 shadow-[0_0_15px_rgba(0,245,255,0.05)] group-hover:shadow-[0_0_20px_rgba(0,245,255,0.2)]"
-                                        />
-                                    </div>
-                                    <span className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-tighter group-hover:text-white transition-colors">
-                                        {new Date(new Date().setMonth(new Date().getMonth() - 7 + i)).toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')}
-                                    </span>
-                                </div>
-                            ))}
+                            {(timeFilter === '30J' ? [30, 40, 50, 45, 60, 55, 75, 80] :
+                                timeFilter === '90J' ? [20, 35, 50, 70, 65, 85, 90, 95] :
+                                    [40, 65, 45, 90, 75, 100, 85, 95]).map((h, i) => (
+                                        <div key={i} className="flex-1 flex flex-col items-center gap-4 group cursor-pointer">
+                                            <div className="w-full h-full relative">
+                                                <motion.div
+                                                    initial={{ height: 0 }}
+                                                    animate={{ height: `${h}%` }}
+                                                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                                                    className="w-full bg-gradient-to-t from-blue-600/40 to-[#00F5FF]/60 rounded-t-lg group-hover:from-blue-600 group-hover:to-[#00F5FF] transition-all duration-300 shadow-[0_0_15px_rgba(0,245,255,0.05)] group-hover:shadow-[0_0_20px_rgba(0,245,255,0.2)]"
+                                                />
+                                            </div>
+                                            <span className="text-[9px] font-black text-[#8A94A6] uppercase tracking-tighter group-hover:text-[var(--color-text-primary)] transition-colors">
+                                                {new Date(new Date().setMonth(new Date().getMonth() - 7 + i)).toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')}
+                                            </span>
+                                        </div>
+                                    ))}
                         </div>
                     </div>
 
@@ -244,6 +260,23 @@ export default function AdminDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* ACTION FEEDBACK TOAST */}
+            <AnimatePresence>
+                {actionFeedback && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#0B0F14] border border-[var(--color-border-subtle)] shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
+                            <CheckCircle2 size={16} />
+                        </div>
+                        <p className="text-sm font-medium text-[var(--color-text-primary)]">{actionFeedback}</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

@@ -17,7 +17,8 @@ import {
     ChevronRight,
     Plus,
     X,
-    User
+    User,
+    CheckCircle2
 } from 'lucide-react';
 
 /* ======= DATA ======= */
@@ -31,6 +32,12 @@ const RECENT_EVALS = [
 export default function MoniteurEvaluationsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedReport, setSelectedReport] = useState<any>(null);
+    const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+
+    const triggerFeedback = (msg: string) => {
+        setActionFeedback(msg);
+        setTimeout(() => setActionFeedback(null), 3000);
+    };
 
     return (
         <div className="space-y-10 group/evals">
@@ -38,14 +45,14 @@ export default function MoniteurEvaluationsPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
                     <h1 className="page-title">Journal Pédagogique</h1>
-                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Audit de performance et archivage des évaluations tactiques.</p>
+                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Suivi de performance et archivage des évaluations.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="btn-secondary">
+                    <button onClick={() => triggerFeedback("L'historique global se synchronise...")} className="btn-secondary">
                         <History size={16} />
                         Historique Global
                     </button>
-                    <button className="btn-primary">
+                    <button onClick={() => triggerFeedback("Création d'un nouvel audit requiert un créneau de planning")} className="btn-primary">
                         <Plus size={16} />
                         Nouvel Audit
                     </button>
@@ -57,7 +64,7 @@ export default function MoniteurEvaluationsPage() {
                 {[
                     { label: 'Audits de la Semaine', value: '28', icon: <ClipboardCheck size={18} />, color: 'text-[#00F5FF]' },
                     { label: 'Moyenne Promotion', value: '7.8/10', icon: <Star size={18} />, color: 'text-amber-400' },
-                    { label: 'Progression Flux', value: '+12%', icon: <TrendingUp size={18} />, color: 'text-emerald-400' },
+                    { label: 'Progression Moyenne', value: '+12%', icon: <TrendingUp size={18} />, color: 'text-emerald-400' },
                     { label: 'Top Performeurs', value: '8', icon: <Trophy size={18} />, color: 'text-blue-400' },
                 ].map((stat, i) => (
                     <div key={i} className="premium-card p-6 flex flex-col justify-between space-y-4">
@@ -159,7 +166,7 @@ export default function MoniteurEvaluationsPage() {
                         </div>
                         <div className="space-y-4">
                             {[
-                                { name: 'Chloé Moreau', reason: 'Retard sur flux Intersection' },
+                                { name: 'Chloé Moreau', reason: 'Retard sur module Intersection' },
                                 { name: 'Emma Petit', reason: 'Stress Autoroute critique' },
                             ].map((v, i) => (
                                 <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 group hover:bg-white/[0.04] transition-colors cursor-pointer">
@@ -241,6 +248,23 @@ export default function MoniteurEvaluationsPage() {
                             </div>
                         </motion.div>
                     </div>
+                )}
+            </AnimatePresence>
+
+            {/* ACTION FEEDBACK TOAST */}
+            <AnimatePresence>
+                {actionFeedback && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#0B0F14] border border-[var(--color-border-subtle)] shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
+                            <CheckCircle2 size={16} />
+                        </div>
+                        <p className="text-sm font-medium text-[var(--color-text-primary)]">{actionFeedback}</p>
+                    </motion.div>
                 )}
             </AnimatePresence>
         </div>

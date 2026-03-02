@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { getUser, type User } from '@/lib/auth';
 import { getInstructorDashboard } from '@/lib/db/queries';
@@ -85,8 +85,11 @@ export default function MoniteurStudentsPage() {
         fetchStudents();
     }, [router]);
 
+    const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+
     const handleAction = (msg: string) => {
-        alert(msg);
+        setActionFeedback(msg);
+        setTimeout(() => setActionFeedback(null), 3000);
     };
 
     if (loading) {
@@ -102,8 +105,8 @@ export default function MoniteurStudentsPage() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
-                    <h1 className="page-title">Mes Engagements</h1>
-                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Suivi tactique et pilotage de la progression de vos élèves.</p>
+                    <h1 className="page-title">Mes Élèves</h1>
+                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Suivi et accompagnement de la progression de vos élèves.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button onClick={() => handleAction("Exportation du rapport en cours d'intégration.")} className="btn-secondary">
@@ -153,7 +156,7 @@ export default function MoniteurStudentsPage() {
                         <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/5 text-amber-400">
                             <Clock size={18} />
                         </div>
-                        <span className="card-title">Charge de Vol</span>
+                        <span className="card-title">Charge de Travail</span>
                     </div>
                     <div>
                         <div className="primary-value">148h / Mois</div>
@@ -188,9 +191,9 @@ export default function MoniteurStudentsPage() {
                         <thead>
                             <tr>
                                 <th>IDENTITÉ / MODULE</th>
-                                <th>PROGRESSION FLUX</th>
+                                <th>PROGRESSION GLOBALE</th>
                                 <th>DERNIER CONTACT</th>
-                                <th>STATUS TACTIQUE</th>
+                                <th>STATUT</th>
                                 <th>EVAL</th>
                                 <th></th>
                             </tr>
@@ -212,7 +215,7 @@ export default function MoniteurStudentsPage() {
                                     <td>
                                         <div className="w-32 space-y-2">
                                             <div className="flex justify-between items-center text-[9px] font-black text-[#5F6B7A] uppercase tracking-tighter">
-                                                <span>Flux Global</span>
+                                                <span>Progression</span>
                                                 <span className="text-white">{student.progress}%</span>
                                             </div>
                                             <div className="h-1 bg-white/5 rounded-full overflow-hidden">
@@ -271,6 +274,23 @@ export default function MoniteurStudentsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* ACTION FEEDBACK TOAST */}
+            <AnimatePresence>
+                {actionFeedback && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#0B0F14] border border-[var(--color-border-subtle)] shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
+                            <CheckCircle2 size={16} />
+                        </div>
+                        <p className="text-sm font-medium text-[var(--color-text-primary)]">{actionFeedback}</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

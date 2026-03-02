@@ -46,6 +46,7 @@ export default function ReservationPage() {
     const [selectedDuration, setSelectedDuration] = useState<number>(1);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
+    const [calendarAdded, setCalendarAdded] = useState(false);
     const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
     const selectedInstructor = INSTRUCTORS.find(i => i.id === selectedInstructorId);
@@ -291,13 +292,13 @@ export default function ReservationPage() {
                                     <p className="secondary-info max-w-[200px] mx-auto">Votre mission a été enregistrée avec succès dans votre planning.</p>
                                 </div>
                                 <div className="space-y-3 mt-8">
-                                    <button onClick={() => alert("Ajout au calendrier (Google/Apple) en cours d'intégration.")} className="w-full flex items-center justify-center gap-2 btn-secondary py-3 text-xs font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20">
-                                        <CalendarIcon size={14} /> Ajouter au calendrier
+                                    <button onClick={() => setCalendarAdded(true)} className={`w-full flex items-center justify-center gap-2 btn-secondary py-3 text-xs font-bold uppercase tracking-widest border transition-colors ${calendarAdded ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10'}`}>
+                                        <CalendarIcon size={14} /> {calendarAdded ? 'Ajouté ✔' : 'Ajouter au calendrier'}
                                     </button>
                                     <button onClick={() => router.push('/dashboard/eleve')} className="w-full btn-primary py-3 flex items-center justify-center gap-2">
                                         Retour au tableau de bord <ArrowRight size={14} />
                                     </button>
-                                    <button onClick={() => { setIsConfirmed(false); setSelectedTime(null); }} className="w-full btn-secondary py-3 text-xs font-bold uppercase tracking-widest bg-transparent border-none text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+                                    <button onClick={() => { setIsConfirmed(false); setSelectedTime(null); setCalendarAdded(false); }} className="w-full btn-secondary py-3 text-xs font-bold uppercase tracking-widest bg-transparent border-none text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
                                         Nouvelle réservation
                                     </button>
                                 </div>
@@ -379,16 +380,11 @@ export default function ReservationPage() {
                         ) : (
                             <div className="premium-card p-12 flex flex-col items-center justify-center text-center space-y-6 min-h-[400px]">
                                 <div className="w-20 h-20 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[var(--color-text-muted)]">
-                                    <div className="relative">
-                                        <CalendarIcon size={40} className="opacity-20" />
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <ChevronRight size={24} className="opacity-40 animate-pulse text-[var(--color-accent)]" />
-                                        </div>
-                                    </div>
+                                    <CalendarIcon size={32} className="opacity-20" />
                                 </div>
                                 <div>
                                     <h3 className="section-title mb-2">En attente de sélection</h3>
-                                    <p className="secondary-info max-w-[200px] mx-auto">Veuillez sélectionner un créneau dans la grille tactique.</p>
+                                    <p className="secondary-info max-w-[200px] mx-auto">Veuillez sélectionner un créneau dans la grille de disponibilité.</p>
                                 </div>
                             </div>
                         )}

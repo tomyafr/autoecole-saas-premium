@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { getUser, type User } from '@/lib/auth';
 import { getInstructorDashboard } from '@/lib/db/queries';
@@ -17,7 +17,8 @@ import {
     CalendarDays,
     Plus,
     Filter,
-    ArrowRight
+    ArrowRight,
+    X
 } from 'lucide-react';
 
 const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
@@ -27,6 +28,13 @@ export default function MoniteurPlanningPage() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [dbData, setDbData] = useState<any>(null);
+    const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+
+    const triggerFeedback = (msg: string) => {
+        setActionFeedback(msg);
+        setTimeout(() => setActionFeedback(null), 3000);
+    };
+
     const [selectedDate, setSelectedDate] = useState(() => {
         const d = new Date();
         d.setHours(12, 0, 0, 0);
@@ -92,11 +100,11 @@ export default function MoniteurPlanningPage() {
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Gestion de vos disponibilités et élèves.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button onClick={() => alert("Module de filtrage à venir")} className="btn-secondary">
+                    <button onClick={() => triggerFeedback("Filtres avancés en cours d'intégration")} className="btn-secondary">
                         <Filter size={16} />
                         Filtrer
                     </button>
-                    <button onClick={() => alert("Ouverture du modal de création de créneau...")} className="btn-primary">
+                    <button onClick={() => triggerFeedback("L'ouverture de créneaux automatiques arrive bientôt")} className="btn-primary">
                         <Plus size={16} />
                         Ouvrir Créneau
                     </button>
@@ -221,10 +229,9 @@ export default function MoniteurPlanningPage() {
                                         </div>
                                     </div>
 
-                                    {/* Action Block */}
                                     <div className="flex items-center gap-3">
-                                        <button onClick={() => alert(`Édition de la session de ${session.student}`)} className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black text-[#8A94A6] hover:text-white transition-all uppercase tracking-widest">Modifier</button>
-                                        <button onClick={() => alert(`Détails complets de la session avec ${session.student}`)} className="w-10 h-10 rounded-xl bg-[#00F5FF]/10 border border-[#00F5FF]/20 text-[#00F5FF] flex items-center justify-center transition-all hover:bg-[#00F5FF] hover:text-black">
+                                        <button onClick={() => triggerFeedback(`Édition de la session de ${session.student}`)} className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black text-[#8A94A6] hover:text-white transition-all uppercase tracking-widest">Modifier</button>
+                                        <button onClick={() => router.push('/dashboard/moniteur/evaluations')} className="w-10 h-10 rounded-xl bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20 text-[var(--color-accent)] flex items-center justify-center transition-all hover:bg-[var(--color-accent)] hover:text-black">
                                             <ArrowRight size={18} />
                                         </button>
                                     </div>
@@ -238,6 +245,23 @@ export default function MoniteurPlanningPage() {
                     </div>
                 </div>
             </div>
+
+            {/* ACTION FEEDBACK TOAST */}
+            <AnimatePresence>
+                {actionFeedback && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#0B0F14] border border-[var(--color-border-subtle)] shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
+                            <CheckCircle2 size={16} />
+                        </div>
+                        <p className="text-sm font-medium text-[var(--color-text-primary)]">{actionFeedback}</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

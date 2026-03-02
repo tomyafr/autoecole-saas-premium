@@ -10,7 +10,6 @@ export async function getStudentDashboard(studentId: string) {
             where: (users, { eq }) => eq(users.id, studentId),
             with: {
                 lessons: {
-                    limit: 5,
                     orderBy: (l, { desc }) => [desc(l.date)],
                     with: {
                         instructor: true
@@ -24,7 +23,6 @@ export async function getStudentDashboard(studentId: string) {
                     }
                 },
                 payments: {
-                    limit: 5,
                     orderBy: (p, { desc }) => [desc(p.date)],
                 }
             }
@@ -48,7 +46,6 @@ export async function getInstructorDashboard(instructorId: string) {
                     }
                 },
                 instructorLessons: {
-                    limit: 10,
                     orderBy: (l, { desc }) => [desc(l.date)],
                     with: {
                         student: true,

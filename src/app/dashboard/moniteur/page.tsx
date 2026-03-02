@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users,
     Calendar,
@@ -12,7 +12,8 @@ import {
     ChevronRight,
     MessageSquare,
     Zap,
-    Play
+    Play,
+    X
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getUser, type User } from '@/lib/auth';
@@ -24,6 +25,13 @@ export default function MoniteurDashboard() {
     const [loading, setLoading] = useState(true);
     const [dbData, setDbData] = useState<any>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+    const [startLessonModal, setStartLessonModal] = useState(false);
+
+    const triggerFeedback = (msg: string) => {
+        setActionFeedback(msg);
+        setTimeout(() => setActionFeedback(null), 3000);
+    };
 
     useEffect(() => {
         const u = getUser();
@@ -135,7 +143,7 @@ export default function MoniteurDashboard() {
                         Planning Complet
                     </button>
                     <button
-                        onClick={() => router.push('/dashboard/moniteur/planning')}
+                        onClick={() => setStartLessonModal(true)}
                         className="btn-primary"
                     >
                         <Zap size={18} />
@@ -170,7 +178,7 @@ export default function MoniteurDashboard() {
                 <div className="lg:col-span-2 space-y-6">
                     <div className="premium-card overflow-hidden">
                         <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
-                            <h3 className="section-title">Engagements du jour</h3>
+                            <h3 className="section-title">Sessions du jour</h3>
                             <div className="flex gap-3">
                                 <span className="status-badge status-badge-cyan">{doneToday} Terminés</span>
                                 <span className="status-badge status-badge-gray">{pendingToday} En attente</span>
@@ -282,19 +290,23 @@ export default function MoniteurDashboard() {
                                 const missionsCount = dbData.appointmentsAsInstructor?.filter((x: any) => x.date && new Date(x.date).toISOString().split('T')[0] === dateStr).length || 0;
 
                                 return (
-                                    <div key={i} className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300
-                                    ${i === 0 ? 'bg-[#00F5FF]/5 border-[#00F5FF]/20 shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'bg-white/[0.01] border-white/5 hover:border-white/10'}`}>
+                                    <div
+                                        key={i}
+                                        onClick={() => router.push('/dashboard/moniteur/planning')}
+                                        className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 cursor-pointer
+                                        ${i === 0 ? 'bg-[var(--color-accent)]/5 border-[var(--color-accent)]/20 shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.05)]' : 'bg-white/[0.01] border-[var(--color-border-subtle)] hover:border-white/20'}`}
+                                    >
                                         <div className="flex items-center gap-3">
-                                            <span className={`text-xs font-bold ${i === 0 ? 'text-[#00F5FF]' : 'text-white/40'}`}>{dayName.slice(0, 3).toUpperCase()}</span>
+                                            <span className={`text-xs font-bold ${i === 0 ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'}`}>{dayName.slice(0, 3).toUpperCase()}</span>
                                             <div className="w-1 h-3 rounded-full bg-white/5" />
-                                            <span className="text-sm font-semibold text-white">{missionsCount} Leçon{missionsCount > 1 ? 's' : ''}</span>
+                                            <span className="text-sm font-semibold text-[var(--color-text-primary)]">{missionsCount} Leçon{missionsCount > 1 ? 's' : ''}</span>
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
                         <button
-                            onClick={() => alert("Module IA d'optimisation de planning à venir.")}
+                            onClick={() => triggerFeedback("Module IA d'optimisation de planning de disponibilité est en cours d'entraînement.")}
                             className="w-full btn-primary mt-8 py-4"
                         >
                             Optimizer Planning
@@ -317,6 +329,63 @@ export default function MoniteurDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* ACTION FEEDBACK TOAST */}
+            <AnimatePresence>
+                {actionFeedback && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#0B0F14] border border-[var(--color-border-subtle)] shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
+                            <CheckCircle2 size={16} />
+                        </div>
+                        <p className="text-sm font-medium text-[var(--color-text-primary)]">{actionFeedback}</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* START LESSON MODAL */}
+            <AnimatePresence>
+                {startLessonModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setStartLessonModal(false)}
+                            className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-sm premium-card border-[var(--color-border-subtle)] overflow-hidden flex flex-col"
+                        >
+                            <div className="p-6">
+                                <div className="flex items-start justify-between mb-6">
+                                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
+                                        <Zap size={24} />
+                                    </div>
+                                    <button onClick={() => setStartLessonModal(false)} className="p-2 text-[#5F6B7A] hover:text-white transition-colors">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                                <h3 className="text-lg font-bold text-white mb-2">Sélectionnez le créneau</h3>
+                                <p className="text-sm text-[#8A94A6] leading-relaxed mb-6">Démarrez une leçon instantanément en sélectionnant l'engagement de votre élève dans la vue planning.</p>
+                                <button
+                                    onClick={() => { setStartLessonModal(false); router.push('/dashboard/moniteur/planning'); }}
+                                    className="btn-primary w-full justify-center"
+                                >
+                                    Accéder au planning
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

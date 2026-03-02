@@ -16,6 +16,9 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { getUser, type User } from '@/lib/auth';
 import { getStudentDashboard } from '@/lib/db/queries';
+import Link from 'next/link';
+import { AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 
 export default function EleveDashboard() {
     const router = useRouter();
@@ -23,6 +26,8 @@ export default function EleveDashboard() {
     const [loading, setLoading] = useState(true);
     const [dbData, setDbData] = useState<any>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [selectedDetails, setSelectedDetails] = useState<any>(null);
+    const [boosterModal, setBoosterModal] = useState(false);
 
     useEffect(() => {
         const u = getUser();
@@ -118,7 +123,7 @@ export default function EleveDashboard() {
                         className="btn-secondary"
                     >
                         <Hexagon size={16} />
-                        Rapport complet
+                        Dossier Pédagogique
                     </button>
                     <button
                         onClick={() => router.push('/dashboard/eleve/reservation')}
@@ -187,7 +192,7 @@ export default function EleveDashboard() {
                                     { label: 'Manoeuvres & Stationnement', status: 'Perfectionnement', color: 'bg-amber-500' },
                                     { label: 'Circulation voies rapides', status: 'Phase initiale', color: 'bg-red-500' }
                                 ].map((step, idx) => (
-                                    <div key={idx} onClick={() => alert(`Détails de l'objectif : ${step.label}`)} className="flex items-center gap-4 group/item cursor-pointer">
+                                    <div key={idx} className="flex items-center gap-4 group/item">
                                         <div className={`w-2 h-2 rounded-full ${step.color} shadow-[0_0_8px_currentColor] opacity-80 group-hover/item:opacity-100 transition-opacity duration-300`} />
                                         <div>
                                             <p className="text-sm font-medium text-white group-hover/item:text-[#00F5FF] transition-colors">{step.label}</p>
@@ -202,12 +207,12 @@ export default function EleveDashboard() {
                     <div className="premium-card overflow-hidden">
                         <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
                             <h3 className="section-title">Dernières missions</h3>
-                            <button
-                                onClick={() => router.push('/dashboard/eleve/lecons')}
+                            <Link
+                                href="/dashboard/eleve/lecons"
                                 className="text-xs font-bold text-[#00F5FF] hover:underline uppercase tracking-wider"
                             >
-                                Archives
-                            </button>
+                                Toutes
+                            </Link>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="premium-table">
@@ -220,7 +225,7 @@ export default function EleveDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {dbData.lessons.map((lesson: any) => (
+                                    {dbData.lessons && dbData.lessons.slice(0, 5).map((lesson: any) => (
                                         <tr key={lesson.id} className="group">
                                             <td>
                                                 <div className="flex flex-col">
@@ -281,10 +286,10 @@ export default function EleveDashboard() {
                                 </div>
                             )}
                             <button
-                                onClick={() => router.push(nextLesson ? '/dashboard/eleve/lecons' : '/dashboard/eleve/reservation')}
+                                onClick={() => nextLesson ? setSelectedDetails(nextLesson) : router.push('/dashboard/eleve/reservation')}
                                 className="w-full btn-primary"
                             >
-                                {nextLesson ? 'Détails de la mission' : 'Réserver maintenant'}
+                                {nextLesson ? 'Détails de la session' : 'Réserver maintenant'}
                                 <ArrowUpRight size={16} />
                             </button>
                         </div>
@@ -294,27 +299,100 @@ export default function EleveDashboard() {
                         <h3 className="card-title mb-6">Centre de ressources</h3>
                         <div className="space-y-2">
                             {['Règlementation Autoroute', 'Les contrôles visuels', 'Mécanique & Sécurité'].map((item, i) => (
-                                <button key={i} onClick={() => alert(`Ouverture du PDF réglementaire : ${item}`)} className="w-full flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-xs font-medium text-[#8A94A6] hover:text-white group border border-transparent hover:border-white/5">
+                                <Link key={i} href="#" target="_blank" className="w-full flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-xs font-medium text-[#8A94A6] hover:text-white group border border-transparent hover:border-white/5">
                                     <span>{item}</span>
                                     <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-[#00F5FF]" />
-                                </button>
+                                </Link>
                             ))}
                         </div>
                     </div>
 
-                    <div onClick={() => alert("Paramétrage du Mode Booster (bientôt disponible)")} className="p-6 rounded-2xl bg-[#00F5FF]/[0.02] border border-[#00F5FF]/10 flex items-center gap-4 cursor-pointer hover:bg-[#00F5FF]/[0.05] transition-colors">
+                    <div onClick={() => setBoosterModal(true)} className="p-6 rounded-2xl bg-[#00F5FF]/[0.02] border border-[#00F5FF]/10 flex items-center gap-4 cursor-pointer hover:bg-[#00F5FF]/[0.05] transition-colors">
                         <div className="w-10 h-10 rounded-xl bg-[#00F5FF]/10 flex items-center justify-center text-[#00F5FF]">
                             <Zap size={20} fill="currentColor" />
                         </div>
                         <div>
                             <p className="text-xs font-bold text-white uppercase tracking-wider italic">Mode Booster</p>
                             <p className="text-[10px] text-[#5F6B7A] font-medium leading-relaxed mt-1">
-                                Vos 4 prochaines heures sont accélérées. Focus sur l'examen blanc.
+                                Vos 4 prochaines heures sont accélérées. Focus sur l'examen.
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Modal Détails Session */}
+            <AnimatePresence>
+                {selectedDetails && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedDetails(null)}
+                            className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-sm premium-card overflow-hidden flex flex-col"
+                        >
+                            <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                                <h3 className="text-lg font-black text-white uppercase">Détails de la Session</h3>
+                                <button onClick={() => setSelectedDetails(null)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#8A94A6] hover:text-white transition-colors">
+                                    <X size={16} />
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                <div>
+                                    <p className="text-[10px] font-bold text-[#5F6B7A] uppercase tracking-widest mb-1">Date Prévue</p>
+                                    <p className="text-base font-semibold text-white">{new Date(selectedDetails.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                    <p className="text-sm font-medium text-emerald-400 mt-1">{selectedDetails.time}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-[#5F6B7A] uppercase tracking-widest mb-1">Formateur</p>
+                                    <p className="text-base font-semibold text-white">{selectedDetails.instructor?.name || 'Moniteur'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-[#5F6B7A] uppercase tracking-widest mb-1">Catégorie</p>
+                                    <p className="text-sm font-medium text-white p-3 rounded-lg border border-white/5 bg-white/[0.02]">{selectedDetails.type}</p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Modal Mode Booster */}
+            <AnimatePresence>
+                {boosterModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setBoosterModal(false)}
+                            className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-sm premium-card border-[#00F5FF]/30 overflow-hidden flex flex-col text-center p-8"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-[#00F5FF]/10 text-[#00F5FF] flex items-center justify-center mx-auto mb-6">
+                                <Zap size={32} fill="currentColor" />
+                            </div>
+                            <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">Mode Booster</h3>
+                            <p className="text-sm text-[#8A94A6] leading-relaxed mb-6">Cette exclusivité premium sera disponible prochainement. Augmentez l'intensité de vos leçons pour viser l'examen sereinement.</p>
+                            <button onClick={() => setBoosterModal(false)} className="btn-primary w-full justify-center">
+                                Compris
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

@@ -43,7 +43,10 @@ const NAV_CONFIG: Record<UserRole, NavItem[]> = {
     admin: [
         { label: 'Vue d\'ensemble', href: '/dashboard/admin', icon: <LayoutDashboard size={18} /> },
         { label: 'Centres de Conduite', href: '/dashboard/admin/centres', icon: <MapPin size={18} /> },
-        { label: 'Staff & Élèves', href: '/dashboard/admin/utilisateurs', icon: <Users size={18} /> },
+        { label: 'Équipe Pédagogique', href: '/dashboard/admin/moniteurs', icon: <UserCircle size={18} /> },
+        { label: 'Parcours Élèves', href: '/dashboard/admin/eleves', icon: <Users size={18} /> },
+        { label: 'Trésorerie', href: '/dashboard/admin/finances', icon: <CreditCard size={18} /> },
+        { label: 'Agenda Général', href: '/dashboard/admin/planning', icon: <Calendar size={18} /> },
         { label: 'Statistiques', href: '/dashboard/admin/stats', icon: <Activity size={18} /> },
     ],
 };
@@ -101,10 +104,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             alt="Logo AutoDrive"
                             width={48}
                             height={48}
-                            className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110 dark:invert-0 invert opacity-90"
+                            className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110 brightness-0 dark:invert opacity-90"
                         />
                     </div>
-                    <h1 className="text-xl font-black text-white tracking-tighter uppercase italic leading-none">
+                    <h1 className="text-xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none">
                         AUTODRIVE
                     </h1>
                 </div>
@@ -148,7 +151,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             {user.avatar}
                         </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-semibold text-white truncate">{user.name}</span>
+                            <span className="text-xs font-semibold text-[var(--color-text-primary)] truncate">{user.name}</span>
                             <span className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-wider">{user.role}</span>
                         </div>
                     </div>
@@ -156,11 +159,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </aside>
 
             <main className="main-content">
-                <header className="h-16 border-b border-white/5 flex items-center justify-between px-10 sticky top-0 bg-[#0B0F14]/60 backdrop-blur-md z-40">
+                <header className="h-16 border-b border-[var(--color-border-subtle)] flex items-center justify-between px-10 sticky top-0 bg-[var(--color-bg)]/80 backdrop-blur-md z-40">
                     <div className="flex items-center gap-4 text-sm font-medium">
                         <span className="text-[#5F6B7A]">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
-                        <span className="text-white/20">/</span>
-                        <span className="text-white">
+                        <span className="text-[var(--color-text-primary)] text-opacity-50 mx-2">/</span>
+                        <span className="text-[var(--color-text-primary)]">
                             {pathname === '/dashboard/settings' ? 'Paramètres' : (navItems.find(n => n.href === pathname)?.label || pathname.split('/').pop()?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Tableau de bord')}
                         </span>
                     </div>
@@ -169,7 +172,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <div className="relative">
                             <button
                                 onClick={() => { setNotificationsOpen(!notificationsOpen); setUserMenuOpen(false); }}
-                                className="relative w-8 h-8 flex items-center justify-center text-[#8A94A6] hover:text-white hover:bg-white/5 rounded-full transition-colors"
+                                className="relative w-8 h-8 flex items-center justify-center text-[#8A94A6] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-border-subtle)] rounded-full transition-colors"
                             >
                                 <Bell size={20} />
                                 <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#00F5FF] rounded-full shadow-[0_0_8px_rgba(0,245,255,0.8)] border border-[#0B0F14]"></div>
@@ -233,7 +236,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                                 {user.avatar}
                                             </div>
                                             <div className="flex flex-col min-w-0">
-                                                <span className="text-sm font-semibold text-white truncate">{user.name}</span>
+                                                <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">{user.name}</span>
                                                 <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest">{user.role}</span>
                                             </div>
                                         </div>

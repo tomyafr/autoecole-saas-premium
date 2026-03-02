@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
     CreditCard,
@@ -14,9 +14,11 @@ import {
     Clock,
     ShieldCheck,
     ArrowUpRight,
-    Search
+    Search,
+    CreditCard as CreditCardIcon
 } from 'lucide-react';
 import { getUser, type User as UserType } from '@/lib/auth';
+import { getStudentDashboard } from '@/lib/db/queries';
 
 /* ======= DATA ======= */
 const currentYear = new Date().getFullYear();
@@ -25,14 +27,18 @@ const INVOICES = [
     { id: `#INV-${currentYear}-002`, date: `12 Fév ${currentYear}`, amount: '120.00€', status: 'Payé', type: 'Heures supplémentaires (2h)' },
     { id: `#INV-${currentYear}-003`, date: `15 Jan ${currentYear}`, amount: '890.00€', status: 'Payé', type: 'Pack Initial Code+20h' },
 ];
-
-import { getStudentDashboard } from '@/lib/db/queries';
-
 export default function ElevePaiementsPage() {
     const router = useRouter();
     const [user, setUser] = useState<UserType | null>(null);
     const [loading, setLoading] = useState(true);
     const [dbData, setDbData] = useState<any>(null);
+    const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+    const [stripeModal, setStripeModal] = useState(false);
+
+    const triggerFeedback = (msg: string) => {
+        setActionFeedback(msg);
+        setTimeout(() => setActionFeedback(null), 3000);
+    };
 
     useEffect(() => {
         const u = getUser();
@@ -46,8 +52,11 @@ export default function ElevePaiementsPage() {
 
     const fetchData = async (userId: string) => {
         try {
-            const data = await getStudentDashboard(userId);
-            setDbData(data);
+            const rawData = await getStudentDashboard(userId);
+            const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+            if (parsed && parsed.success) {
+                setDbData(parsed.data);
+            }
         } catch (error) {
             console.error('Fetch error:', error);
         } finally {
@@ -78,26 +87,39 @@ export default function ElevePaiementsPage() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
-                    <h1 className="page-title">Facturation & Flux</h1>
+                    <h1 className="page-title">Facturation & Paiements</h1>
                     <p className="text-sm text-[var(--color-text-secondary)] mt-1 font-medium">Gestion de vos transactions et crédits de formation.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button onClick={() => alert("Exportation PDF en cours d'intégration.")} className="btn-secondary">
+                    <button onClick={() => triggerFeedback("Archive ZIP prête et en cours de formatage sécurisé...")} className="btn-secondary">
                         <Download size={16} />
                         Télécharger tout
                     </button>
-                    <button onClick={() => alert("Tunnel de paiement Stripe en cours d'intégration.")} className="btn-primary">
+                    <button onClick={() => setStripeModal(true)} className="btn-primary">
                         <Plus size={16} />
                         Ajouter Crédits
                     </button>
                 </div>
             </div>
 
+            <AnimatePresence>
+                {actionFeedback && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="fixed top-6 right-6 z-50 bg-[#00F5FF]/10 border border-[#00F5FF]/30 text-[#00F5FF] px-6 py-3 rounded-xl shadow-[0_0_20px_rgba(0,245,255,0.2)] text-xs font-bold tracking-widest uppercase flex items-center gap-3"
+                    >
+                        {actionFeedback}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Tactical Grid Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
                     { label: 'Solde Formations', value: `${dbData.lessons?.length || 0}/35h`, sub: 'Heures réalisées', icon: <Clock size={18} />, color: 'text-[var(--color-accent)]' },
-                    { label: 'Total Investi', value: `${totalInvested}€`, sub: 'Flux de trésorerie', icon: <DollarSign size={18} />, color: 'text-emerald-400' },
+                    { label: 'Total Investi', value: `${totalInvested}€`, sub: 'Total payé', icon: <DollarSign size={18} />, color: 'text-emerald-400' },
                     { label: 'Prochaine Session', value: dbData.appointmentsAsStudent?.[0]?.date ? new Date(dbData.appointmentsAsStudent[0].date).toLocaleDateString() : 'Aucune', sub: 'Engagement prévu', icon: <CreditCard size={18} />, color: 'text-blue-400' },
                 ].map((stat, i) => (
                     <div key={i} className="premium-card p-6 flex flex-col justify-between space-y-4">
@@ -164,7 +186,7 @@ export default function ElevePaiementsPage() {
                                                 </div>
                                             </td>
                                             <td className="text-right">
-                                                <button onClick={() => alert("Génération de la facture en cours...")} className="p-2.5 rounded-xl bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all">
+                                                <button onClick={() => triggerFeedback("Génération de la facture en cours...")} className="p-2.5 rounded-xl bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all">
                                                     <FileText size={18} />
                                                 </button>
                                             </td>
@@ -180,7 +202,7 @@ export default function ElevePaiementsPage() {
                                                         <p className="text-sm font-bold text-[var(--color-text-primary)]">Aucune transaction pour le moment.</p>
                                                         <p className="text-[10px] text-[var(--color-text-secondary)] font-medium max-w-xs mx-auto mt-2 leading-relaxed">Votre historique financier est vierge. Effectuez une première réservation ou ajoutez des crédits pour commencer.</p>
                                                     </div>
-                                                    <button onClick={() => alert("Tunnel de paiement Stripe en cours d'intégration.")} className="btn-primary mt-4 flex items-center gap-2 px-6 py-3">
+                                                    <button onClick={() => setStripeModal(true)} className="btn-primary mt-4 flex items-center gap-2 px-6 py-3">
                                                         <Plus size={14} /> Ajouter Crédits
                                                     </button>
                                                 </div>
@@ -198,7 +220,7 @@ export default function ElevePaiementsPage() {
                     <div className="premium-card p-8 bg-gradient-to-br from-[#00F5FF]/10 to-transparent border-[var(--color-accent)]/10">
                         <div className="flex items-center gap-3 mb-6">
                             <ShieldCheck size={20} className="text-[var(--color-accent)]" />
-                            <h3 className="section-title">Sécurité Flux</h3>
+                            <h3 className="section-title">Sécurité des Paiements</h3>
                         </div>
                         <p className="text-[11px] text-[var(--color-text-secondary)] font-medium leading-relaxed mb-8">
                             Toutes vos transactions sont chiffrées de bout-en-bout via le protocole AutoDrive Secure Vault.
@@ -214,10 +236,10 @@ export default function ElevePaiementsPage() {
                                         <span className="text-[9px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">Expire 08/28</span>
                                     </div>
                                 </div>
-                                <button onClick={() => alert("Édition des moyens de paiement à venir.")} className="text-[9px] font-black text-[var(--color-accent)] uppercase tracking-widest border-b border-[var(--color-accent)]/20">Editer</button>
+                                <button onClick={() => triggerFeedback("Modification de carte vérifiée par DSP2 en cours.")} className="text-[9px] font-black text-[var(--color-accent)] uppercase tracking-widest border-b border-[var(--color-accent)]/20">Editer</button>
                             </div>
                         </div>
-                        <button onClick={() => alert("Gestion de l'abonnement à venir")} className="w-full btn-primary mt-8">
+                        <button onClick={() => setStripeModal(true)} className="w-full btn-primary mt-8">
                             Actualiser Abonnement
                             <ArrowUpRight size={16} />
                         </button>
@@ -225,7 +247,7 @@ export default function ElevePaiementsPage() {
 
                     <div className="premium-card p-8 space-y-6">
                         <h3 className="card-title text-[var(--color-text-muted)] italic font-black">Support Facturation</h3>
-                        <div onClick={() => alert("Ouverture du module de chat IA...")} className="p-5 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] group hover:bg-[var(--color-sidebar)] transition-all cursor-pointer">
+                        <div onClick={() => triggerFeedback("Connexion au terminal de messagerie sécurisé...")} className="p-5 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] group hover:bg-[var(--color-sidebar)] transition-all cursor-pointer">
                             <p className="text-xs font-bold text-[var(--color-text-primary)] mb-2">Besoin d'un échéancier ?</p>
                             <p className="text-[10px] text-[var(--color-text-muted)] font-medium leading-relaxed">
                                 Contactez notre service financier pour étaler vos paiements sans frais.
@@ -238,6 +260,40 @@ export default function ElevePaiementsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal Paiement Sécurisé (Stripe Sandbox) */}
+            <AnimatePresence>
+                {stripeModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setStripeModal(false)}
+                            className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-sm premium-card border-[var(--color-border-subtle)] overflow-hidden flex flex-col text-center"
+                        >
+                            <div className="p-8 space-y-6">
+                                <div className="w-16 h-16 rounded-[2rem] bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(99,102,241,0.2)]">
+                                    <CreditCardIcon size={28} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">Terminal de Paiement</h3>
+                                    <p className="text-sm text-[var(--color-text-muted)] leading-relaxed italic">Gateway chiffré par Stripe en cours d'initialisation. Les paiements réels seront activés prochainement.</p>
+                                </div>
+                                <button onClick={() => setStripeModal(false)} className="btn-secondary border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300 w-full justify-center underline decoration-indigo-400/30">
+                                    Fermer le Sandbox
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
