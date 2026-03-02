@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogIn, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import { saveUser, getUser, getDashboardPath } from '@/lib/auth';
+import { saveUser, getUser, getDashboardPath, logout } from '@/lib/auth';
 import { authenticateServer } from '@/app/actions/auth';
 
 export default function LoginPage() {
@@ -16,8 +16,12 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const u = getUser();
-        if (u) router.replace(getDashboardPath(u.role));
+        if (typeof window !== 'undefined' && window.location.search.includes('switch=true')) {
+            logout();
+        } else {
+            const u = getUser();
+            if (u) router.replace(getDashboardPath(u.role));
+        }
     }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {

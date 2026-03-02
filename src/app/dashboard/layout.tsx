@@ -242,6 +242,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                             <Settings size={14} className="group-hover:text-[#00F5FF] transition-colors" />
                                             <span>Paramètres</span>
                                         </button>
+                                        <button onClick={() => router.push('/login?switch=true')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-[#8A94A6] hover:text-white hover:bg-white/5 transition-all group mt-1">
+                                            <Users size={14} className="group-hover:text-[#00F5FF] transition-colors" />
+                                            <span>Changer de Rôle</span>
+                                        </button>
                                         <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-500/10 transition-all mt-1">
                                             <LogOut size={14} />
                                             <span>Déconnexion Rapide</span>

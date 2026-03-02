@@ -143,7 +143,7 @@ export default function ElevePaiementsPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {invoices.map((inv: any) => (
+                                    {invoices.length > 0 ? invoices.map((inv: any) => (
                                         <tr key={inv.id} className="group">
                                             <td>
                                                 <div className="flex flex-col">
@@ -169,7 +169,24 @@ export default function ElevePaiementsPage() {
                                                 </button>
                                             </td>
                                         </tr>
-                                    ))}
+                                    )) : (
+                                        <tr>
+                                            <td colSpan={5} className="py-20 text-center border-none">
+                                                <div className="flex flex-col items-center justify-center space-y-4">
+                                                    <div className="w-16 h-16 rounded-3xl bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[var(--color-text-muted)] shadow-inner">
+                                                        <History size={32} strokeWidth={1.5} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-[var(--color-text-primary)]">Aucune transaction pour le moment.</p>
+                                                        <p className="text-[10px] text-[var(--color-text-secondary)] font-medium max-w-xs mx-auto mt-2 leading-relaxed">Votre historique financier est vierge. Effectuez une première réservation ou ajoutez des crédits pour commencer.</p>
+                                                    </div>
+                                                    <button onClick={() => alert("Tunnel de paiement Stripe en cours d'intégration.")} className="btn-primary mt-4 flex items-center gap-2 px-6 py-3">
+                                                        <Plus size={14} /> Ajouter Crédits
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
