@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     ClipboardCheck,
     Star,
@@ -15,7 +15,9 @@ import {
     Zap,
     History,
     ChevronRight,
-    Plus
+    Plus,
+    X,
+    User
 } from 'lucide-react';
 
 /* ======= DATA ======= */
@@ -28,6 +30,7 @@ const RECENT_EVALS = [
 
 export default function MoniteurEvaluationsPage() {
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedReport, setSelectedReport] = useState<any>(null);
 
     return (
         <div className="space-y-10 group/evals">
@@ -38,11 +41,11 @@ export default function MoniteurEvaluationsPage() {
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Audit de performance et archivage des évaluations tactiques.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button onClick={() => alert("Chargement exhaustif de l'historique...")} className="btn-secondary">
+                    <button className="btn-secondary">
                         <History size={16} />
                         Historique Global
                     </button>
-                    <button onClick={() => alert("Formulaire de nouvel audit en cours d'intégration.")} className="btn-primary">
+                    <button className="btn-primary">
                         <Plus size={16} />
                         Nouvel Audit
                     </button>
@@ -112,7 +115,7 @@ export default function MoniteurEvaluationsPage() {
                                     </div>
                                     <div className="flex flex-col items-end gap-3 min-w-[120px]">
                                         <span className="text-[10px] font-bold text-[#5F6B7A] uppercase tracking-widest">{evalItem.date}</span>
-                                        <button onClick={(e) => { e.stopPropagation(); alert(`Affichage du rapport complet de ${evalItem.student}...`); }} className="flex items-center gap-2 text-[10px] font-black text-[#00F5FF] uppercase tracking-widest hover:translate-x-1 transition-transform">
+                                        <button onClick={(e) => { e.stopPropagation(); setSelectedReport(evalItem); }} className="flex items-center gap-2 text-[10px] font-black text-[#00F5FF] uppercase tracking-widest hover:translate-x-1 transition-transform">
                                             Rapport Full
                                             <ChevronRight size={14} />
                                         </button>
@@ -168,6 +171,78 @@ export default function MoniteurEvaluationsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal Rapport Complet */}
+            <AnimatePresence>
+                {selectedReport && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedReport(null)}
+                            className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-2xl premium-card overflow-hidden flex flex-col max-h-[90vh]"
+                        >
+                            <div className="p-6 border-b border-white/5 flex items-center justify-between sticky top-0 bg-[var(--color-card)] z-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-xl bg-[#00F5FF]/10 text-[#00F5FF] flex items-center justify-center">
+                                        <FileText size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black text-white uppercase tracking-tighter">Rapport Pédagogique</h3>
+                                        <p className="text-sm font-medium text-[#8A94A6]">{selectedReport.category} — {selectedReport.date}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setSelectedReport(null)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#8A94A6] hover:text-white transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="p-8 overflow-y-auto w-full flex-1 space-y-8">
+                                <div className="flex flex-col md:flex-row gap-6">
+                                    <div className="flex-1 premium-card p-6 bg-white/[0.02]">
+                                        <h4 className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-[0.2em] mb-4">Profil Évalué</h4>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[#8A94A6]">
+                                                <User size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-lg font-bold text-white">{selectedReport.student}</p>
+                                                <p className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mt-1">Élève Conducteur/trice</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="premium-card p-6 bg-gradient-to-br from-[#00F5FF]/10 to-transparent flex flex-col justify-center items-center md:min-w-[160px]">
+                                        <h4 className="text-[10px] font-black text-[#8A94A6] uppercase tracking-[0.2em] mb-2">Note Globale</h4>
+                                        <div className="text-4xl font-black text-white">{selectedReport.score}</div>
+                                        <div className="text-[10px] uppercase font-bold text-[#00F5FF] mt-1 tracking-widest">Sur 10</div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <h4 className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-[0.2em]">Observations du Formateur</h4>
+                                    <div className="p-5 rounded-xl border border-white/5 bg-white/[0.02] text-sm text-[#8A94A6] leading-relaxed">
+                                        <p>{selectedReport.comment}</p>
+                                        <p className="mt-4 italic">Note : Ce rapport est automatiquement synchronisé dans le livret d'apprentissage de l'élève.</p>
+                                    </div>
+                                </div>
+
+                                <div className="pt-6 border-t border-white/5 flex gap-4">
+                                    <button className="flex-1 btn-primary" onClick={() => setSelectedReport(null)}>
+                                        Fermer et Archiver
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

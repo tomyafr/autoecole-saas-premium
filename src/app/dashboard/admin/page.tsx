@@ -60,26 +60,30 @@ export default function AdminDashboard() {
 
             {/* Tactical Grid Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, i) => (
-                    <div
-                        key={i}
-                        className="premium-card p-6 flex flex-col justify-between space-y-4 min-h-[160px]"
-                    >
-                        <div className="flex justify-between items-start">
-                            <div className={`p-2.5 rounded-xl bg-white/[0.03] border border-white/5 ${stat.color}`}>
-                                {stat.icon}
+                {stats.map((stat, i) => {
+                    const links = ['/dashboard/admin/finances', '/dashboard/admin/eleves', '/dashboard/admin/stats', '/dashboard/admin/centres'];
+                    return (
+                        <div
+                            key={i}
+                            onClick={() => router.push(links[i])}
+                            className="premium-card p-6 flex flex-col justify-between space-y-4 min-h-[160px] cursor-pointer hover:border-[#00F5FF]/20"
+                        >
+                            <div className="flex justify-between items-start">
+                                <div className={`p-2.5 rounded-xl bg-white/[0.03] border border-white/5 ${stat.color}`}>
+                                    {stat.icon}
+                                </div>
+                                <span className="card-title">{stat.label}</span>
                             </div>
-                            <span className="card-title">{stat.label}</span>
-                        </div>
-                        <div>
-                            <div className="primary-value">{stat.value}</div>
-                            <div className="flex items-center gap-1.5 mt-2">
-                                <span className={`text-[10px] font-bold font-mono ${stat.color}`}>{stat.sub}</span>
-                                <ArrowUpRight size={10} className={stat.color} />
+                            <div>
+                                <div className="primary-value">{stat.value}</div>
+                                <div className="flex items-center gap-1.5 mt-2">
+                                    <span className={`text-[10px] font-bold font-mono ${stat.color}`}>{stat.sub}</span>
+                                    <ArrowUpRight size={10} className={stat.color} />
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -220,10 +224,10 @@ export default function AdminDashboard() {
                             ))}
                         </div>
                         <button
-                            onClick={() => alert("Le module de gestion des effectifs est en cours de déploiement.")}
+                            onClick={() => router.push('/dashboard/admin/moniteurs')}
                             className="w-full mt-6 py-4 text-[10px] font-black uppercase tracking-widest text-[#5F6B7A] hover:text-white transition-colors"
                         >
-                            Voir tout l'effectif
+                            Gérer les formateurs
                         </button>
                     </div>
 
