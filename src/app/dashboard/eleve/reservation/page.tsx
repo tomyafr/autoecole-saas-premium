@@ -108,6 +108,16 @@ export default function ReservationPage() {
 
         if (result.success) {
             setIsConfirmed(true);
+
+            // Immediately update visually to prevent double clicks and confusion
+            const newBooked = [...bookedSlots, selectedTime];
+            if (selectedDuration === 2) {
+                const hour = parseInt(selectedTime.split(':')[0], 10);
+                const nextTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
+                newBooked.push(nextTime);
+            }
+            setBookedSlots(newBooked);
+
             setTimeout(() => {
                 setIsConfirmed(false);
                 setSelectedTime(null);

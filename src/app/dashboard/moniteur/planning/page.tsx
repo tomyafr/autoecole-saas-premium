@@ -62,6 +62,8 @@ export default function MoniteurPlanningPage() {
     }
 
     const currentMonthDays = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
+    const firstDayOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1).getDay();
+    const paddingDays = (firstDayOfMonth + 6) % 7; // Convert Sunday(0) to 6, Monday(1) to 0...
 
     // Filter DB appointments by selectedDate
     const dateStr = selectedDate.toISOString().split('T')[0];
@@ -114,6 +116,9 @@ export default function MoniteurPlanningPage() {
                             ))}
                         </div>
                         <div className="grid grid-cols-7 gap-1">
+                            {Array.from({ length: paddingDays }).map((_, i) => (
+                                <div key={`pad-${i}`} />
+                            ))}
                             {Array.from({ length: currentMonthDays }).map((_, i) => {
                                 const dayNum = i + 1;
                                 const isSelected = dayNum === selectedDate.getDate();
