@@ -5,28 +5,34 @@ import { users, appointments, lessons, payments } from './schema';
 import { eq, desc, and } from 'drizzle-orm';
 
 export async function getStudentDashboardData(studentId: string) {
-    const student = await db.query.users.findFirst({
-        where: eq(users.id, studentId),
-        with: {
-            lessons: {
-                limit: 5,
-                orderBy: [desc(lessons.date)],
-            },
-            appointmentsAsStudent: {
-                where: eq(appointments.status, 'pending'),
-                orderBy: [desc(appointments.date)],
-                with: {
-                    instructor: true,
+    try {
+        const student = await db.query.users.findFirst({
+            where: (users, { eq }) => eq(users.id, studentId),
+            with: {
+                lessons: {
+                    limit: 5,
+                    orderBy: (lessons, { desc }) => [desc(lessons.date)],
+                },
+                appointmentsAsStudent: {
+                    where: (appointments, { eq }) => eq(appointments.status, 'pending'),
+                    orderBy: (appointments, { desc }) => [desc(appointments.date)],
+                    with: {
+                        instructor: true,
+                    }
+                },
+                payments: {
+                    limit: 5,
+                    orderBy: (payments, { desc }) => [desc(payments.date)],
                 }
-            },
-            payments: {
-                limit: 5,
-                orderBy: [desc(payments.date)],
             }
-        }
-    });
+        });
 
-    return student;
+        // Ensure safe serialization for Next.js Client Boundaries
+        return student ? JSON.parse(JSON.stringify(student)) : null;
+    } catch (err: any) {
+        console.error("Erreur critique Db dans getStudentDashboardData:", err);
+        throw new Error(err.message || 'Erreur lors de la lecture de la base de données');
+    }
 }
 
 export async function getStudentDashboard(studentId: string) {
@@ -34,30 +40,36 @@ export async function getStudentDashboard(studentId: string) {
 }
 
 export async function getInstructorDashboardData(instructorId: string) {
-    const instructor = await db.query.users.findFirst({
-        where: eq(users.id, instructorId),
-        with: {
-            appointmentsAsInstructor: {
-                orderBy: [desc(appointments.date), desc(appointments.time)],
-                with: {
-                    student: true,
-                }
-            },
-            lessons: {
-                limit: 10,
-                orderBy: [desc(lessons.date)],
-                with: {
-                    student: true,
+    try {
+        const instructor = await db.query.users.findFirst({
+            where: (users, { eq }) => eq(users.id, instructorId),
+            with: {
+                appointmentsAsInstructor: {
+                    orderBy: (appointments, { desc }) => [desc(appointments.date), desc(appointments.time)],
+                    with: {
+                        student: true,
+                    }
+                },
+                lessons: {
+                    limit: 10,
+                    orderBy: (lessons, { desc }) => [desc(lessons.date)],
+                    with: {
+                        student: true,
+                    }
                 }
             }
-        }
-    });
+        });
 
-    const studentsCount = await db.query.users.findMany({
-        where: eq(users.role, 'eleve')
-    }).then(res => res.length);
+        const studentsCount = await db.query.users.findMany({
+            where: (users, { eq }) => eq(users.role, 'eleve')
+        }).then(res => res.length);
 
-    return { ...instructor, totalStudents: studentsCount };
+        const result = { ...instructor, totalStudents: studentsCount };
+        return JSON.parse(JSON.stringify(result));
+    } catch (err: any) {
+        console.error("Erreur critique Db dans getInstructorDashboardData:", err);
+        throw new Error(err.message || 'Erreur lors de la lecture de la base de données Instructeur');
+    }
 }
 
 export async function getInstructorDashboard(instructorId: string) {
