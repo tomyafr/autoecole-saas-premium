@@ -18,9 +18,8 @@ import { getUser, type User as UserType } from '@/lib/auth';
 import { createAppointment, getBookedSlots } from '@/app/actions/appointment';
 
 const INSTRUCTORS = [
-    { id: '1', name: 'Marc Dupont', exp: 'Senior - 15 ans exp.', rating: 4.9, avatar: 'MD', color: 'emerald' },
+    { id: '1', name: 'Marie Dupont', exp: 'Senior - 15 ans exp.', rating: 4.9, avatar: 'MD', color: 'emerald' },
     { id: '2', name: 'Sophie Martin', exp: 'Expert - Examen', rating: 5.0, avatar: 'SM', color: 'blue' },
-    { id: '3', name: 'Jean Roche', exp: 'Instructeur Ville', rating: 4.7, avatar: 'JR', color: 'amber' },
 ];
 
 const ALL_HOURS = [
