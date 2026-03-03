@@ -1,21 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Search, Target, Shield, ArrowUpRight, Lock, MapPin, Briefcase } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const currentYear = new Date().getFullYear();
-const INSTRUCTORS = [
-    { id: 1, name: 'Marc Dupont', email: 'm.dupont@autodrive.pro', status: 'Actif', students: 24, hours: 32, center: 'Paris - République', joined: '05 Nov 2023', score: '9.8' },
-    { id: 2, name: 'Sophie Martin', email: 's.martin@autodrive.pro', status: 'Actif', students: 18, hours: 28, center: 'Paris - République', joined: '20 Déc 2023', score: '9.6' },
-    { id: 3, name: 'Julien Morel', email: 'j.morel@autodrive.pro', status: 'Repos', students: 12, hours: 0, center: 'Versailles', joined: `12 Jan ${currentYear}`, score: '8.9' },
-    { id: 4, name: 'Emma Leroux', email: 'e.leroux@autodrive.pro', status: 'Actif', students: 29, hours: 35, center: 'Nanterre', joined: `15 Fév ${currentYear}`, score: '9.2' },
-];
+import { getMoniteursData } from '@/app/actions/admin';
 
 export default function AdminMoniteursPage() {
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
+    const [instructors, setInstructors] = useState<any[]>([]);
+
+    useEffect(() => {
+        let mounted = true;
+        getMoniteursData().then(data => {
+            if (mounted && data) setInstructors(data);
+        });
+        return () => { mounted = false; };
+    }, []);
 
     return (
         <div className="space-y-10">
@@ -76,7 +80,7 @@ export default function AdminMoniteursPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {INSTRUCTORS.filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase())).map((inst) => (
+                            {instructors.filter((inst: any) => inst.name.toLowerCase().includes(searchQuery.toLowerCase())).map((inst) => (
                                 <tr key={inst.id} className="group">
                                     <td>
                                         <div className="flex flex-col">

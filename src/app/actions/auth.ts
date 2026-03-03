@@ -53,6 +53,40 @@ export async function authenticateServer(
     }
 }
 
+export async function registerUserServer(data: { name: string, username: string, password: string }) {
+    try {
+        const { error } = await supabase
+            .from('users')
+            .insert({
+                name: data.name,
+                username: data.username,
+                password: data.password,
+                role: 'eleve' // Rôle par défaut
+            });
+
+        if (error) throw error;
+        return { success: true };
+    } catch (error: any) {
+        console.error("Registration error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
 export async function logoutServer() {
     await deleteSession();
+}
+
+export async function updateUserProfile(userId: string, data: { name?: string, phone?: string }) {
+    try {
+        const { error } = await supabase
+            .from('users')
+            .update(data)
+            .eq('id', userId);
+
+        if (error) throw error;
+        return { success: true };
+    } catch (error: any) {
+        console.error("Update profile error:", error);
+        return { success: false, error: error.message };
+    }
 }

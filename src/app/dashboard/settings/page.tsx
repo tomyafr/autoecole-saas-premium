@@ -23,6 +23,8 @@ import {
 import { getUser, logout, type User as UserType } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
+import { updateUserProfile } from '@/app/actions/auth';
+import { toast } from 'sonner';
 
 export default function SettingsPage() {
     const router = useRouter();
@@ -30,11 +32,15 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
     const [activeSection, setActiveSection] = useState('profile');
     const [isSaving, setIsSaving] = useState(false);
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
 
     useEffect(() => {
         const u = getUser();
         if (u) {
             setUser(u);
+            setName(u.name || '');
+            setPhone((u as any).phone || '');
             setLoading(false);
         } else {
             // If No user found in Settings, layout will handle logout but let's be safe
@@ -47,9 +53,21 @@ export default function SettingsPage() {
         router.replace('/');
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        if (!user) return;
         setIsSaving(true);
-        setTimeout(() => setIsSaving(false), 1500);
+        try {
+            const res = await updateUserProfile(user.id, { name, phone });
+            if (res.success) {
+                toast.success("Profil mis à jour !");
+            } else {
+                toast.error("Erreur: " + res.error);
+            }
+        } catch (error) {
+            toast.error("Une erreur est survenue.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     if (loading || !user) {
@@ -171,7 +189,8 @@ export default function SettingsPage() {
                                                 <User className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] transition-colors group-focus-within/input:text-[#00F5FF]" size={18} />
                                                 <input
                                                     type="text"
-                                                    defaultValue={user.name}
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
                                                     className="w-full pl-14 pr-6 py-5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-2xl text-sm font-bold text-[var(--color-text-primary)] focus:outline-none focus:border-[#00F5FF]/20 transition-all focus:bg-[var(--color-sidebar)]"
                                                 />
                                             </div>
@@ -194,6 +213,8 @@ export default function SettingsPage() {
                                                 <input
                                                     type="tel"
                                                     placeholder="+33 6 00 00 00 00"
+                                                    value={phone}
+                                                    onChange={(e) => setPhone(e.target.value)}
                                                     className="w-full pl-14 pr-6 py-5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-2xl text-sm font-bold text-[var(--color-text-primary)] focus:outline-none focus:border-[#00F5FF]/20 transition-all focus:bg-[var(--color-sidebar)]"
                                                 />
                                             </div>

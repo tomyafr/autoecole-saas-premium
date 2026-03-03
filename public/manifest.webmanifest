@@ -1,0 +1,22 @@
+{
+    "name": "AutoDrive Pro",
+    "short_name": "AutoDrive",
+    "description": "SaaS de gestion premium pour auto-écoles",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0B0F14",
+    "theme_color": "#00F5FF",
+    "icons": [
+        {
+            "src": "/app-icon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/app-icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

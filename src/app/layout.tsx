@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -8,10 +8,28 @@ const inter = Inter({
   weight: ["300", "400", "500", "600", "700", "800"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#0B0F14",
+};
+
 export const metadata: Metadata = {
   title: "AutoDrive Pro | SaaS Auto-École Premium",
   description:
     "Plateforme SaaS ultra-premium de gestion intelligente pour auto-écoles. Authentification, dashboards, plannings et paiements.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "AutoDrive",
+  },
+  icons: {
+    icon: "/app-icon.png",
+    apple: "/app-icon.png",
+  },
   keywords: [
     "auto-école",
     "SaaS",

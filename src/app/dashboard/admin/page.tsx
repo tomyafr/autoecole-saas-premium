@@ -239,7 +239,7 @@ export default function AdminDashboard() {
                         <h3 className="card-title mb-8">Top formateurs rattachés</h3>
                         <div className="space-y-4">
                             {[
-                                { name: "Marc Dupont", score: "9.8/10", sessions: 142 },
+                                { name: "Marie Dupont", score: "9.8/10", sessions: 142 },
                                 { name: "Sophie Martin", score: "9.6/10", sessions: 128 }
                             ].map((m, i) => (
                                 <div key={i} className="flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5">

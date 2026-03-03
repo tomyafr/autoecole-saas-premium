@@ -25,10 +25,10 @@ const currentYear = new Date().getFullYear();
 const currentMonth = new Date().toLocaleDateString('fr-FR', { month: 'short' });
 
 const LESSONS = [
-    { id: 'CITY-101', date: `10 ${currentMonth} ${currentYear}`, time: '09:00', moniteur: 'Marc Dupont', vehicule: 'Renault Clio 5', score: '18/20', status: 'Effectué' },
+    { id: 'CITY-101', date: `10 ${currentMonth} ${currentYear}`, time: '09:00', moniteur: 'Marie Dupont', vehicule: 'Renault Clio 5', score: '18/20', status: 'Effectué' },
     { id: 'PARK-102', date: `08 ${currentMonth} ${currentYear}`, time: '14:30', moniteur: 'Sophie Martin', vehicule: 'Peugeot 208', score: '15/20', status: 'Effectué' },
     { id: 'HWY-103', date: `12 ${currentMonth} ${currentYear}`, time: '11:00', moniteur: 'Sophie Martin', vehicule: 'Peugeot 208', score: null, status: 'Prévu' },
-    { id: 'NIGHT-104', date: `15 ${currentMonth} ${currentYear}`, time: '18:00', moniteur: 'Marc Dupont', vehicule: 'Renault Clio 5', score: null, status: 'Prévu' },
+    { id: 'NIGHT-104', date: `15 ${currentMonth} ${currentYear}`, time: '18:00', moniteur: 'Marie Dupont', vehicule: 'Renault Clio 5', score: null, status: 'Prévu' },
 ];
 
 export default function LeconsPage() {

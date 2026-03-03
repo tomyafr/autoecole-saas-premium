@@ -1,10 +1,21 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getPlanningData } from '@/app/actions/admin';
 
 const currentYear = new Date().getFullYear();
 
 export default function AdminPlanningPage() {
+    const [slots, setSlots] = useState<any[]>([]);
+
+    useEffect(() => {
+        let mounted = true;
+        getPlanningData().then(data => {
+            if (mounted && data) setSlots(data);
+        });
+        return () => { mounted = false; };
+    }, []);
     return (
         <div className="space-y-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-white/5">
@@ -47,40 +58,42 @@ export default function AdminPlanningPage() {
                 </div>
 
                 <div className="space-y-4">
-                    {[
-                        { time: '08:00 - 10:00', inst: 'Marc Dupont', student: 'Lucas Bernard', center: 'Paris - Villette', status: 'Confirmé' },
-                        { time: '10:00 - 12:00', inst: 'Sophie Martin', student: 'Emma Leroux', center: 'Paris - République', status: 'Confirmé' },
-                        { time: '14:00 - 16:00', inst: 'Julien Morel', student: '-', center: 'Versailles', status: 'Disponible' },
-                        { time: '16:00 - 18:00', inst: 'Marc Dupont', student: 'Hugo Roux', center: 'Paris - Villette', status: 'En attente' },
-                    ].map((slot, i) => (
-                        <div key={i} className="flex flex-col md:flex-row items-center gap-6 p-4 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-colors cursor-pointer group">
-                            <div className="flex items-center gap-3 w-40 shrink-0">
-                                <Clock size={14} className="text-[#5F6B7A]" />
-                                <span className="text-sm font-black text-white">{slot.time}</span>
-                            </div>
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mb-1">Formateur</span>
-                                    <span className="text-sm font-medium text-white group-hover:text-[#00F5FF] transition-colors">{slot.inst}</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mb-1">Élève Assigné</span>
-                                    <span className={`text-sm font-medium ${slot.student === '-' ? 'text-[#5F6B7A]' : 'text-white'}`}>{slot.student}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <MapPin size={14} className="text-[#8A94A6]" />
-                                    <span className="text-xs text-[#8A94A6]">{slot.center}</span>
-                                </div>
-                            </div>
-                            <div className="shrink-0 w-24 text-right">
-                                <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${slot.status === 'Confirmé' ? 'bg-emerald-500/10 text-emerald-400' :
-                                        slot.status === 'En attente' ? 'bg-amber-500/10 text-amber-500' : 'bg-white/5 text-[#5F6B7A]'
-                                    }`}>
-                                    {slot.status}
-                                </span>
-                            </div>
+                    {slots.length === 0 ? (
+                        <div className="text-center py-20 text-[#5F6B7A]">
+                            <Calendar size={40} className="mx-auto mb-4 opacity-10" />
+                            <p className="text-sm font-medium">Aucun rendez-vous planifié pour cette période.</p>
                         </div>
-                    ))}
+                    ) : (
+                        slots.map((slot: any, i: number) => (
+                            <div key={i} className="flex flex-col md:flex-row items-center gap-6 p-4 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] transition-colors cursor-pointer group">
+                                <div className="flex items-center gap-3 w-40 shrink-0">
+                                    <Clock size={14} className="text-[#5F6B7A]" />
+                                    <span className="text-sm font-black text-white">{slot.time}</span>
+                                </div>
+                                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mb-1">Formateur</span>
+                                        <span className="text-sm font-medium text-white group-hover:text-[#00F5FF] transition-colors">{slot.inst}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-widest mb-1">Élève Assigné</span>
+                                        <span className={`text-sm font-medium ${slot.student === '-' || !slot.student ? 'text-[#5F6B7A]' : 'text-white'}`}>{slot.student}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <MapPin size={14} className="text-[#8A94A6]" />
+                                        <span className="text-xs text-[#8A94A6]">{slot.center}</span>
+                                    </div>
+                                </div>
+                                <div className="shrink-0 w-24 text-right">
+                                    <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${slot.status === 'Confirmé' ? 'bg-emerald-500/10 text-emerald-400' :
+                                        slot.status === 'En attente' ? 'bg-amber-500/10 text-amber-500' : 'bg-white/5 text-[#5F6B7A]'
+                                        }`}>
+                                        {slot.status}
+                                    </span>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>

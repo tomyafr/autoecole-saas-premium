@@ -13,11 +13,15 @@ import {
     MessageSquare,
     Zap,
     Play,
-    X
+    Plus,
+    X,
+    Star
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getUser, type User } from '@/lib/auth';
 import { getInstructorDashboard } from '@/app/actions/dashboard';
+import SignaturePad from '@/components/SignaturePad';
+import { completeLessonWithSignature } from '@/app/actions/pedagogie';
 
 export default function MoniteurDashboard() {
     const router = useRouter();
@@ -27,6 +31,7 @@ export default function MoniteurDashboard() {
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [actionFeedback, setActionFeedback] = useState<string | null>(null);
     const [startLessonModal, setStartLessonModal] = useState(false);
+    const [signingLessonId, setSigningLessonId] = useState<string | null>(null);
 
     const triggerFeedback = (msg: string) => {
         setActionFeedback(msg);
@@ -67,6 +72,25 @@ export default function MoniteurDashboard() {
             setErrorMsg(error.message || 'Erreur lors du chargement des données.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSaveSignature = async (signature: string) => {
+        if (!signingLessonId) return;
+
+        try {
+            const res = await completeLessonWithSignature(signingLessonId, signature);
+            if (res.success) {
+                triggerFeedback("Leçon signée et validée avec succès !");
+                if (user) fetchDashboardData(user.id);
+            } else {
+                triggerFeedback("Erreur lors de la signature.");
+            }
+        } catch (error) {
+            console.error("Signature error:", error);
+            triggerFeedback("Une erreur est survenue.");
+        } finally {
+            setSigningLessonId(null);
         }
     };
 
@@ -111,8 +135,8 @@ export default function MoniteurDashboard() {
     const stats = [
         { label: 'Sessions du jour', value: `${todaySessionsAll.length} M.`, sub: `${pendingToday} restantes`, icon: <Users size={18} />, color: 'text-[#00F5FF]' },
         { label: 'Volume horaire', value: `${hoursTotal}h`, sub: 'Heures effectuées', icon: <Clock size={18} />, color: 'text-blue-400' },
-        { label: 'Taux Succès', value: `${successRate}%`, sub: 'Moyenne de réussite', icon: <TrendingUp size={18} />, color: 'text-emerald-400' },
-        { label: 'Statut instructeur', value: 'Confirmé', sub: 'Certifié Autodrive', icon: <Award size={18} />, color: 'text-amber-400' },
+        { label: 'Note moyenne', value: '4.8/5', sub: 'Basé sur 24 avis', icon: <Star size={18} className="fill-current" />, color: 'text-amber-400' },
+        { label: 'Taux Succès', value: `${successRate}%`, sub: 'Mov. réussite', icon: <TrendingUp size={18} />, color: 'text-emerald-400' },
     ];
 
     const todaySessions = todaySessionsAll.map((app: any) => ({
@@ -225,12 +249,19 @@ export default function MoniteurDashboard() {
                                                 )}
                                             </td>
                                             <td>
-                                                <button
-                                                    onClick={() => router.push('/dashboard/moniteur/planning')}
-                                                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${session.status === 'done' ? 'text-emerald-400 bg-emerald-400/5' : 'text-[#8A94A6] bg-white/5 hover:bg-[#00F5FF]/10 hover:text-[#00F5FF]'}`}
-                                                >
-                                                    {session.status === 'done' ? <CheckCircle2 size={18} /> : <ChevronRight size={18} />}
-                                                </button>
+                                                {session.status === 'done' ? (
+                                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-400 bg-emerald-400/5">
+                                                        <CheckCircle2 size={18} />
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setSigningLessonId(session.id)}
+                                                        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#00F5FF]/10 text-[#00F5FF] text-[10px] font-black uppercase tracking-widest hover:bg-[#00F5FF]/20 transition-all border border-[#00F5FF]/20 group/sign"
+                                                    >
+                                                        <Plus size={14} className="group-hover/sign:rotate-90 transition-transform" />
+                                                        Signer
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -384,6 +415,16 @@ export default function MoniteurDashboard() {
                             </div>
                         </motion.div>
                     </div>
+                )}
+            </AnimatePresence>
+
+            {/* SIGNATURE PAD */}
+            <AnimatePresence>
+                {signingLessonId && (
+                    <SignaturePad
+                        onSave={handleSaveSignature}
+                        onClose={() => setSigningLessonId(null)}
+                    />
                 )}
             </AnimatePresence>
         </div>

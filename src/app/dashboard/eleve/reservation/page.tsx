@@ -47,6 +47,12 @@ export default function ReservationPage() {
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [calendarAdded, setCalendarAdded] = useState(false);
     const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+    const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+
+    const triggerFeedback = (msg: string) => {
+        setActionFeedback(msg);
+        setTimeout(() => setActionFeedback(null), 3000);
+    };
 
     const selectedInstructor = INSTRUCTORS.find(i => i.id === selectedInstructorId);
 
@@ -117,8 +123,8 @@ export default function ReservationPage() {
             setBookedSlots(newBooked);
             setLoading(false);
         } else {
-            alert('Erreur lors de la réservation');
             setLoading(false);
+            triggerFeedback('Erreur lors de la réservation. Veuillez réessayer.');
         }
     };
 
@@ -400,6 +406,22 @@ export default function ReservationPage() {
                     </div>
                 </div>
             </div>
+            {/* ACTION FEEDBACK TOAST */}
+            <AnimatePresence>
+                {actionFeedback && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#0B0F14] border border-[var(--color-border-subtle)] shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
+                            <CheckCircle2 size={16} />
+                        </div>
+                        <p className="text-sm font-medium text-[var(--color-text-primary)]">{actionFeedback}</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

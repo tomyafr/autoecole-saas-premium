@@ -10,17 +10,22 @@ import {
     CheckCircle2,
     Search
 } from 'lucide-react';
-import { useState } from 'react';
-
-// Mock data for initial UI (will be replaced by DB fetch)
-const mockVehicles = [
-    { id: '1', name: 'Peugeot 208 #01', brand: 'Peugeot', model: '208', plate: 'AB-123-CD', status: 'active', mileage: '42,500 km', nextService: '12/05/2026' },
-    { id: '2', name: 'Citroën C3 #04', brand: 'Citroën', model: 'C3', plate: 'EF-456-GH', status: 'maintenance', mileage: '68,200 km', nextService: 'Immédiat' },
-    { id: '3', name: 'Renault Clio #02', brand: 'Renault', model: 'Clio', plate: 'IJ-789-KL', status: 'active', mileage: '12,100 km', nextService: '20/11/2026' },
-];
+import { useState, useEffect } from 'react';
+import { getVehiclesData } from '@/app/actions/admin';
 
 export default function VehiclesPage() {
     const [searchTerm, setSearchTerm] = useState('');
+    const [vehicles, setVehicles] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        getVehiclesData().then(data => {
+            setVehicles(data);
+            setLoading(false);
+        });
+    }, []);
+
+    if (loading) return <div className="p-10 text-center text-[#5F6B7A]">Synchronisation de la flotte...</div>;
 
     return (
         <div className="space-y-8">
@@ -86,13 +91,13 @@ export default function VehiclesPage() {
                             <th>VÉHICULE</th>
                             <th>PLAQUE</th>
                             <th>KILOMÉTRAGE</th>
-                            <th>PROCHAINE RÉVISION</th>
+                            <th>PROCHAIN CT</th>
                             <th>STATUT</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {mockVehicles.map((v, i) => (
+                        {vehicles.filter(v => v.name.toLowerCase().includes(searchTerm.toLowerCase()) || v.plate.toLowerCase().includes(searchTerm.toLowerCase())).map((v, i) => (
                             <tr key={v.id} className="group">
                                 <td>
                                     <div className="flex items-center gap-3">
@@ -108,9 +113,10 @@ export default function VehiclesPage() {
                                 <td className="font-mono text-xs text-[#8A94A6] font-bold">{v.plate}</td>
                                 <td className="text-sm font-medium text-[#8A94A6]">{v.mileage}</td>
                                 <td>
-                                    <span className={`text-xs font-semibold ${v.status === 'maintenance' ? 'text-red-400' : 'text-[#8A94A6]'}`}>
-                                        {v.nextService}
-                                    </span>
+                                    <div className="flex flex-col">
+                                        <span className={`text-[11px] font-bold ${v.nextCT === 'Non défini' ? 'text-[#5F6B7A]' : 'text-white'}`}>{v.nextCT}</span>
+                                        <span className="text-[9px] text-[#5F6B7A] font-medium uppercase tracking-widest mt-1">Assur: {v.insuranceExpiry}</span>
+                                    </div>
                                 </td>
                                 <td>
                                     <span className={`status-badge ${v.status === 'active' ? 'status-badge-cyan' : 'status-badge-gray'}`}>

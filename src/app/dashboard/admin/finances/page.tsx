@@ -1,10 +1,19 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { CreditCard, TrendingUp, BarChart, ArrowUpRight, Calendar, Search } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { getFinancesData } from '@/app/actions/admin';
 
 export default function AdminFinancesPage() {
+    const [transactions, setTransactions] = useState<any[]>([]);
+
+    useEffect(() => {
+        let mounted = true;
+        getFinancesData().then(data => {
+            if (mounted && data) setTransactions(data);
+        });
+        return () => { mounted = false; };
+    }, []);
     return (
         <div className="space-y-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-white/5">
@@ -68,28 +77,33 @@ export default function AdminFinancesPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {[
-                                { ref: 'TXN-001', client: 'Lucas Bernard', date: 'Aujourd\'hui', amount: '1,200€', status: 'Payé', type: 'Pack Complet 35h' },
-                                { ref: 'TXN-002', client: 'Emma Leroux', date: 'Hier', amount: '800€', status: 'Payé', type: 'Pack Accéléré 20h' },
-                                { ref: 'TXN-003', client: 'Hugo Roux', date: 'Il y a 2j', amount: '120€', status: 'En attente', type: 'Heures Supplémentaires' },
-                            ].map((txn, idx) => (
-                                <tr key={idx} className="group">
-                                    <td>
-                                        <div className="flex flex-col">
-                                            <span className="font-mono text-sm font-semibold text-white group-hover:text-emerald-400 transition-colors">{txn.ref}</span>
-                                            <span className="text-[10px] text-[#5F6B7A] mt-1">{txn.type}</span>
-                                        </div>
-                                    </td>
-                                    <td className="font-semibold text-white">{txn.client}</td>
-                                    <td className="text-xs text-[#8A94A6]">{txn.date}</td>
-                                    <td className="font-bold text-white font-mono">{txn.amount}</td>
-                                    <td>
-                                        <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${txn.status === 'Payé' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
-                                            {txn.status}
-                                        </span>
+                            {transactions.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="text-center py-20 text-[#5F6B7A]">
+                                        <CreditCard size={40} className="mx-auto mb-4 opacity-10" />
+                                        <p className="text-sm font-medium">Aucune transaction enregistrée.</p>
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                transactions.map((txn, idx) => (
+                                    <tr key={idx} className="group">
+                                        <td>
+                                            <div className="flex flex-col">
+                                                <span className="font-mono text-sm font-semibold text-white group-hover:text-emerald-400 transition-colors">{txn.ref}</span>
+                                                <span className="text-[10px] text-[#5F6B7A] mt-1">{txn.type}</span>
+                                            </div>
+                                        </td>
+                                        <td className="font-semibold text-white">{txn.client}</td>
+                                        <td className="text-xs text-[#8A94A6]">{txn.date}</td>
+                                        <td className="font-bold text-white font-mono">{txn.amount}</td>
+                                        <td>
+                                            <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${txn.status === 'Payé' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                {txn.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>

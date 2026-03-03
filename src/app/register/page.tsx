@@ -6,16 +6,31 @@ import { motion } from 'framer-motion';
 import { UserPlus, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
+import { registerUserServer } from '@/app/actions/auth';
+
 export default function RegisterPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(1);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-        await new Promise(r => setTimeout(r, 1500));
-        setStep(2);
+        setError(null);
+
+        const formData = new FormData(e.currentTarget);
+        const name = `${formData.get('firstname')} ${formData.get('lastname')}`;
+        const username = formData.get('email') as string;
+        const password = formData.get('password') as string;
+
+        const result = await registerUserServer({ name, username, password });
+
+        if (result.success) {
+            setStep(2);
+        } else {
+            setError(result.error || "Erreur lors de l'inscription");
+        }
         setLoading(false);
     };
 
@@ -42,28 +57,33 @@ export default function RegisterPage() {
                             <div className="mb-10 text-center">
                                 <h1 className="text-3xl font-black tracking-tighter mb-2">Rejoindre AutoDrive</h1>
                                 <p className="text-slate-500 text-sm font-medium italic">Commencez votre formation elite aujourd'hui.</p>
+                                {error && (
+                                    <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold uppercase tracking-widest">
+                                        {error}
+                                    </div>
+                                )}
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Prénom</label>
-                                        <input required className="w-full px-4 py-4 bg-white/[0.03] border border-white/5 rounded-xl text-sm focus:border-violet-500/50 transition-colors focus:outline-none" />
+                                        <input name="firstname" required className="w-full px-4 py-4 bg-white/[0.03] border border-white/5 rounded-xl text-sm focus:border-violet-500/50 transition-colors focus:outline-none" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Nom</label>
-                                        <input required className="w-full px-4 py-4 bg-white/[0.03] border border-white/5 rounded-xl text-sm focus:border-violet-500/50 transition-colors focus:outline-none" />
+                                        <input name="lastname" required className="w-full px-4 py-4 bg-white/[0.03] border border-white/5 rounded-xl text-sm focus:border-violet-500/50 transition-colors focus:outline-none" />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Email Académique</label>
-                                    <input type="email" required className="w-full px-4 py-4 bg-white/[0.03] border border-white/5 rounded-xl text-sm focus:border-violet-500/50 transition-colors focus:outline-none" />
+                                    <input name="email" type="email" required className="w-full px-4 py-4 bg-white/[0.03] border border-white/5 rounded-xl text-sm focus:border-violet-500/50 transition-colors focus:outline-none" />
                                 </div>
 
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Mot de passe</label>
-                                    <input type="password" required className="w-full px-4 py-4 bg-white/[0.03] border border-white/5 rounded-xl text-sm focus:border-violet-500/50 transition-colors focus:outline-none" />
+                                    <input name="password" type="password" required className="w-full px-4 py-4 bg-white/[0.03] border border-white/5 rounded-xl text-sm focus:border-violet-500/50 transition-colors focus:outline-none" />
                                 </div>
 
                                 <button

@@ -10,7 +10,10 @@ import {
     Zap,
     Timer,
     Target,
-    Hexagon
+    Hexagon,
+    FileText,
+    Clock,
+    AlertCircle
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -19,6 +22,7 @@ import { getStudentDashboard } from '@/app/actions/dashboard';
 import Link from 'next/link';
 import { AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { getStudentPedagogyData } from '@/app/actions/pedagogie';
 
 export default function EleveDashboard() {
     const router = useRouter();
@@ -28,6 +32,7 @@ export default function EleveDashboard() {
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [selectedDetails, setSelectedDetails] = useState<any>(null);
     const [boosterModal, setBoosterModal] = useState(false);
+    const [pedagogyData, setPedagogyData] = useState<any>(null);
 
     useEffect(() => {
         const u = getUser();
@@ -60,6 +65,10 @@ export default function EleveDashboard() {
                 return;
             }
             setDbData(data);
+
+            // Fetch pedagogy data
+            const peda = await getStudentPedagogyData(userId);
+            if (peda) setPedagogyData(peda);
         } catch (error: any) {
             console.error('Failed to fetch dashboard data:', error);
             setErrorMsg(error.message || 'Erreur lors du chargement des données.');
@@ -119,7 +128,14 @@ export default function EleveDashboard() {
                 </div>
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => router.push('/dashboard/eleve/lecons')}
+                        onClick={() => router.push('/dashboard/eleve/documents')}
+                        className="btn-secondary"
+                    >
+                        <FileText size={16} />
+                        Documents
+                    </button>
+                    <button
+                        onClick={() => router.push('/dashboard/eleve/livret')}
                         className="btn-secondary"
                     >
                         <Hexagon size={16} />
@@ -165,12 +181,12 @@ export default function EleveDashboard() {
                                     <Target size={22} />
                                 </div>
                                 <div>
-                                    <h3 className="section-title">Progression du Pack</h3>
-                                    <p className="secondary-info">Suivi des heures de conduite réalisées sur le total</p>
+                                    <h3 className="section-title">Progression Pédagogique (REM)</h3>
+                                    <p className="secondary-info">Suivi des 4 compétences obligatoires</p>
                                 </div>
                             </div>
                             <div className="flex items-baseline gap-1.5">
-                                <span className="text-2xl font-semibold text-white">{Math.round((hoursDone / 35) * 100)}</span>
+                                <span className="text-2xl font-semibold text-white">{pedagogyData?.globalProgress || 0}</span>
                                 <span className="text-xs font-bold text-[#5F6B7A] uppercase">%</span>
                             </div>
                         </div>
@@ -179,24 +195,29 @@ export default function EleveDashboard() {
                             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden flex">
                                 <motion.div
                                     initial={{ width: 0 }}
-                                    animate={{ width: `${Math.round((hoursDone / 35) * 100)}%` }}
+                                    animate={{ width: `${pedagogyData?.globalProgress || 0}%` }}
                                     transition={{ duration: 1.5, ease: "easeOut" }}
                                     className="h-full bg-gradient-to-r from-[#00F5FF]/40 to-[#00F5FF] rounded-full shadow-[0_0_15px_rgba(0,245,255,0.4)]"
                                 />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-8 pt-4">
-                                {[
-                                    { label: 'Démarrage & Embrayage', status: 'Expertise acquise', color: 'bg-emerald-500' },
-                                    { label: 'Contrôle en milieu urbain', status: 'En cours d\'acquisition', color: 'bg-amber-500' },
-                                    { label: 'Manoeuvres & Stationnement', status: 'Perfectionnement', color: 'bg-amber-500' },
-                                    { label: 'Circulation voies rapides', status: 'Phase initiale', color: 'bg-red-500' }
-                                ].map((step, idx) => (
+                                {(pedagogyData?.pedagogy || [
+                                    { id: 'C1', title: 'Compétence 1', progress: 0 },
+                                    { id: 'C2', title: 'Compétence 2', progress: 0 },
+                                    { id: 'C3', title: 'Compétence 3', progress: 0 },
+                                    { id: 'C4', title: 'Compétence 4', progress: 0 }
+                                ]).map((cat: any, idx: number) => (
                                     <div key={idx} className="flex items-center gap-4 group/item">
-                                        <div className={`w-2 h-2 rounded-full ${step.color} shadow-[0_0_8px_currentColor] opacity-80 group-hover/item:opacity-100 transition-opacity duration-300`} />
-                                        <div>
-                                            <p className="text-sm font-medium text-white group-hover/item:text-[#00F5FF] transition-colors">{step.label}</p>
-                                            <p className="text-[10px] text-[#5F6B7A] uppercase font-bold tracking-wider mt-1">{step.status}</p>
+                                        <div className={`w-2 h-2 rounded-full ${cat.progress >= 100 ? 'bg-emerald-500' : cat.progress > 0 ? 'bg-amber-500' : 'bg-red-500'} shadow-[0_0_8px_currentColor] opacity-80 group-hover/item:opacity-100 transition-opacity duration-300`} />
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <p className="text-sm font-medium text-white group-hover/item:text-[#00F5FF] transition-colors">{cat.title}</p>
+                                                <span className="text-[10px] text-[#5F6B7A] font-bold">{cat.progress}%</span>
+                                            </div>
+                                            <div className="h-0.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                                <div className={`h-full ${cat.progress >= 100 ? 'bg-emerald-500' : 'bg-[#00F5FF]'} transition-all`} style={{ width: `${cat.progress}%` }} />
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -257,8 +278,46 @@ export default function EleveDashboard() {
                 <div className="space-y-6">
                     <div className="premium-card p-6 border-l-4 border-l-[#00F5FF] shadow-[0_0_40px_rgba(0,245,255,0.02)]">
                         <div className="flex items-center gap-2.5 mb-8">
+                            <Clock size={14} className="text-[#00F5FF] fill-[#00F5FF]" />
+                            <h3 className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-[0.2em]">Priorité administrative</h3>
+                        </div>
+                        <div className="space-y-6">
+                            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
+                                <div className="flex justify-between items-end">
+                                    <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest">Dossier ANTS</span>
+                                    <span className="text-xs font-black text-white">1/3 PIÈCES</span>
+                                </div>
+                                <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                    <div className="h-full bg-[#00F5FF]" style={{ width: '33%' }} />
+                                </div>
+                                <button
+                                    onClick={() => router.push('/dashboard/eleve/documents')}
+                                    className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-[#8A94A6] hover:text-white transition-all border border-white/5"
+                                >
+                                    Compléter mon dossier
+                                </button>
+                            </div>
+
+                            <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 border-dashed space-y-3">
+                                <div className="flex items-center gap-2 text-amber-500">
+                                    <AlertCircle size={14} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Action requise</span>
+                                </div>
+                                <p className="text-[11px] text-[#8A94A6] leading-relaxed">Vous avez 1 leçon en attente de signature pour valider vos heures REM.</p>
+                                <button
+                                    onClick={() => router.push('/dashboard/eleve/livret')}
+                                    className="text-[10px] font-bold text-amber-500 hover:underline underline-offset-4"
+                                >
+                                    Signer maintenant →
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="h-px w-full bg-white/5 my-8" />
+
+                        <div className="flex items-center gap-2.5 mb-8">
                             <Play size={14} className="text-[#00F5FF] fill-[#00F5FF]" />
-                            <h3 className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-[0.2em]">Priorité actuelle</h3>
+                            <h3 className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-[0.2em]">Prochaine étape</h3>
                         </div>
                         <div className="space-y-8">
                             {nextLesson ? (

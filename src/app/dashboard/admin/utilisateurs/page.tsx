@@ -25,17 +25,25 @@ import {
 
 /* ======= DATA ======= */
 const currentYear = new Date().getFullYear();
-const USERS = [
-    { id: 1, name: 'Lucas Bernard', role: 'eleve', email: 'lucas.b@gmail.com', status: 'actif', joined: `12 Jan ${currentYear}`, center: 'Paris - République' },
-    { id: 2, name: 'Marc Dupont', role: 'moniteur', email: 'm.dupont@autodrive.pro', status: 'actif', joined: '05 Nov 2023', center: 'Versailles' },
-    { id: 3, name: 'Sophie Martin', role: 'moniteur', email: 's.martin@autodrive.pro', status: 'actif', joined: '20 Déc 2023', center: 'Paris - République' },
-    { id: 4, name: 'Emma Petit', role: 'eleve', email: 'emma.p@yahoo.fr', status: 'suspendu', joined: `02 Fév ${currentYear}`, center: 'Nanterre' },
-    { id: 5, name: 'Admin Core', role: 'admin', email: 'admin@autodrive.io', status: 'actif', joined: '01 Jan 2025', center: 'HQ Paris' },
-];
+import { useEffect } from 'react';
+import { getUsersManagementData } from '@/app/actions/admin';
 
 export default function AdminUsersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRole, setSelectedRole] = useState('tous');
+    const [users, setUsers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let mounted = true;
+        getUsersManagementData().then(data => {
+            if (mounted && data) {
+                setUsers(data);
+                setLoading(false);
+            }
+        });
+        return () => { mounted = false; };
+    }, []);
 
     return (
         <div className="space-y-10 group/admin-users">
@@ -116,15 +124,15 @@ export default function AdminUsersPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {USERS.filter(u =>
+                            {users.filter((u: any) =>
                                 (selectedRole === 'tous' || u.role === selectedRole) &&
                                 (u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase()))
-                            ).map((user) => (
+                            ).map((user: any) => (
                                 <tr key={user.id} className="group">
                                     <td>
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#8A94A6] group-hover:text-[#00F5FF] transition-colors">
-                                                {user.name.split(' ').map(n => n[0]).join('')}
+                                                {user.name.split(' ').map((n: string) => n[0]).join('')}
                                             </div>
                                             <div className="flex flex-col min-w-0">
                                                 <span className="text-sm font-semibold text-white truncate">{user.name}</span>

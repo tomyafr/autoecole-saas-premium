@@ -17,7 +17,9 @@ import {
     MapPin,
     ClipboardCheck,
     Hexagon,
-    Car
+    Car,
+    Menu,
+    X
 } from 'lucide-react';
 import Image from 'next/image';
 import { getUser, logout, type User, type UserRole } from '@/lib/auth';
@@ -60,6 +62,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [loading, setLoading] = useState(true);
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         const u = getUser();
@@ -101,21 +104,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     return (
         <div className="min-h-screen">
-            <aside className="sidebar-layout">
-                <div className="p-8 pb-10 flex items-center gap-x-3">
-                    <div className="relative group">
-                        <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <img
-                            src="https://uwuethmbvxomawzyuqfp.supabase.co/storage/v1/object/public/assets/logo.png"
-                            alt="Logo AutoDrive"
-                            width={90}
-                            height={90}
-                            className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(0,245,255,0.3)]"
-                        />
+            <aside className={`sidebar-layout ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+                <div className="p-8 pb-10 flex items-center justify-between">
+                    <div className="flex items-center gap-x-3">
+                        <div className="relative group">
+                            <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            <img
+                                src="https://uwuethmbvxomawzyuqfp.supabase.co/storage/v1/object/public/assets/logo.png"
+                                alt="Logo AutoDrive"
+                                width={80}
+                                height={80}
+                                className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(0,245,255,0.3)]"
+                            />
+                        </div>
+                        <h1 className="text-xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none">
+                            AUTODRIVE
+                        </h1>
                     </div>
-                    <h1 className="text-xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none">
-                        AUTODRIVE
-                    </h1>
+                    <button
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="lg:hidden p-2 text-[#5F6B7A] hover:text-white"
+                    >
+                        <X size={20} />
+                    </button>
                 </div>
 
                 <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
@@ -166,13 +177,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             <main className="main-content">
                 <header className="h-16 border-b border-[var(--color-border-subtle)] flex items-center justify-between px-10 sticky top-0 bg-[var(--color-bg)]/80 backdrop-blur-md z-40">
-                    <div className="flex items-center gap-4 text-sm font-medium">
-                        <span className="text-[#5F6B7A]">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
-                        <span className="text-[var(--color-text-primary)] text-opacity-50 mx-2">/</span>
-                        <span className="text-[var(--color-text-primary)]">
-                            {pathname === '/dashboard/settings' ? 'Paramètres' : (navItems.find(n => n.href === pathname)?.label || pathname.split('/').pop()?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Tableau de bord')}
-                        </span>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setMobileMenuOpen(true)}
+                            className="lg:hidden p-2 -ml-2 text-[#5F6B7A] hover:text-white"
+                        >
+                            <Menu size={20} />
+                        </button>
+                        <div className="hidden sm:flex items-center gap-4 text-sm font-medium">
+                            <span className="text-[#5F6B7A]">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
+                            <span className="text-[var(--color-text-primary)] text-opacity-50 mx-2">/</span>
+                            <span className="text-[var(--color-text-primary)]">
+                                {pathname === '/dashboard/settings' ? 'Paramètres' : (navItems.find(n => n.href === pathname)?.label || pathname.split('/').pop()?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Tableau de bord')}
+                            </span>
+                        </div>
                     </div>
+
                     <div className="flex items-center gap-5 relative">
                         {/* Notifications Dropdown */}
                         <div className="relative">
@@ -265,9 +285,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
                 </header>
 
+
                 <div className="main-container">
                     {children}
                 </div>
+
+                {/* Mobile Navigation Bar */}
+                <nav className="mobile-nav">
+                    {navItems.slice(0, 4).map((item) => (
+                        <button
+                            key={item.href}
+                            onClick={() => router.push(item.href)}
+                            className={`mobile-nav-item ${pathname === item.href ? 'active' : ''}`}
+                        >
+                            {item.icon}
+                            <span>{item.label.split(' ')[0]}</span>
+                        </button>
+                    ))}
+                    <button
+                        onClick={() => router.push('/dashboard/settings')}
+                        className={`mobile-nav-item ${pathname === '/dashboard/settings' ? 'active' : ''}`}
+                    >
+                        <Settings size={18} />
+                        <span>Réglages</span>
+                    </button>
+                </nav>
             </main>
         </div>
     );
