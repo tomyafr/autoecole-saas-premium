@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     User,
@@ -34,8 +34,13 @@ export default function SettingsPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
+    const [currentTime, setCurrentTime] = useState('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
+        const now = new Date();
+        setCurrentTime(`Aujourd'hui, ${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`);
         const u = getUser();
         if (u) {
             setUser(u);
@@ -78,6 +83,33 @@ export default function SettingsPage() {
         );
     }
 
+    const displayAvatar = user.avatar !== '??'
+        ? user.avatar
+        : (user.name ? user.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : '??');
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        // Simulation d'upload pour la démo, ou future implémentation Supabase Storage
+        setTimeout(() => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const base64Avatar = event.target?.result as string;
+                // Update local storage and state for quick feedback
+                const updatedUser = { ...user, avatar: base64Avatar };
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('autodrive_user', JSON.stringify(updatedUser));
+                }
+                setUser(updatedUser);
+                setIsUploading(false);
+                toast.success("Photo de profil mise à jour !");
+            };
+            reader.readAsDataURL(file);
+        }, 1500);
+    };
+
     const sections = [
         { id: 'profile', label: 'Profil Personnel', icon: <User size={18} />, desc: 'Identité et préférences publiques' },
         { id: 'notifications', label: 'Alertes & Emails', icon: <Bell size={18} />, desc: 'Gestion de vos communications' },
@@ -96,7 +128,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-3">
                     <div className="px-4 py-2 rounded-xl bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest flex items-center gap-3">
                         <Monitor size={12} className="text-[#00F5FF]" />
-                        Dernière synchro: <span className="text-[var(--color-text-primary)]">Aujourd&#39;hui, 14:20</span>
+                        Dernière synchro: <span className="text-[var(--color-text-primary)]">{currentTime}</span>
                     </div>
                 </div>
             </div>
@@ -159,13 +191,30 @@ export default function SettingsPage() {
                                     <div className="flex flex-col sm:flex-row items-center gap-10">
                                         <div className="relative group">
                                             <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-tr from-blue-600 to-[#00F5FF] p-1 shadow-2xl transition-transform duration-700 group-hover:rotate-6">
-                                                <div className="w-full h-full rounded-[2.3rem] bg-[#0E1319] flex items-center justify-center text-4xl font-black text-[var(--color-text-primary)]">
-                                                    {user.avatar}
+                                                <div className="w-full h-full rounded-[2.3rem] overflow-hidden bg-[#0E1319] flex items-center justify-center text-4xl font-black text-[var(--color-text-primary)]">
+                                                    {isUploading ? (
+                                                        <div className="w-8 h-8 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+                                                    ) : user.avatar && user.avatar.startsWith('data:image') ? (
+                                                        <img src={user.avatar} className="w-full h-full object-cover" alt="Profile" />
+                                                    ) : (
+                                                        displayAvatar
+                                                    )}
                                                 </div>
                                             </div>
-                                            <button className="absolute -bottom-2 -right-2 p-3 rounded-2xl bg-[#00F5FF] text-black shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer border-4 border-[#0B0F14]">
+                                            <button
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="absolute -bottom-2 -right-2 p-3 rounded-2xl bg-[#00F5FF] text-black shadow-2xl hover:scale-110 active:scale-95 transition-all cursor-pointer border-4 border-[#0B0F14]"
+                                            >
                                                 <Camera size={18} />
                                             </button>
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                onChange={handleAvatarChange}
+                                                accept="image/*"
+                                                className="hidden"
+                                                capture="environment"
+                                            />
                                         </div>
                                         <div className="text-center sm:text-left flex-1 min-w-0">
                                             <h3 className="text-3xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase">{user.name}</h3>
@@ -223,12 +272,15 @@ export default function SettingsPage() {
                                             <label className="text-[10px] text-[#5F6B7A] uppercase font-black tracking-[0.2em] ml-1">Centre de Rattachement</label>
                                             <div className="relative group/input">
                                                 <Globe className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] transition-colors group-focus-within/input:text-[#00F5FF]" size={18} />
-                                                <select className="w-full pl-14 pr-6 py-5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-2xl text-sm font-bold text-[var(--color-text-primary)] focus:outline-none focus:border-[#00F5FF]/20 transition-all appearance-none cursor-pointer">
+                                                <select
+                                                    disabled={user.role === 'eleve'}
+                                                    className={`w-full pl-14 pr-6 py-5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-2xl text-sm font-bold text-[var(--color-text-primary)] focus:outline-none focus:border-[#00F5FF]/20 transition-all appearance-none ${user.role === 'eleve' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                                >
                                                     <option>Île-de-France (Centre Principal)</option>
                                                     <option>Lyon (Agence Sud)</option>
                                                     <option>Marseille (Agence Mer)</option>
                                                 </select>
-                                                <ChevronRight className="absolute right-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] rotate-90" size={16} />
+                                                <ChevronRight className={`absolute right-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] ${user.role === 'eleve' ? 'opacity-50' : 'rotate-90'}`} size={16} />
                                             </div>
                                         </div>
                                     </div>
@@ -287,27 +339,91 @@ export default function SettingsPage() {
                                 </div>
                             )}
 
-                            {activeSection !== 'profile' && activeSection !== 'preferences' && (
-                                <div className="py-24 text-center space-y-8 flex flex-col items-center">
-                                    <div className="w-24 h-24 rounded-[2rem] bg-white/[0.01] border border-white/5 flex items-center justify-center text-[#5F6B7A] group/icon">
-                                        {sections.find(s => s.id === activeSection) &&
-                                            <div className="transition-transform duration-500 group-hover/icon:scale-110">
-                                                {sections.find(s => s.id === activeSection)?.icon}
+                            {activeSection === 'notifications' && (
+                                <div className="space-y-12">
+                                    <div className="flex items-center gap-6">
+                                        <div className="p-4 rounded-2xl bg-amber-500/10 text-amber-500">
+                                            <Bell size={32} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-2xl font-black text-[var(--color-text-primary)] uppercase tracking-tighter">Alertes & Emails</h3>
+                                            <p className="text-[#8A94A6] text-xs font-bold mt-1">Préférences de communications</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        {[
+                                            { title: 'Rappels de leçons (SMS / WhatsApp)', desc: 'Reçois un message 24h avant chaque heure de conduite', active: true },
+                                            { title: 'Nouvelles disponibilités', desc: 'Alertes lors de l\'ajout de nouveaux créneaux', active: false },
+                                            { title: 'Rapports hebdomadaires', desc: 'Analyse synthétique de ta progression par email', active: true }
+                                        ].map((setting, idx) => (
+                                            <div key={idx} className="p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] flex items-center justify-between gap-4 transition-all hover:border-[#00F5FF]/20">
+                                                <div>
+                                                    <h4 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">{setting.title}</h4>
+                                                    <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">{setting.desc}</p>
+                                                </div>
+                                                <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${setting.active ? 'bg-[#00F5FF]' : 'bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)]'}`}>
+                                                    <div className={`w-4 h-4 rounded-full transition-transform ${setting.active ? 'translate-x-6 bg-[#0B0F14]' : 'bg-[#5F6B7A]'}`} />
+                                                </div>
                                             </div>
-                                        }
-                                    </div>
-                                    <div className="space-y-4 max-w-sm">
-                                        <h3 className="text-[var(--color-text-primary)] font-black uppercase tracking-widest text-sm">En développement</h3>
-                                        <p className="text-[#8A94A6] text-[11px] font-bold leading-relaxed px-6">
-                                            Les options de la section &quot;{sections.find(s => s.id === activeSection)?.label}&quot; arrivent bientôt.
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center gap-3 px-6 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[9px] font-black uppercase tracking-widest">
-                                        <AlertCircle size={12} fill="currentColor" className="opacity-80" />
-                                        Feature Incomplète
+                                        ))}
                                     </div>
                                 </div>
                             )}
+
+                            {activeSection === 'security' && (
+                                <div className="space-y-12">
+                                    <div className="flex items-center gap-6">
+                                        <div className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-500">
+                                            <Shield size={32} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-2xl font-black text-[var(--color-text-primary)] uppercase tracking-tighter">Sécurité Avancée</h3>
+                                            <p className="text-[#8A94A6] text-xs font-bold mt-1">Sécurisation du compte AutoDrive</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] space-y-6">
+                                        <div>
+                                            <h4 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide mb-4">Changement de mot de passe</h4>
+                                            <div className="space-y-4">
+                                                <div className="relative">
+                                                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5F6B7A]" size={18} />
+                                                    <input
+                                                        type="password"
+                                                        placeholder="Mot de passe actuel"
+                                                        className="w-full pl-14 pr-6 py-4 bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-medium focus:border-[#00F5FF]/30 transition-all focus:outline-none"
+                                                    />
+                                                </div>
+                                                <div className="relative">
+                                                    <Shield className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5F6B7A]" size={18} />
+                                                    <input
+                                                        type="password"
+                                                        placeholder="Nouveau mot de passe"
+                                                        className="w-full pl-14 pr-6 py-4 bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] rounded-xl text-sm font-medium focus:border-[#00F5FF]/30 transition-all focus:outline-none"
+                                                    />
+                                                </div>
+                                                <button className="btn-secondary w-full sm:w-auto mt-2">
+                                                    Mettre à jour le mot de passe
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-6 border-t border-[var(--color-border-subtle)]">
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                                <div>
+                                                    <h4 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">Déconnexion de tous les appareils</h4>
+                                                    <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">Ferme les sessions web et mobile ouvertes.</p>
+                                                </div>
+                                                <button className="px-4 py-2.5 rounded-lg border border-red-500/20 text-red-500 text-xs font-bold uppercase hover:bg-red-500/10 transition-colors">
+                                                    Forcer la déconnexion
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                         </motion.div>
                     </AnimatePresence>
                 </div>

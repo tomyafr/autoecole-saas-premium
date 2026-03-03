@@ -107,7 +107,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="min-h-screen">
             <aside className={`sidebar-layout ${mobileMenuOpen ? 'mobile-open' : ''}`}>
                 <div className="p-8 pb-10 flex items-center justify-between">
-                    <div className="flex items-center gap-x-3">
+                    <div
+                        className="flex items-center gap-x-3 cursor-pointer"
+                        onClick={() => router.push(`/dashboard/${user.role}`)}
+                    >
                         <div className="relative group">
                             <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             <img
@@ -139,6 +142,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             onClick={() => {
                                 console.log('Navigating to:', item.href);
                                 router.push(item.href);
+                                setMobileMenuOpen(false);
                             }}
                             className={`nav-item w-full cursor-pointer relative z-20 ${pathname === item.href ? 'active' : ''}`}
                         >
@@ -195,17 +199,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
 
                     <div className="flex items-center gap-5 relative">
-                        {/* Glassmorphism Click-Away Overlay for Dropdowns */}
-                        {(notificationsOpen || userMenuOpen) && (
-                            <div
-                                className="fixed inset-0 z-40 bg-transparent"
-                                onClick={() => {
-                                    setNotificationsOpen(false);
-                                    setUserMenuOpen(false);
-                                }}
-                            />
-                        )}
-
                         {/* Notifications Dropdown */}
                         <div className="relative">
                             <button
@@ -226,8 +219,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                         className="absolute -right-[70px] sm:right-0 top-12 w-[320px] max-w-[calc(100vw-40px)] sm:w-80 premium-card z-50 p-4 shadow-2xl border-[#00F5FF]/10 overflow-hidden"
                                     >
                                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
-                                            <h4 className="text-xs font-bold text-white uppercase tracking-widest">Centre de contrôle</h4>
-                                            <span className="text-[10px] text-[#00F5FF] font-black uppercase">2 Nouvelles</span>
+                                            <div className="flex flex-col">
+                                                <h4 className="text-xs font-bold text-white uppercase tracking-widest">Centre de contrôle</h4>
+                                                <span className="text-[10px] text-[#00F5FF] font-black uppercase mt-0.5">2 Nouvelles</span>
+                                            </div>
+                                            <button
+                                                onClick={() => setNotificationsOpen(false)}
+                                                className="p-1 rounded-md hover:bg-white/10 text-[#5F6B7A] hover:text-white transition-colors"
+                                            >
+                                                <X size={14} />
+                                            </button>
                                         </div>
                                         <div className="space-y-3">
                                             <div className="p-3 rounded-lg bg-[#00F5FF]/5 border border-[#00F5FF]/10 hover:bg-[#00F5FF]/10 transition-colors cursor-pointer">
@@ -269,14 +270,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                         transition={{ duration: 0.2 }}
                                         className="absolute right-0 top-12 w-56 premium-card z-50 p-2 shadow-2xl border-[#00F5FF]/10"
                                     >
-                                        <div className="px-3 py-3 border-b border-white/5 flex items-center gap-3 mb-1">
-                                            <div className="w-10 h-10 rounded-lg bg-[#00F5FF]/10 text-[#00F5FF] flex items-center justify-center font-black">
-                                                {displayAvatar}
+                                        <div className="px-3 py-3 border-b border-white/5 flex items-start justify-between mb-1">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-lg bg-[#00F5FF]/10 text-[#00F5FF] flex items-center justify-center font-black">
+                                                    {displayAvatar}
+                                                </div>
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">{user.name}</span>
+                                                    <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest">{user.role}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-col min-w-0">
-                                                <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">{user.name}</span>
-                                                <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest">{user.role}</span>
-                                            </div>
+                                            <button
+                                                onClick={() => setUserMenuOpen(false)}
+                                                className="p-1 rounded-md hover:bg-white/10 text-[#5F6B7A] hover:text-white transition-colors"
+                                            >
+                                                <X size={14} />
+                                            </button>
                                         </div>
                                         <button onClick={() => router.push('/dashboard/settings')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-[#8A94A6] hover:text-white hover:bg-white/5 transition-all group">
                                             <Settings size={14} className="group-hover:text-[#00F5FF] transition-colors" />
