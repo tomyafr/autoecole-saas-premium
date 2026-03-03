@@ -105,12 +105,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="p-8 pb-10 flex items-center gap-x-3">
                     <div className="relative group">
                         <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <Image
+                        <img
                             src="/logo-autodrive-removebg-preview.png"
                             alt="Logo AutoDrive"
                             width={76}
                             height={76}
-                            priority
                             className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(0,245,255,0.3)]"
                         />
                     </div>
