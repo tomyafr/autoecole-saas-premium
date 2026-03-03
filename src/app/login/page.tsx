@@ -69,8 +69,15 @@ export default function LoginPage() {
                 className="w-full max-w-[400px] relative z-10"
             >
                 <div className="flex flex-col items-center mb-10">
-                    <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                        <span className="text-black font-black text-xl italic">A</span>
+                    <div className="relative group mb-6 hover:scale-105 transition-transform duration-500">
+                        <div className="absolute inset-0 bg-[#00F5FF]/20 blur-3xl rounded-full opacity-60 shadow-[0_0_40px_rgba(0,245,255,0.4)]" />
+                        <img
+                            src="https://i.imgur.com/ZvGdbPc.png"
+                            alt="Logo AutoDrive"
+                            width={88}
+                            height={88}
+                            className="relative z-10 object-contain drop-shadow-[0_0_25px_rgba(0,245,255,0.5)]"
+                        />
                     </div>
                     <h1 className="text-2xl font-bold tracking-tight text-white">AutoDrive Pro</h1>
                     <p className="text-slate-500 text-sm mt-1">Plateforme SaaS Haute Fidélité</p>

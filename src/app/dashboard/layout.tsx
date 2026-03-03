@@ -16,7 +16,8 @@ import {
     Activity,
     MapPin,
     ClipboardCheck,
-    Hexagon
+    Hexagon,
+    Car
 } from 'lucide-react';
 import Image from 'next/image';
 import { getUser, logout, type User, type UserRole } from '@/lib/auth';
@@ -43,6 +44,7 @@ const NAV_CONFIG: Record<UserRole, NavItem[]> = {
     admin: [
         { label: 'Vue d\'ensemble', href: '/dashboard/admin', icon: <LayoutDashboard size={18} /> },
         { label: 'Centres de Conduite', href: '/dashboard/admin/centres', icon: <MapPin size={18} /> },
+        { label: 'Gestion des Véhicules', href: '/dashboard/admin/vehicules', icon: <Car size={18} /> },
         { label: 'Équipe Pédagogique', href: '/dashboard/admin/moniteurs', icon: <UserCircle size={18} /> },
         { label: 'Parcours Élèves', href: '/dashboard/admin/eleves', icon: <Users size={18} /> },
         { label: 'Trésorerie', href: '/dashboard/admin/finances', icon: <CreditCard size={18} /> },
@@ -78,8 +80,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
     }, [pathname, router]);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         logout();
+        try {
+            const { logoutServer } = await import('@/app/actions/auth');
+            await logoutServer();
+        } catch (e) { }
         router.replace('/');
     };
 
@@ -102,9 +108,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <Image
                             src="https://i.imgur.com/ZvGdbPc.png"
                             alt="Logo AutoDrive"
-                            width={48}
-                            height={48}
-                            className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110 brightness-0 dark:invert opacity-90"
+                            width={56}
+                            height={56}
+                            priority
+                            className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(0,245,255,0.3)]"
                         />
                     </div>
                     <h1 className="text-xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none">

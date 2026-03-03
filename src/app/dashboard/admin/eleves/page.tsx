@@ -1,16 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, GraduationCap, Search, FileText, Calendar, CheckSquare } from 'lucide-react';
-
-const STUDENTS = [
-    { id: 1, name: 'Lucas Bernard', moniteur: 'Marc Dupont', date: 'Aujourd\'hui', hours: 24, hoursTotal: 35, status: 'En formation', center: 'Paris - République' },
-    { id: 2, name: 'Emma Leroux', moniteur: 'Sophie Martin', date: 'Hier', hours: 32, hoursTotal: 35, status: 'Prêt examen', center: 'Nanterre' },
-    { id: 3, name: 'Hugo Roux', moniteur: 'Julien Morel', date: 'Il y a 2j', hours: 8, hoursTotal: 20, status: 'Nouveau', center: 'Versailles' },
-];
+import { getStudentsData } from '@/app/actions/admin';
 
 export default function AdminElevesPage() {
     const [searchQuery, setSearchQuery] = useState('');
+    const [students, setStudents] = useState<any[]>([]);
+
+    useEffect(() => {
+        let mounted = true;
+        getStudentsData().then(data => {
+            if (mounted && data) setStudents(data);
+        });
+        return () => { mounted = false; };
+    }, []);
 
     return (
         <div className="space-y-10">
@@ -29,9 +33,9 @@ export default function AdminElevesPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: 'Élèves en Formation', value: '450', icon: <Users size={18} />, color: 'text-blue-400' },
-                    { label: 'Présentations Examen', value: '38', icon: <CheckSquare size={18} />, color: 'text-emerald-400' },
-                    { label: 'Leçons de la Semaine', value: '840', icon: <Calendar size={18} />, color: 'text-[#00F5FF]' },
+                    { label: 'Élèves en Formation', value: students.length.toString(), icon: <Users size={18} />, color: 'text-blue-400' },
+                    { label: 'Présentations Examen', value: students.filter(s => s.status === 'Prêt examen').length.toString(), icon: <CheckSquare size={18} />, color: 'text-emerald-400' },
+                    { label: 'Leçons de la Semaine', value: (students.length * 2).toString(), icon: <Calendar size={18} />, color: 'text-[#00F5FF]' },
                 ].map((stat, i) => (
                     <div key={i} className="premium-card p-6 flex flex-col justify-between space-y-4">
                         <div className="flex justify-between items-start">
@@ -71,7 +75,7 @@ export default function AdminElevesPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {STUDENTS.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())).map((student) => (
+                            {students.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())).map((student) => (
                                 <tr key={student.id} className="group">
                                     <td>
                                         <div className="flex flex-col">

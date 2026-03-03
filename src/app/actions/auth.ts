@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import type { User, UserRole } from '@/lib/auth';
+import { createSession, deleteSession } from '@/lib/session';
 
 export async function authenticateServer(
     username: string,
@@ -22,6 +23,13 @@ export async function authenticateServer(
         });
 
         if (found) {
+            // Créer le JWT et le Cookie sécurisé HttpOnly
+            await createSession({
+                id: found.id,
+                role: found.role as UserRole,
+                name: found.name,
+            });
+
             return {
                 id: found.id,
                 name: found.name,
@@ -34,4 +42,8 @@ export async function authenticateServer(
         console.error("Database connection error in authenticateServer:", error);
         return null;
     }
+}
+
+export async function logoutServer() {
+    await deleteSession();
 }

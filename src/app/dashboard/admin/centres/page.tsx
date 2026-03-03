@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getCentersData } from '@/app/actions/admin';
 import {
     MapPin,
     Building2,
@@ -25,17 +26,18 @@ import {
     Home
 } from 'lucide-react';
 
-/* ======= DATA ======= */
-const CENTRES = [
-    { id: 1, name: 'Paris - République', address: '12 Boulevard du Temple, 75011 Paris', students: 450, instructors: 12, status: 'nominal', load: 85 },
-    { id: 2, name: 'Versailles', address: '5 Avenue de Saint-Cloud, 78000 Versailles', students: 280, instructors: 8, status: 'nominal', load: 62 },
-    { id: 3, name: 'Nanterre', address: '24 Rue de la Liberté, 92000 Nanterre', students: 195, instructors: 5, status: 'maintenance', load: 45 },
-    { id: 4, name: 'Lyon Center', address: '10 Place Bellecour, 69002 Lyon', students: 310, instructors: 10, status: 'alerte', load: 92 },
-];
-
 export default function AdminCentresPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+    const [centers, setCenters] = useState<any[]>([]);
+
+    useEffect(() => {
+        let mounted = true;
+        getCentersData().then(data => {
+            if (mounted && data) setCenters(data);
+        });
+        return () => { mounted = false; };
+    }, []);
 
     const triggerFeedback = (msg: string) => {
         setActionFeedback(msg);
@@ -64,9 +66,9 @@ export default function AdminCentresPage() {
             {/* Tactical Grid Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                    { label: 'Centres Actifs', value: '4 Centres', icon: <Home size={18} />, color: 'text-[#00F5FF]' },
-                    { label: 'Empreinte Réseau', value: '3 Villes', icon: <Navigation size={18} />, color: 'text-blue-400' },
-                    { label: 'Charge Moyenne', value: '71%', icon: <Activity size={18} />, color: 'text-emerald-400' },
+                    { label: 'Centres Actifs', value: `${centers.length} Centres`, icon: <Home size={18} />, color: 'text-[#00F5FF]' },
+                    { label: 'Empreinte Réseau', value: 'National', icon: <Navigation size={18} />, color: 'text-blue-400' },
+                    { label: 'Charge Moyenne', value: `${centers.length > 0 ? Math.round(centers.reduce((acc, c) => acc + c.load, 0) / centers.length) : 0}%`, icon: <Activity size={18} />, color: 'text-emerald-400' },
                 ].map((stat, i) => (
                     <div key={i} className="premium-card p-6 flex flex-col justify-between space-y-4">
                         <div className="flex justify-between items-start">
@@ -81,7 +83,7 @@ export default function AdminCentresPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {CENTRES.map((centre, i) => (
+                {centers.map((centre, i) => (
                     <motion.div
                         key={centre.id}
                         initial={{ opacity: 0, scale: 0.98 }}

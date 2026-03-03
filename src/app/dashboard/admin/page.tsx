@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     BarChart3,
     Building2,
@@ -17,11 +17,30 @@ import {
     CheckCircle2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { getAdminDashboardData, getGrowthData } from '@/app/actions/admin';
 
 export default function AdminDashboard() {
     const router = useRouter();
     const [actionFeedback, setActionFeedback] = useState<string | null>(null);
     const [timeFilter, setTimeFilter] = useState<'30J' | '90J' | '12M'>('12M');
+    const [dashboardData, setDashboardData] = useState<any>(null);
+    const [growthData, setGrowthData] = useState<any>({ values: [0, 0, 0, 0, 0, 0, 0, 0], labels: ['', '', '', '', '', '', '', ''] });
+
+    useEffect(() => {
+        let mounted = true;
+        getAdminDashboardData().then(data => {
+            if (mounted && data) setDashboardData(data);
+        });
+        return () => { mounted = false; };
+    }, []);
+
+    useEffect(() => {
+        let mounted = true;
+        getGrowthData(timeFilter).then(data => {
+            if (mounted && data) setGrowthData(data);
+        });
+        return () => { mounted = false; };
+    }, [timeFilter]);
 
     const triggerFeedback = (msg: string) => {
         setActionFeedback(msg);
@@ -29,18 +48,20 @@ export default function AdminDashboard() {
     };
 
     const stats = [
-        { label: 'Chiffre d\'Affaires', value: '42,850€', sub: '+12.5% vs mois dernier', icon: <CreditCard size={18} />, color: 'text-emerald-400' },
-        { label: 'Nouveaux Élèves', value: '128', sub: 'Semaine en cours', icon: <Users size={18} />, color: 'text-[#00F5FF]' },
-        { label: 'Taux de Réussite', value: '89.2%', sub: 'Permis B - 30j', icon: <TrendingUp size={18} />, color: 'text-blue-400' },
-        { label: 'Centres Actifs', value: '4', sub: 'Île-de-France', icon: <Building2 size={18} />, color: 'text-amber-400' },
+        { label: 'Chiffre d\'Affaires', value: dashboardData?.revenue || '...', sub: 'Revenus Totaux', icon: <CreditCard size={18} />, color: 'text-emerald-400' },
+        { label: 'Total Élèves', value: dashboardData?.studentsCount || '...', sub: 'Actifs dans la DB', icon: <Users size={18} />, color: 'text-[#00F5FF]' },
+        { label: 'Taux de Réussite', value: '89.2%', sub: 'Permis B (Estimé)', icon: <TrendingUp size={18} />, color: 'text-blue-400' },
+        { label: 'Centres Actifs', value: dashboardData?.centersCount || '...', sub: 'Connectés', icon: <Building2 size={18} />, color: 'text-amber-400' },
     ];
 
-    const centers = [
+    const fallbackCenters = [
         { name: 'Paris - République', students: 245, moniteurs: 12, revenue: '12,400€' },
         { name: 'Versailles - Rive Gauche', students: 112, moniteurs: 6, revenue: '6,200€' },
         { name: 'Nanterre - Université', students: 180, moniteurs: 8, revenue: '9,800€' },
         { name: 'Boulogne - Centre', students: 156, moniteurs: 7, revenue: '8,500€' },
     ];
+
+    const displayCenters = dashboardData?.centersList || fallbackCenters;
 
     return (
         <div className="space-y-10">
@@ -124,23 +145,21 @@ export default function AdminDashboard() {
                         </div>
 
                         <div className="h-48 mt-12 flex items-end justify-between gap-4">
-                            {(timeFilter === '30J' ? [30, 40, 50, 45, 60, 55, 75, 80] :
-                                timeFilter === '90J' ? [20, 35, 50, 70, 65, 85, 90, 95] :
-                                    [40, 65, 45, 90, 75, 100, 85, 95]).map((h, i) => (
-                                        <div key={i} className="flex-1 flex flex-col items-center gap-4 group cursor-pointer">
-                                            <div className="w-full h-full relative">
-                                                <motion.div
-                                                    initial={{ height: 0 }}
-                                                    animate={{ height: `${h}%` }}
-                                                    transition={{ duration: 0.5, delay: i * 0.05 }}
-                                                    className="w-full bg-gradient-to-t from-blue-600/40 to-[#00F5FF]/60 rounded-t-lg group-hover:from-blue-600 group-hover:to-[#00F5FF] transition-all duration-300 shadow-[0_0_15px_rgba(0,245,255,0.05)] group-hover:shadow-[0_0_20px_rgba(0,245,255,0.2)]"
-                                                />
-                                            </div>
-                                            <span className="text-[9px] font-black text-[#8A94A6] uppercase tracking-tighter group-hover:text-[var(--color-text-primary)] transition-colors">
-                                                {new Date(new Date().setMonth(new Date().getMonth() - 7 + i)).toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')}
-                                            </span>
-                                        </div>
-                                    ))}
+                            {growthData?.values?.map((h: number, i: number) => (
+                                <div key={i} className="flex-1 flex flex-col items-center gap-4 group cursor-pointer">
+                                    <div className="w-full h-full relative">
+                                        <motion.div
+                                            initial={{ height: 0 }}
+                                            animate={{ height: `${h}%` }}
+                                            transition={{ duration: 0.5, delay: i * 0.05 }}
+                                            className="w-full bg-gradient-to-t from-blue-600/40 to-[#00F5FF]/60 rounded-t-lg group-hover:from-blue-600 group-hover:to-[#00F5FF] transition-all duration-300 shadow-[0_0_15px_rgba(0,245,255,0.05)] group-hover:shadow-[0_0_20px_rgba(0,245,255,0.2)]"
+                                        />
+                                    </div>
+                                    <span className="text-[9px] font-black text-[#8A94A6] uppercase tracking-tighter group-hover:text-[var(--color-text-primary)] transition-colors">
+                                        {growthData?.labels?.[i]}
+                                    </span>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
@@ -166,7 +185,7 @@ export default function AdminDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {centers.map((center, idx) => (
+                                    {displayCenters.map((center: any, idx: number) => (
                                         <tr key={idx} className="group">
                                             <td className="font-semibold text-white group-hover:text-[#00F5FF] transition-colors">{center.name}</td>
                                             <td className="font-medium text-[#8A94A6]">{center.students} actifs</td>

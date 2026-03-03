@@ -98,3 +98,23 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
         references: [users.id],
     }),
 }));
+
+export const vehicles = pgTable('vehicles', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull(), // ex: "Peugeot 208 #1"
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    plate: text('plate').notNull().unique(),
+    year: integer('year'),
+    status: text('status', { enum: ['active', 'maintenance', 'retired'] }).notNull().default('active'),
+    centerId: uuid('center_id').references(() => centers.id),
+    lastService: timestamp('last_service'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const vehiclesRelations = relations(vehicles, ({ one }) => ({
+    center: one(centers, {
+        fields: [vehicles.centerId],
+        references: [centers.id],
+    }),
+}));

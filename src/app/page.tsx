@@ -19,8 +19,15 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
       <div className="relative z-10 flex flex-col items-center gap-6">
-        <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center animate-pulse">
-          <span className="text-black font-black text-2xl italic">A</span>
+        <div className="relative group animate-pulse">
+          <div className="absolute inset-0 bg-[#00F5FF]/20 blur-3xl rounded-full opacity-60 shadow-[0_0_40px_rgba(0,245,255,0.4)]" />
+          <img
+            src="https://i.imgur.com/ZvGdbPc.png"
+            alt="Logo AutoDrive"
+            width={88}
+            height={88}
+            className="relative z-10 object-contain drop-shadow-[0_0_25px_rgba(0,245,255,0.5)]"
+          />
         </div>
         <div className="spinner-elegant" />
       </div>
