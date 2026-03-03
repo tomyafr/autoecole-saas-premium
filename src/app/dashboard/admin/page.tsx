@@ -71,7 +71,7 @@ export default function AdminDashboard() {
                     <h1 className="page-title">Executive Overview</h1>
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Analyse globale de la performance du réseau AutoDrive.</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-4 md:mt-0 w-full md:w-auto">
                     <button
                         onClick={() => router.push('/dashboard/admin/stats')}
                         className="btn-secondary"

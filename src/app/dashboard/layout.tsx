@@ -100,6 +100,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         );
     }
 
+    const displayAvatar = user.avatar !== '??' ? user.avatar : (user.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '??');
     const navItems = NAV_CONFIG[user.role] || [];
 
     return (
@@ -165,7 +166,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                     <div className="mt-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-[#00F5FF]/10 flex items-center justify-center text-[#00F5FF] text-[10px] font-bold border border-[#00F5FF]/20">
-                            {user.avatar}
+                            {displayAvatar}
                         </div>
                         <div className="flex flex-col min-w-0">
                             <span className="text-xs font-semibold text-[var(--color-text-primary)] truncate">{user.name}</span>
@@ -194,11 +195,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
 
                     <div className="flex items-center gap-5 relative">
+                        {/* Glassmorphism Click-Away Overlay for Dropdowns */}
+                        {(notificationsOpen || userMenuOpen) && (
+                            <div
+                                className="fixed inset-0 z-40 bg-transparent"
+                                onClick={() => {
+                                    setNotificationsOpen(false);
+                                    setUserMenuOpen(false);
+                                }}
+                            />
+                        )}
+
                         {/* Notifications Dropdown */}
                         <div className="relative">
                             <button
                                 onClick={() => { setNotificationsOpen(!notificationsOpen); setUserMenuOpen(false); }}
-                                className="relative w-8 h-8 flex items-center justify-center text-[#8A94A6] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-border-subtle)] rounded-full transition-colors"
+                                className="relative w-8 h-8 flex items-center justify-center text-[#8A94A6] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-border-subtle)] rounded-full transition-colors z-50"
                             >
                                 <Bell size={20} />
                                 <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#00F5FF] rounded-full shadow-[0_0_8px_rgba(0,245,255,0.8)] border border-[#0B0F14]"></div>
@@ -211,7 +223,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                         transition={{ duration: 0.2 }}
-                                        className="absolute right-0 top-12 w-80 premium-card z-50 p-4 shadow-2xl border-[#00F5FF]/10 overflow-hidden"
+                                        className="absolute -right-[70px] sm:right-0 top-12 w-[320px] max-w-[calc(100vw-40px)] sm:w-80 premium-card z-50 p-4 shadow-2xl border-[#00F5FF]/10 overflow-hidden"
                                     >
                                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
                                             <h4 className="text-xs font-bold text-white uppercase tracking-widest">Centre de contrôle</h4>
@@ -243,9 +255,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <div className="relative">
                             <button
                                 onClick={() => { setUserMenuOpen(!userMenuOpen); setNotificationsOpen(false); }}
-                                className="w-9 h-9 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center text-[10px] font-black text-gray-400 hover:border-[#00F5FF]/30 hover:text-[#00F5FF] transition-all"
+                                className="relative z-50 w-9 h-9 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center text-[10px] font-black text-gray-400 hover:border-[#00F5FF]/30 hover:text-[#00F5FF] transition-all"
                             >
-                                {user.avatar}
+                                {displayAvatar}
                             </button>
 
                             <AnimatePresence>
@@ -259,7 +271,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     >
                                         <div className="px-3 py-3 border-b border-white/5 flex items-center gap-3 mb-1">
                                             <div className="w-10 h-10 rounded-lg bg-[#00F5FF]/10 text-[#00F5FF] flex items-center justify-center font-black">
-                                                {user.avatar}
+                                                {displayAvatar}
                                             </div>
                                             <div className="flex flex-col min-w-0">
                                                 <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">{user.name}</span>

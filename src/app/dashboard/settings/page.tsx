@@ -273,7 +273,7 @@ export default function SettingsPage() {
 
                                     <div className="space-y-8">
                                         <div className="p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] space-y-6">
-                                            <div className="flex items-center justify-between">
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                                                 <div>
                                                     <h4 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">Mode d'affichage</h4>
                                                     <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">Choisissez entre le thème Clair et le Sombre</p>
@@ -282,18 +282,7 @@ export default function SettingsPage() {
                                             </div>
                                         </div>
 
-                                        <div className="p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] space-y-6 opacity-50 pointer-events-none filter grayscale">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h4 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">Densité d'Information</h4>
-                                                    <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">Compact ou Aéré</p>
-                                                </div>
-                                                <div className="flex bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] p-1 rounded-lg">
-                                                    <div className="px-3 py-1 bg-[var(--color-text-primary)] text-[var(--color-background)] shadow-sm rounded text-[10px] font-bold uppercase transition-colors">Standard</div>
-                                                    <div className="px-3 py-1 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] rounded text-[10px] font-bold uppercase transition-colors">Compact</div>
-                                                </div>
-                                            </div>
-                                        </div>
+
                                     </div>
                                 </div>
                             )}

@@ -44,7 +44,7 @@ export async function authenticateServer(
             id: found.id,
             name: found.name,
             role: found.role as UserRole,
-            avatar: found.avatar || '??',
+            avatar: found.avatar || (found.name ? found.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : '??'),
         };
     } catch (globalError: any) {
         console.error("CRITICAL AUTH SERVER ERROR:", globalError);

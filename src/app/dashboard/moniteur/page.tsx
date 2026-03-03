@@ -158,7 +158,7 @@ export default function MoniteurDashboard() {
                     <h1 className="page-title">Espace Formateur</h1>
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Gestion de vos leçons de conduite.</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-4 md:mt-0 w-full md:w-auto">
                     <button
                         onClick={() => router.push('/dashboard/moniteur/planning')}
                         className="btn-secondary"

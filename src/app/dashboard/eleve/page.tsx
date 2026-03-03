@@ -126,7 +126,7 @@ export default function EleveDashboard() {
                     <h1 className="page-title">Tableau de bord</h1>
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Bon retour parmi nous, {dbData.name?.split(' ')[0] || user.name}. Voici votre progression en temps réel.</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4 md:mt-0 w-full md:w-auto">
                     <button
                         onClick={() => router.push('/dashboard/eleve/documents')}
                         className="btn-secondary"
