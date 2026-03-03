@@ -109,7 +109,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="p-8 pb-10 flex items-center justify-between">
                     <div
                         className="flex items-center gap-x-3 cursor-pointer"
-                        onClick={() => router.push(`/dashboard/${user.role}`)}
+                        onClick={() => {
+                            router.push(`/dashboard/${user.role}`);
+                            setMobileMenuOpen(false);
+                        }}
                     >
                         <div className="relative group">
                             <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -154,7 +157,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                 <div className="p-4 mt-auto border-t border-white/5 space-y-1.5">
                     <button
-                        onClick={() => router.push('/dashboard/settings')}
+                        onClick={() => {
+                            router.push('/dashboard/settings');
+                            setMobileMenuOpen(false);
+                        }}
                         className={`nav-item w-full ${pathname === '/dashboard/settings' ? 'active' : ''}`}
                     >
                         <Settings size={18} />
@@ -199,10 +205,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
 
                     <div className="flex items-center gap-5 relative">
+                        {/* Glassmorphism Click-Away Overlay for Dropdowns */}
+                        {(notificationsOpen || userMenuOpen) && (
+                            <div
+                                className="fixed inset-0 z-40 bg-transparent"
+                                onClick={() => {
+                                    setNotificationsOpen(false);
+                                    setUserMenuOpen(false);
+                                }}
+                            />
+                        )}
+
                         {/* Notifications Dropdown */}
                         <div className="relative">
                             <button
-                                onClick={() => { setNotificationsOpen(!notificationsOpen); setUserMenuOpen(false); }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setNotificationsOpen(!notificationsOpen);
+                                    setUserMenuOpen(false);
+                                }}
                                 className="relative w-8 h-8 flex items-center justify-center text-[#8A94A6] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-border-subtle)] rounded-full transition-colors z-50"
                             >
                                 <Bell size={20} />
@@ -216,6 +237,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                         transition={{ duration: 0.2 }}
+                                        onClick={(e) => e.stopPropagation()}
                                         className="absolute -right-[70px] sm:right-0 top-12 w-[320px] max-w-[calc(100vw-40px)] sm:w-80 premium-card z-50 p-4 shadow-2xl border-[#00F5FF]/10 overflow-hidden"
                                     >
                                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
@@ -255,7 +277,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         {/* User Menu Dropdown */}
                         <div className="relative">
                             <button
-                                onClick={() => { setUserMenuOpen(!userMenuOpen); setNotificationsOpen(false); }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setUserMenuOpen(!userMenuOpen);
+                                    setNotificationsOpen(false);
+                                }}
                                 className="relative z-50 w-9 h-9 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center text-[10px] font-black text-gray-400 hover:border-[#00F5FF]/30 hover:text-[#00F5FF] transition-all"
                             >
                                 {displayAvatar}
@@ -268,6 +294,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                         transition={{ duration: 0.2 }}
+                                        onClick={(e) => e.stopPropagation()}
                                         className="absolute right-0 top-12 w-56 premium-card z-50 p-2 shadow-2xl border-[#00F5FF]/10"
                                     >
                                         <div className="px-3 py-3 border-b border-white/5 flex items-start justify-between mb-1">
@@ -316,7 +343,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     {navItems.slice(0, 4).map((item) => (
                         <button
                             key={item.href}
-                            onClick={() => router.push(item.href)}
+                            onClick={() => {
+                                router.push(item.href);
+                                setMobileMenuOpen(false);
+                            }}
                             className={`mobile-nav-item ${pathname === item.href ? 'active' : ''}`}
                         >
                             {item.icon}

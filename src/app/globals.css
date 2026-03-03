@@ -306,12 +306,15 @@
 @media (max-width: 1024px) {
   .sidebar-layout {
     transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
     z-index: 150;
+    opacity: 0;
+    will-change: transform, opacity;
   }
 
   .sidebar-layout.mobile-open {
     transform: translateX(0);
+    opacity: 1;
   }
 
   .main-content {
