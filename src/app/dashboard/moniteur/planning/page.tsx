@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { getUser, type User } from '@/lib/auth';
-import { getInstructorDashboard } from '@/lib/db/queries';
+import { getInstructorDashboard } from '@/app/actions/dashboard';
 import {
     Calendar as CalendarIcon,
     ChevronLeft,

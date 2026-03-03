@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getUser, type User } from '@/lib/auth';
-import { getInstructorDashboard } from '@/lib/db/queries';
+import { getInstructorDashboard } from '@/app/actions/dashboard';
 
 export default function MoniteurDashboard() {
     const router = useRouter();

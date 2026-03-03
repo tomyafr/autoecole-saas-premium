@@ -15,7 +15,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { getUser, type User } from '@/lib/auth';
-import { getStudentDashboard } from '@/lib/db/queries';
+import { getStudentDashboard } from '@/app/actions/dashboard';
 import Link from 'next/link';
 import { AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';

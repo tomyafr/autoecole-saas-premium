@@ -18,7 +18,7 @@ import {
     CreditCard as CreditCardIcon
 } from 'lucide-react';
 import { getUser, type User as UserType } from '@/lib/auth';
-import { getStudentDashboard } from '@/lib/db/queries';
+import { getStudentDashboard } from '@/app/actions/dashboard';
 
 /* ======= DATA ======= */
 const currentYear = new Date().getFullYear();
