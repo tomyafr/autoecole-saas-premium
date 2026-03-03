@@ -57,7 +57,7 @@ export default function LoginPage() {
                 playsInline
                 className="absolute inset-0 w-full h-full object-cover z-0 opacity-40 pointer-events-none"
             >
-                <source src="/animation_voiture.mp4" type="video/mp4" />
+                <source src="https://uwuethmbvxomawzyuqfp.supabase.co/storage/v1/object/public/assets/animation_voiture.mp4" type="video/mp4" />
             </video>
 
             {/* Subtle background effects */}

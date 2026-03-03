@@ -5,9 +5,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'i.imgur.com',
+        hostname: 'uwuethmbvxomawzyuqfp.supabase.co',
         port: '',
-        pathname: '/**',
+        pathname: '/storage/**',
       },
     ],
   },

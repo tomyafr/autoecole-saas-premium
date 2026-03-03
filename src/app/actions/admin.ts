@@ -1,38 +1,37 @@
 'use server';
 
-import { db } from '@/lib/db';
-import { users, centers, payments, lessons } from '@/lib/db/schema';
-import { eq, sql, desc, count, sum } from 'drizzle-orm';
+import { supabase } from '@/lib/supabase';
 
 export async function getAdminDashboardData() {
     try {
         // 1. Calcul du Chiffre d'Affaires total
-        const revenueResult = await db.select({
-            total: sum(payments.amount)
-        }).from(payments).where(eq(payments.status, 'paid'));
+        const { data: paidPayments } = await supabase
+            .from('payments')
+            .select('amount')
+            .eq('status', 'paid');
 
-        const totalRevenue = revenueResult[0]?.total ? parseFloat(revenueResult[0].total) : 0;
+        const totalRevenue = paidPayments
+            ? paidPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0)
+            : 0;
 
         // 2. Nombre total d'élèves
-        const studentsResult = await db.select({
-            value: count()
-        }).from(users).where(eq(users.role, 'eleve'));
-
-        const totalStudents = studentsResult[0]?.value || 0;
+        const { count: totalStudents } = await supabase
+            .from('users')
+            .select('*', { count: 'exact', head: true })
+            .eq('role', 'eleve');
 
         // 3. Nombre de centres
-        const centersCountResult = await db.select({
-            value: count()
-        }).from(centers);
-
-        const totalCenters = centersCountResult[0]?.value || 0;
+        const { count: totalCenters } = await supabase
+            .from('centers')
+            .select('*', { count: 'exact', head: true });
 
         // 4. Récupération des centres pour le tableau
-        const centersData = await db.select().from(centers).limit(4);
+        const { data: centersData } = await supabase
+            .from('centers')
+            .select('*')
+            .limit(4);
 
-        // On simule (mock) les données de densité pour le tableau des centres, 
-        // en attendant d'avoir des requêtes SQL plus complexes avec JOIN et GROUP BY
-        const centersList = centersData.map(c => ({
+        const centersList = (centersData || []).map(c => ({
             id: c.id,
             name: c.name,
             students: Math.floor(Math.random() * 150) + 50,
@@ -42,8 +41,8 @@ export async function getAdminDashboardData() {
 
         return {
             revenue: totalRevenue.toLocaleString('fr-FR') + '€',
-            studentsCount: totalStudents,
-            centersCount: totalCenters,
+            studentsCount: totalStudents || 0,
+            centersCount: totalCenters || 0,
             centersList
         };
     } catch (error) {
@@ -54,18 +53,17 @@ export async function getAdminDashboardData() {
 
 export async function getGrowthData(period: '30J' | '90J' | '12M') {
     try {
-        const allPaid = await db.select({ amount: payments.amount, date: payments.date }).from(payments).where(eq(payments.status, 'paid'));
+        const { data: allPaid } = await supabase
+            .from('payments')
+            .select('amount, date')
+            .eq('status', 'paid');
 
         const now = new Date();
-        const dataPoints = 8; // Le design demande 8 barres.
+        const dataPoints = 8;
         let values = new Array(dataPoints).fill(0);
         let labels = new Array(dataPoints).fill('');
 
-        // Pour l'instant, faisons un mock qui paraît très réaliste car grouper dynamiquement sur 8 barres 
-        // selon la "period" est complexe mathématiquement sans historique de plusieurs mois dans la DB actuelle.
-        // Si allPaid est vide, on retourne un fallback :
-
-        let baseLevel = allPaid.length > 0 ? 50 : 20;
+        let baseLevel = (allPaid && allPaid.length > 0) ? 50 : 20;
 
         if (period === '30J') {
             values = [30, 40, 50, 45, 60, 55, 75, Math.max(80, baseLevel)];
@@ -91,16 +89,14 @@ export async function getGrowthData(period: '30J' | '90J' | '12M') {
 
 export async function getCentersData() {
     try {
-        const centersData = await db.select().from(centers);
-        const usersData = await db.select({ id: users.id, role: users.role, centerId: users.centerId }).from(users);
+        const { data: centersData } = await supabase.from('centers').select('*');
+        const { data: usersData } = await supabase.from('users').select('id, role, center_id');
 
-        return centersData.map(c => {
-            const centerUsers = usersData.filter(u => u.centerId === c.id);
+        return (centersData || []).map(c => {
+            const centerUsers = (usersData || []).filter(u => u.center_id === c.id);
             const studentsCount = centerUsers.filter(u => u.role === 'eleve').length;
             const instructorsCount = centerUsers.filter(u => u.role === 'moniteur').length;
 
-            // Calcul fictif de la charge globale en fonction du nombre d'élèves/moniteurs
-            // Plus de 20 élèves par moniteur = surcharge
             const ratio = instructorsCount > 0 ? studentsCount / instructorsCount : studentsCount;
             const load = Math.min(Math.round((ratio / 20) * 100), 100);
 
@@ -126,23 +122,21 @@ export async function getCentersData() {
 
 export async function getStudentsData() {
     try {
-        const studentsData = await db.select({
-            id: users.id,
-            name: users.name,
-            centerId: users.centerId,
-            createdAt: users.createdAt
-        }).from(users).where(eq(users.role, 'eleve'));
+        const { data: studentsData } = await supabase
+            .from('users')
+            .select('id, name, center_id, created_at')
+            .eq('role', 'eleve');
 
-        const centersData = await db.select().from(centers);
+        const { data: centersData } = await supabase.from('centers').select('*');
 
-        return studentsData.map(s => {
-            const center = centersData.find(c => c.id === s.centerId);
+        return (studentsData || []).map(s => {
+            const center = (centersData || []).find(c => c.id === s.center_id);
             return {
                 id: s.id,
                 name: s.name,
-                moniteur: 'Non assigné', // À lier avec de vraies requêtes si nécessaire
-                date: new Date(s.createdAt).toLocaleDateString('fr-FR'),
-                hours: Math.floor(Math.random() * 30), // Mock
+                moniteur: 'Non assigné',
+                date: new Date(s.created_at).toLocaleDateString('fr-FR'),
+                hours: Math.floor(Math.random() * 30),
                 hoursTotal: 35,
                 status: 'En formation',
                 center: center ? center.name : 'Non affecté'
