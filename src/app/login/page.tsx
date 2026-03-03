@@ -73,10 +73,10 @@ export default function LoginPage() {
                     <div className="relative group mb-6 hover:scale-105 transition-transform duration-500">
                         <div className="absolute inset-0 bg-[#00F5FF]/20 blur-3xl rounded-full opacity-60 shadow-[0_0_40px_rgba(0,245,255,0.4)]" />
                         <img
-                            src="/logo-autodrive-removebg-preview.png"
+                            src="https://uwuethmbvxomawzyuqfp.supabase.co/storage/v1/object/public/assets/logo.png"
                             alt="Logo AutoDrive"
-                            width={88}
-                            height={88}
+                            width={110}
+                            height={110}
                             className="relative z-10 object-contain drop-shadow-[0_0_25px_rgba(0,245,255,0.5)]"
                         />
                     </div>
