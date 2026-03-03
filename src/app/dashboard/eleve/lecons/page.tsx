@@ -24,12 +24,7 @@ import { X } from 'lucide-react';
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().toLocaleDateString('fr-FR', { month: 'short' });
 
-const LESSONS = [
-    { id: 'CITY-101', date: `10 ${currentMonth} ${currentYear}`, time: '09:00', moniteur: 'Marie Dupont', vehicule: 'Renault Clio 5', score: '18/20', status: 'Effectué' },
-    { id: 'PARK-102', date: `08 ${currentMonth} ${currentYear}`, time: '14:30', moniteur: 'Sophie Martin', vehicule: 'Peugeot 208', score: '15/20', status: 'Effectué' },
-    { id: 'HWY-103', date: `12 ${currentMonth} ${currentYear}`, time: '11:00', moniteur: 'Sophie Martin', vehicule: 'Peugeot 208', score: null, status: 'Prévu' },
-    { id: 'NIGHT-104', date: `15 ${currentMonth} ${currentYear}`, time: '18:00', moniteur: 'Marie Dupont', vehicule: 'Renault Clio 5', score: null, status: 'Prévu' },
-];
+const LESSONS: any[] = [];
 
 export default function LeconsPage() {
     const router = useRouter();
@@ -103,52 +98,7 @@ export default function LeconsPage() {
                 )}
             </AnimatePresence>
 
-            {/* Performance Stats Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="premium-card p-6 flex flex-col justify-between space-y-4">
-                    <div className="flex justify-between items-start">
-                        <div className="p-2.5 rounded-xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] text-[var(--color-accent)]">
-                            <Star size={18} fill="currentColor" className="text-[var(--color-accent)]/40" />
-                        </div>
-                        <span className="card-title">Score de Maîtrise</span>
-                    </div>
-                    <div>
-                        <div className="primary-value">7.8/10</div>
-                        <div className="flex items-center gap-2 mt-2">
-                            <div className="h-1 flex-1 bg-[var(--color-card)] rounded-full overflow-hidden">
-                                <div className="h-full bg-emerald-400 w-[78%]" />
-                            </div>
-                            <span className="text-[10px] font-bold text-emerald-400 font-mono tracking-tighter">+12%</span>
-                        </div>
-                    </div>
-                </div>
 
-                <div className="premium-card p-6 flex flex-col justify-between space-y-4">
-                    <div className="flex justify-between items-start">
-                        <div className="p-2.5 rounded-xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)]">
-                            <Target size={18} />
-                        </div>
-                        <span className="card-title">Zones Explorées</span>
-                    </div>
-                    <div>
-                        <div className="primary-value">12 Zones</div>
-                        <p className="secondary-info mt-1 font-medium">78% du secteur parisien</p>
-                    </div>
-                </div>
-
-                <div className="premium-card p-6 flex flex-col justify-between space-y-4">
-                    <div className="flex justify-between items-start">
-                        <div className="p-2.5 rounded-xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)]">
-                            <CheckCircle2 size={18} />
-                        </div>
-                        <span className="card-title">Missions Validées</span>
-                    </div>
-                    <div>
-                        <div className="primary-value">24 Sessions</div>
-                        <p className="secondary-info mt-1 font-medium">Sur 35 prévues au total</p>
-                    </div>
-                </div>
-            </div>
 
             {/* Main History Table Block */}
             <div className="premium-card overflow-hidden">
@@ -165,7 +115,13 @@ export default function LeconsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {LESSONS.map((lesson, idx) => (
+                            {LESSONS.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="text-center py-10 text-[var(--color-text-muted)] text-sm font-medium">
+                                        Aucune leçon récente trouvée.
+                                    </td>
+                                </tr>
+                            ) : LESSONS.map((lesson, idx) => (
                                 <motion.tr
                                     key={lesson.id}
                                     initial={{ opacity: 0, x: -10 }}
@@ -188,7 +144,7 @@ export default function LeconsPage() {
                                     <td>
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-lg bg-[var(--color-card)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[10px] font-black text-[var(--color-text-muted)] group-hover:bg-[var(--color-accent)]/10 group-hover:text-[var(--color-accent)] transition-all">
-                                                {lesson.moniteur.split(' ').map(n => n[0]).join('')}
+                                                {lesson.moniteur.split(' ').map((n: string) => n[0]).join('')}
                                             </div>
                                             <span className="text-sm font-medium text-[var(--color-text-muted)]">{lesson.moniteur}</span>
                                         </div>
