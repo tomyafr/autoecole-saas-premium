@@ -48,6 +48,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="apple-touch-icon" href="/app-icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/app-icon.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/app-icon.png" />
+      </head>
       <body className={`${inter.variable} antialiased`}>
         <script
           dangerouslySetInnerHTML={{

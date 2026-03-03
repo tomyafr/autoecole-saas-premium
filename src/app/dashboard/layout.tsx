@@ -65,22 +65,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
-        const u = getUser();
-        if (!u) {
-            router.replace('/login');
-        } else {
-            // Apply Route Guards
-            if (pathname.startsWith('/dashboard/admin') && u.role !== 'admin') {
-                router.replace('/dashboard/eleve');
-                return;
+        const checkUser = () => {
+            const u = getUser();
+            if (!u) {
+                router.replace('/login');
+            } else {
+                // Apply Route Guards
+                if (pathname.startsWith('/dashboard/admin') && u.role !== 'admin') {
+                    router.replace('/dashboard/eleve');
+                    return;
+                }
+                if (pathname.startsWith('/dashboard/moniteur') && u.role !== 'moniteur') {
+                    router.replace('/dashboard/eleve');
+                    return;
+                }
+                setUser(u);
+                setLoading(false);
             }
-            if (pathname.startsWith('/dashboard/moniteur') && u.role !== 'moniteur') {
-                router.replace('/dashboard/eleve');
-                return;
-            }
-            setUser(u);
-            setLoading(false);
-        }
+        };
+
+        checkUser();
+
+        // Listen for user profile updates from settings
+        window.addEventListener('user-updated', checkUser);
+        return () => window.removeEventListener('user-updated', checkUser);
     }, [pathname, router]);
 
     const handleLogout = async () => {

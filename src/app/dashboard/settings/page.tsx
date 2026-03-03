@@ -105,6 +105,7 @@ export default function SettingsPage() {
                 setUser(updatedUser);
                 setIsUploading(false);
                 toast.success("Photo de profil mise à jour !");
+                window.dispatchEvent(new Event('user-updated'));
             };
             reader.readAsDataURL(file);
         }, 1500);
@@ -213,7 +214,6 @@ export default function SettingsPage() {
                                                 onChange={handleAvatarChange}
                                                 accept="image/*"
                                                 className="hidden"
-                                                capture="environment"
                                             />
                                         </div>
                                         <div className="text-center sm:text-left flex-1 min-w-0">
