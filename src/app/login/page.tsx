@@ -176,7 +176,7 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <div className="absolute bottom-8 text-[10px] text-gray-500 font-medium tracking-widest uppercase">
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full text-center text-[10px] text-gray-500 font-medium tracking-widest uppercase">
                     &copy; {new Date().getFullYear()} AutoDrive Pro — All rights reserved
                 </div>
             </motion.div>

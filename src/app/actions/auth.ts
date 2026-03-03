@@ -8,11 +8,11 @@ export async function authenticateServer(
     username: string,
     password: string
 ) {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-        throw new Error("La variable NEXT_PUBLIC_SUPABASE_URL n'est pas configurée.");
-    }
-
     try {
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+            console.error("ERREUR: NEXT_PUBLIC_SUPABASE_URL manquante dans Vercel");
+            return null;
+        }
         const { data: found, error } = await supabase
             .from('users')
             .select('*')
