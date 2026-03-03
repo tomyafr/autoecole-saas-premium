@@ -9,10 +9,11 @@ export async function authenticateServer(
     password: string
 ) {
     try {
-        if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-            console.error("ERREUR: NEXT_PUBLIC_SUPABASE_URL manquante dans Vercel");
-            return null;
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) {
+            console.error("ERREUR: Variables Supabase non configurées sur Vercel");
+            return null; // Retourner null au lieu de throw pour éviter le crash RSC
         }
+
         const { data: found, error } = await supabase
             .from('users')
             .select('*')
@@ -20,16 +21,24 @@ export async function authenticateServer(
             .eq('password', password)
             .single();
 
-        if (error || !found) {
+        if (error) {
+            console.warn("Supabase auth query error (likely invalid credentials):", error.message);
             return null;
         }
 
+        if (!found) return null;
+
         // Créer le JWT et le Cookie sécurisé HttpOnly
-        await createSession({
-            id: found.id,
-            role: found.role as UserRole,
-            name: found.name,
-        });
+        try {
+            await createSession({
+                id: found.id,
+                role: found.role as UserRole,
+                name: found.name,
+            });
+        } catch (sessionErr: any) {
+            console.error("Session creation failed:", sessionErr);
+            throw new Error(`Erreur de session: ${sessionErr.message}`);
+        }
 
         return {
             id: found.id,
@@ -37,9 +46,10 @@ export async function authenticateServer(
             role: found.role as UserRole,
             avatar: found.avatar || '??',
         };
-    } catch (error) {
-        console.error("Database connection error in authenticateServer:", error);
-        return null;
+    } catch (globalError: any) {
+        console.error("CRITICAL AUTH SERVER ERROR:", globalError);
+        // On renvoie l'erreur sous forme de message pour que le client l'affiche au lieu de crasher
+        throw new Error(globalError.message || "Erreur serveur inconnue");
     }
 }
 

@@ -37,12 +37,12 @@ export default function LoginPage() {
                 saveUser(user);
                 router.push(getDashboardPath(user.role));
             } else {
-                setError('Identifiants invalides');
+                setError('Identifiants invalides ou connexion impossible');
                 setLoading(false);
             }
         } catch (err: any) {
-            console.error(err);
-            setError(err.message || 'Une erreur réseau est survenue. Veuillez réessayer.');
+            console.error("Login Error details:", err);
+            setError(`Erreur Critique: ${err.message || 'Problème de communication avec le serveur'}`);
             setLoading(false);
         }
     };
@@ -176,10 +176,14 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full text-center text-[10px] text-gray-500 font-medium tracking-widest uppercase">
-                    &copy; {new Date().getFullYear()} AutoDrive Pro — All rights reserved
-                </div>
             </motion.div>
+
+            {/* Centered Footer - Fixed at bottom */}
+            <div className="fixed bottom-8 left-0 w-full flex justify-center z-50 pointer-events-none">
+                <p className="text-[10px] text-gray-500 font-medium tracking-widest uppercase text-center">
+                    &copy; 2026 AutoDrive Pro — All rights reserved
+                </p>
+            </div>
         </div>
     );
 }
