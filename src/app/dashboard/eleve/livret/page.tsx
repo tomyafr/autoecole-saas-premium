@@ -135,6 +135,7 @@ export default function LivretPedagogiquePage() {
                                 <div className="w-full md:w-64 bg-[#0B0F14] rounded-2xl p-2 border border-white/5">
                                     <SignaturePad
                                         onSave={(sig: string) => handleSignatureComplete(lesson.id, sig)}
+                                        onClose={() => { }}
                                     />
                                     <p className="text-[9px] text-center text-[#5F6B7A] font-bold uppercase tracking-[0.2em] mt-2">Signer ici pour valider</p>
                                 </div>
