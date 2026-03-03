@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogIn, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import Image from 'next/image';
 import { saveUser, getUser, getDashboardPath, logout } from '@/lib/auth';
 import { authenticateServer } from '@/app/actions/auth';
 
@@ -71,11 +72,12 @@ export default function LoginPage() {
                 <div className="flex flex-col items-center mb-10">
                     <div className="relative group mb-6 hover:scale-105 transition-transform duration-500">
                         <div className="absolute inset-0 bg-[#00F5FF]/20 blur-3xl rounded-full opacity-60 shadow-[0_0_40px_rgba(0,245,255,0.4)]" />
-                        <img
-                            src="https://i.imgur.com/ZvGdbPc.png"
+                        <Image
+                            src="/logo.svg"
                             alt="Logo AutoDrive"
                             width={88}
                             height={88}
+                            priority
                             className="relative z-10 object-contain drop-shadow-[0_0_25px_rgba(0,245,255,0.5)]"
                         />
                     </div>
