@@ -116,13 +116,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <aside className={`sidebar-layout ${mobileMenuOpen ? 'mobile-open' : ''}`}>
                 <div className="p-8 pb-10 flex items-center justify-between">
                     <div
-                        className="flex items-center gap-x-3 cursor-pointer"
+                        className="flex items-center gap-x-3 cursor-pointer overflow-hidden"
                         onClick={() => {
                             router.push(`/dashboard/${user.role}`);
                             setMobileMenuOpen(false);
                         }}
                     >
-                        <div className="relative group w-12 h-12 lg:w-16 lg:h-16 flex items-center justify-center shrink-0">
+                        <div className="relative group w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center shrink-0">
                             <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             <img
                                 src="https://uwuethmbvxomawzyuqfp.supabase.co/storage/v1/object/public/assets/logo.png"
@@ -132,7 +132,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 className="relative z-10 w-full h-full object-contain origin-center transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(0,245,255,0.3)]"
                             />
                         </div>
-                        <h1 className="text-xl lg:text-3xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none whitespace-nowrap overflow-hidden text-ellipsis">
+                        <h1 className="text-xl lg:text-2xl font-black text-[var(--color-text-primary)] tracking-tight uppercase italic leading-none whitespace-nowrap overflow-hidden text-ellipsis">
                             AUTODRIVE
                         </h1>
                     </div>
