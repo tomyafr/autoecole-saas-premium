@@ -118,25 +118,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="min-h-screen">
             <aside className={`sidebar-layout ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-                <div className="pl-2 pr-4 py-8 pb-10 flex items-center justify-between">
+                <div className="pl-0 pr-0 py-8 pb-10 flex items-center justify-between">
                     <div
-                        className="flex items-center gap-x-1 cursor-pointer"
+                        className="flex items-center gap-x-0 cursor-pointer"
                         onClick={() => {
                             router.push(`/dashboard/${user.role}`);
                             setMobileMenuOpen(false);
                         }}
                     >
-                        <div className="relative group w-14 h-14 lg:w-20 lg:h-20 flex items-center justify-center shrink-0">
+                        <div className="relative group w-16 h-16 lg:w-24 lg:h-24 flex items-center justify-center shrink-0">
                             <div className="absolute inset-0 bg-[#00F5FF]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             <img
                                 src="/logo-autodrive-removebg-preview.png"
                                 alt="Logo AutoDrive"
-                                width={100}
-                                height={100}
-                                className="relative z-10 w-full h-full object-contain origin-center transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(0,245,255,0.4)]"
+                                width={120}
+                                height={120}
+                                className="relative z-10 w-full h-full object-contain origin-center scale-110 transition-transform duration-300 group-hover:scale-125 drop-shadow-[0_0_15px_rgba(0,245,255,0.4)]"
                             />
                         </div>
-                        <h1 className="text-2xl lg:text-3xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none whitespace-nowrap">
+                        <h1 className="text-[22px] lg:text-[26px] font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none whitespace-nowrap">
                             AUTODRIVE
                         </h1>
                     </div>
