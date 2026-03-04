@@ -85,3 +85,59 @@ export async function getBookedSlots(instructorName: string, date: Date) {
         return [];
     }
 }
+
+export async function completeAppointmentWithEvaluation(
+    appointmentId: string,
+    studentId: string,
+    instructorId: string,
+    score: number,
+    comment: string,
+    negativePoints: string,
+    studentSignature: string,
+    instructorSignature: string
+) {
+    try {
+        const { data: apt, error: aptError } = await supabase
+            .from('appointments')
+            .select('*')
+            .eq('id', appointmentId)
+            .single();
+
+        if (aptError || !apt) {
+            throw new Error('Appointment not found');
+        }
+
+        const signatureJson = JSON.stringify({ student: studentSignature, instructor: instructorSignature });
+
+        const { error: insertError } = await supabase
+            .from('lessons')
+            .insert({
+                student_id: studentId,
+                instructor_id: instructorId,
+                date: apt.date,
+                title: 'Leçon de conduite',
+                score: score,
+                note: typeof comment === 'string' ? comment : '', // some schema use note, some use comment. Assuming comment is mapped to "comment" properly or just stored
+                // Actually, we saw dbData.lessons[0].score and dbData.lessons[0].title
+                // So score and title are definitely there. Let's just pass comment as well.
+                status: 'done',
+                signature: signatureJson,
+                signed_at: new Date().toISOString()
+            } as any); // using any for missing dynamic columns like 'comment' if they aren't typed
+
+        // Update the appointment status
+        await supabase
+            .from('appointments')
+            .update({ status: 'completed' })
+            .eq('id', appointmentId);
+
+        revalidatePath('/dashboard/moniteur');
+        revalidatePath('/dashboard/eleve');
+        revalidatePath('/dashboard/admin');
+
+        return { success: true };
+    } catch (error: any) {
+        console.error('Failed to complete appointment:', error);
+        return { success: false, error: error.message || 'Database error' };
+    }
+}

@@ -63,10 +63,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [unreadNotifs, setUnreadNotifs] = useState([
-        { id: 1, title: 'Mise à jour Systémique', desc: 'Les serveurs AutoDrive v2.1 sont déployés avec succès. Navigation fluide garantie.', time: 'Il y a 10 min' },
-        { id: 2, title: 'Rapport Pédagogique généré', desc: 'L\'IA a terminé l\'analyse de votre dernière session de conduite.', time: 'Il y a 2 heures' }
-    ]);
+    const [unreadNotifs, setUnreadNotifs] = useState<{ id: number; title: string; desc: string; time: string; }[]>([]);
+    const [notifsLoaded, setNotifsLoaded] = useState(false);
+
+    // Charger les notifs une fois que le user est connu
+    useEffect(() => {
+        if (!user || notifsLoaded) return;
+        const storageKey = `unreadNotifs_${user.id}`;
+        const hasBeenInitialized = localStorage.getItem(`notifs_init_${user.id}`);
+        const savedNotifs = localStorage.getItem(storageKey);
+
+        if (hasBeenInitialized) {
+            // L'utilisateur a déjà été initialisé, on charge ce qu'il reste
+            setUnreadNotifs(savedNotifs ? JSON.parse(savedNotifs) : []);
+        } else {
+            // Première fois pour cet utilisateur
+            const initialNotifs = [
+                { id: 1, title: 'Mise à jour Systémique', desc: 'Les serveurs AutoDrive v2.1 sont déployés avec succès. Navigation fluide garantie.', time: 'Il y a 10 min' },
+                { id: 2, title: 'Rapport Pédagogique généré', desc: 'L\'IA a terminé l\'analyse de votre dernière session de conduite.', time: 'Il y a 2 heures' }
+            ];
+            setUnreadNotifs(initialNotifs);
+            localStorage.setItem(storageKey, JSON.stringify(initialNotifs));
+            localStorage.setItem(`notifs_init_${user.id}`, 'true');
+        }
+        setNotifsLoaded(true);
+    }, [user, notifsLoaded]);
+
+    const updateNotifs = (newNotifs: any[]) => {
+        setUnreadNotifs(newNotifs);
+        if (user) {
+            localStorage.setItem(`unreadNotifs_${user.id}`, JSON.stringify(newNotifs));
+        }
+    };
 
     useEffect(() => {
         const checkUser = () => {
@@ -274,7 +302,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                                 unreadNotifs.map(notif => (
                                                     <div
                                                         key={notif.id}
-                                                        onClick={() => setUnreadNotifs(prev => prev.filter(n => n.id !== notif.id))}
+                                                        onClick={() => updateNotifs(unreadNotifs.filter(n => n.id !== notif.id))}
                                                         className="p-3 rounded-lg bg-[#00F5FF]/5 border border-[#00F5FF]/10 hover:bg-[#00F5FF]/10 transition-colors cursor-pointer"
                                                     >
                                                         <p className="text-xs font-bold text-white">{notif.title}</p>
@@ -293,7 +321,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                                         {unreadNotifs.length > 0 && (
                                             <button
-                                                onClick={() => setUnreadNotifs([])}
+                                                onClick={() => updateNotifs([])}
                                                 className="w-full mt-4 py-2 text-[10px] font-black text-[#5F6B7A] uppercase tracking-[0.2em] hover:text-white transition-colors border-t border-white/5"
                                             >
                                                 Tout marquer comme lu

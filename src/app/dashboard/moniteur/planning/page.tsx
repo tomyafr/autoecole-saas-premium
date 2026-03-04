@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getUser, type User } from '@/lib/auth';
 import { getInstructorDashboard } from '@/app/actions/dashboard';
 import {
@@ -23,8 +23,10 @@ import {
 
 const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
-export default function MoniteurPlanningPage() {
+function MoniteurPlanningContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const initialDate = searchParams.get('date');
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [dbData, setDbData] = useState<any>(null);
@@ -36,10 +38,27 @@ export default function MoniteurPlanningPage() {
     };
 
     const [selectedDate, setSelectedDate] = useState(() => {
+        if (initialDate) {
+            const d = new Date(initialDate);
+            if (!isNaN(d.getTime())) {
+                d.setHours(12, 0, 0, 0);
+                return d;
+            }
+        }
         const d = new Date();
         d.setHours(12, 0, 0, 0);
         return d;
     });
+
+    useEffect(() => {
+        if (initialDate) {
+            const d = new Date(initialDate);
+            if (!isNaN(d.getTime())) {
+                d.setHours(12, 0, 0, 0);
+                setSelectedDate(d);
+            }
+        }
+    }, [initialDate]);
 
     useEffect(() => {
         const u = getUser();
@@ -263,5 +282,17 @@ export default function MoniteurPlanningPage() {
                 )}
             </AnimatePresence>
         </div>
+    );
+}
+
+export default function MoniteurPlanningPage() {
+    return (
+        <Suspense fallback={
+            <div className="h-[60vh] flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        }>
+            <MoniteurPlanningContent />
+        </Suspense>
     );
 }

@@ -81,7 +81,11 @@ export default function AdminMoniteursPage() {
                         </thead>
                         <tbody>
                             {instructors.filter((inst: any) => inst.name.toLowerCase().includes(searchQuery.toLowerCase())).map((inst) => (
-                                <tr key={inst.id} className="group">
+                                <tr
+                                    key={inst.id}
+                                    className="group cursor-pointer hover:bg-white/[0.02] transition-colors"
+                                    onClick={() => router.push(`/dashboard/profile/${inst.id}`)}
+                                >
                                     <td>
                                         <div className="flex flex-col">
                                             <span className="font-semibold text-white group-hover:text-[#00F5FF] transition-colors">{inst.name}</span>

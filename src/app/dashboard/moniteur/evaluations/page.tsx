@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ClipboardCheck,
@@ -25,8 +25,15 @@ import {
 } from 'lucide-react';
 import { getUser, type User } from '@/lib/auth';
 import { getStudentsList, getStudentPedagogyData, updateStudentCompetency } from '@/app/actions/pedagogie';
+import { completeAppointmentWithEvaluation } from '@/app/actions/appointment';
+import { useSearchParams, useRouter } from 'next/navigation';
 
-export default function MoniteurEvaluationsPage() {
+function MoniteurEvaluationsContent() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const lessonId = searchParams.get('lesson_id');
+    const urlStudentId = searchParams.get('student_id');
+
     const [moniteur, setMoniteur] = useState<User | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [students, setStudents] = useState<any[]>([]);
@@ -37,17 +44,27 @@ export default function MoniteurEvaluationsPage() {
     const [actionFeedback, setActionFeedback] = useState<string | null>(null);
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
+    // Formulaire d'évaluation
+    const [evalNote, setEvalNote] = useState<number>(20);
+    const [evalComment, setEvalComment] = useState('');
+    const [evalNegatives, setEvalNegatives] = useState('');
+
     // Pour la gestion basique des signatures
     const studentCanvasRef = useRef<HTMLCanvasElement>(null);
     const instrCanvasRef = useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [activeCanvas, setActiveCanvas] = useState<'student' | 'instr' | null>(null);
+    const [studentSigned, setStudentSigned] = useState(false);
+    const [instrSigned, setInstrSigned] = useState(false);
 
     useEffect(() => {
         const u = getUser();
         if (u) setMoniteur(u);
         fetchStudents();
-    }, []);
+        if (urlStudentId) {
+            setSelectedStudentId(urlStudentId);
+        }
+    }, [urlStudentId]);
 
     useEffect(() => {
         if (selectedStudentId) {
@@ -100,6 +117,8 @@ export default function MoniteurEvaluationsPage() {
         ctx.moveTo(clientX - rect.left, clientY - rect.top);
         setIsDrawing(true);
         setActiveCanvas(type);
+        if (type === 'student') setStudentSigned(true);
+        if (type === 'instr') setInstrSigned(true);
     };
 
     const draw = (e: any, type: 'student' | 'instr') => {
@@ -131,11 +150,42 @@ export default function MoniteurEvaluationsPage() {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (type === 'student') setStudentSigned(false);
+        if (type === 'instr') setInstrSigned(false);
     };
 
-    const handleCloturer = () => {
-        setIsSignatureModalOpen(false);
-        triggerFeedback('Séance clôturée et signée numériquement avec succès.');
+    const handleCloturer = async () => {
+        if (!studentSigned || !instrSigned) {
+            triggerFeedback('Veuillez recueillir les deux signatures requises.');
+            return;
+        }
+
+        if (lessonId && selectedStudentId && moniteur) {
+            const stuStr = studentCanvasRef.current?.toDataURL('image/png') || '';
+            const instrStr = instrCanvasRef.current?.toDataURL('image/png') || '';
+
+            const res = await completeAppointmentWithEvaluation(
+                lessonId,
+                selectedStudentId,
+                moniteur.id,
+                evalNote,
+                evalComment,
+                evalNegatives,
+                stuStr,
+                instrStr
+            );
+
+            if (res.success) {
+                setIsSignatureModalOpen(false);
+                triggerFeedback('Séance clôturée et évaluée avec succès !');
+                setTimeout(() => router.push('/dashboard/moniteur'), 1500);
+            } else {
+                triggerFeedback('Erreur lors de la clôture : ' + res.error);
+            }
+        } else {
+            setIsSignatureModalOpen(false);
+            triggerFeedback('Séance clôturée (Test UI).');
+        }
     };
 
     const getLevelConfig = (level: number) => {
@@ -238,6 +288,56 @@ export default function MoniteurEvaluationsPage() {
                                     </button>
                                 </div>
                             </div>
+
+                            {/* Section Évaluation de Leçon (seulement si lessonId) */}
+                            {lessonId && (
+                                <div className="premium-card p-6 border-l-4 border-l-[#00F5FF]/50 bg-white/[0.01]">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="p-2 rounded-lg bg-white/5 text-white">
+                                            <FileText size={20} />
+                                        </div>
+                                        <div>
+                                            <h3 className="section-title">Compte-rendu de leçon</h3>
+                                            <p className="secondary-info">Remplissez ces informations avant de clôturer.</p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="text-[10px] font-black text-[#8A94A6] uppercase tracking-widest block mb-2">Note de la séance (/20)</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    max="20"
+                                                    value={evalNote}
+                                                    onChange={e => setEvalNote(Number(e.target.value))}
+                                                    className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-white focus:border-[#00F5FF]/30 transition-colors"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-black text-[#8A94A6] uppercase tracking-widest block mb-2">Commentaire global</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Bien, mais attention à la priorité..."
+                                                    value={evalComment}
+                                                    onChange={e => setEvalComment(e.target.value)}
+                                                    className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-white focus:border-[#00F5FF]/30 transition-colors"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-black text-[#8A94A6] uppercase tracking-widest block mb-2">Points à améliorer (négatifs)</label>
+                                            <textarea
+                                                rows={2}
+                                                placeholder="Contrôle des angles morts, vitesse excessive..."
+                                                value={evalNegatives}
+                                                onChange={e => setEvalNegatives(e.target.value)}
+                                                className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-white focus:border-[#00F5FF]/30 transition-colors resize-none"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Competencies Categories */}
                             <div className="space-y-12">
@@ -355,7 +455,13 @@ export default function MoniteurEvaluationsPage() {
 
                             <div className="mt-8 flex justify-end gap-4">
                                 <button onClick={() => setIsSignatureModalOpen(false)} className="px-6 py-3 rounded-xl border border-white/10 text-white text-xs font-bold uppercase hover:bg-white/5 transition-all">Annuler</button>
-                                <button onClick={handleCloturer} className="px-6 py-3 rounded-xl bg-[#00F5FF] text-black text-xs font-black uppercase tracking-widest hover:shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-all">Valider la leçon</button>
+                                <button
+                                    onClick={handleCloturer}
+                                    disabled={!studentSigned || !instrSigned}
+                                    className="px-6 py-3 rounded-xl bg-[#00F5FF] text-black text-xs font-black uppercase tracking-widest hover:shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Valider la leçon
+                                </button>
                             </div>
                         </motion.div>
                     </div>
@@ -379,5 +485,17 @@ export default function MoniteurEvaluationsPage() {
                 )}
             </AnimatePresence>
         </div>
+    );
+}
+
+export default function MoniteurEvaluationsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-[#0B0F14]">
+                <div className="w-8 h-8 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        }>
+            <MoniteurEvaluationsContent />
+        </Suspense>
     );
 }

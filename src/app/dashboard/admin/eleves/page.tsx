@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Users, GraduationCap, Search, FileText, Calendar, CheckSquare, MessageSquare, ExternalLink, Check, X as XIcon, Clock } from 'lucide-react';
 import { getStudentDocuments, updateDocumentStatus } from '@/app/actions/admin';
 import { sendWhatsAppNotification } from '@/app/actions/crm';
@@ -9,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getStudentsData, getStudentsDashboardStats } from '@/app/actions/admin';
 
 export default function AdminElevesPage() {
+    const router = useRouter();
     const [students, setStudents] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [stats, setStats] = useState({ totalStudents: 0, examReady: 0, weeklyLessons: 0 });
@@ -118,7 +120,11 @@ export default function AdminElevesPage() {
                         </thead>
                         <tbody>
                             {students.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())).map((student) => (
-                                <tr key={student.id} className="group">
+                                <tr
+                                    key={student.id}
+                                    className="group cursor-pointer hover:bg-white/[0.02] transition-colors"
+                                    onClick={() => router.push(`/dashboard/profile/${student.id}`)}
+                                >
                                     <td>
                                         <div className="flex flex-col">
                                             <span className="font-semibold text-white group-hover:text-[#00F5FF] transition-colors">{student.name}</span>

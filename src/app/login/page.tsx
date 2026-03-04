@@ -151,13 +151,17 @@ export default function LoginPage() {
                     <div className="mt-8 pt-8 border-t border-white/5">
                         <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter text-center mb-4">Accès rapide Démo</p>
                         <div className="grid grid-cols-3 gap-2">
-                            {['eleve', 'moniteur', 'admin'].map(role => (
+                            {[
+                                { label: 'Élève', username: 'tom.eleve', password: 'Blonde54' },
+                                { label: 'Moniteur', username: 'moniteur', password: 'moniteur54' },
+                                { label: 'Admin', username: 'admin', password: 'admin54' },
+                            ].map(shortcut => (
                                 <button
-                                    key={role}
-                                    onClick={() => { setUsername(role); setPassword(`${role}54`); }}
+                                    key={shortcut.label}
+                                    onClick={() => { setUsername(shortcut.username); setPassword(shortcut.password); }}
                                     className="py-2 rounded-lg bg-white/[0.01] border border-white/5 text-[9px] font-bold text-slate-500 hover:border-cyan-500/30 hover:text-cyan-400 transition-all uppercase"
                                 >
-                                    {role}
+                                    {shortcut.label}
                                 </button>
                             ))}
                         </div>

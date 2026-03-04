@@ -293,15 +293,23 @@ export async function getUsersManagementData() {
     }
 }
 
-export async function getPlanningData() {
+export async function getPlanningData(targetDate?: Date) {
     try {
-        const { data: appts } = await supabase
+        let query = supabase
             .from('appointments')
             .select('*, student:users!student_id(name), instructor:users!instructor_id(name, center_id)');
 
+        if (targetDate) {
+            const dateStr = targetDate.toISOString().split('T')[0];
+            query = query.eq('date', dateStr);
+        }
+
+        const { data: appts } = await query;
         const { data: centers } = await supabase.from('centers').select('*');
 
-        return (appts || []).map(a => {
+        const sortedAppts = (appts || []).sort((a, b) => a.time.localeCompare(b.time));
+
+        return sortedAppts.map(a => {
             const instructorName = (a.instructor as any)?.name || 'Inconnu';
             const studentName = (a.student as any)?.name || '-';
             const center = (centers || []).find(c => c.id === (a.instructor as any)?.center_id);

@@ -141,6 +141,7 @@ export default function MoniteurDashboard() {
 
     const todaySessions = todaySessionsAll.map((app: any) => ({
         id: app.id,
+        studentId: app.student?.id || '',
         name: app.student?.name || 'Inconnu',
         time: app.time,
         type: app.type,
@@ -233,7 +234,12 @@ export default function MoniteurDashboard() {
                                                         {session.name.split(' ').map((n: string) => n[0]).join('')}
                                                     </div>
                                                     <div className="flex flex-col min-w-0">
-                                                        <span className="text-sm font-semibold text-white truncate">{session.name}</span>
+                                                        <span
+                                                            className="text-sm font-semibold text-white truncate cursor-pointer hover:text-[#00F5FF] hover:underline transition-colors"
+                                                            onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/profile/${session.studentId}`); }}
+                                                        >
+                                                            {session.name}
+                                                        </span>
                                                         <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-0.5">{session.type}</span>
                                                     </div>
                                                 </div>
@@ -255,11 +261,11 @@ export default function MoniteurDashboard() {
                                                     </div>
                                                 ) : (
                                                     <button
-                                                        onClick={() => setSigningLessonId(session.id)}
+                                                        onClick={() => router.push(`/dashboard/moniteur/evaluations?student_id=${session.studentId}&lesson_id=${session.id}`)}
                                                         className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#00F5FF]/10 text-[#00F5FF] text-[10px] font-black uppercase tracking-widest hover:bg-[#00F5FF]/20 transition-all border border-[#00F5FF]/20 group/sign"
                                                     >
                                                         <Plus size={14} className="group-hover/sign:rotate-90 transition-transform" />
-                                                        Signer
+                                                        Évaluer
                                                     </button>
                                                 )}
                                             </td>
@@ -323,7 +329,7 @@ export default function MoniteurDashboard() {
                                 return (
                                     <div
                                         key={i}
-                                        onClick={() => router.push('/dashboard/moniteur/planning')}
+                                        onClick={() => router.push(`/dashboard/moniteur/planning?date=${dateStr}`)}
                                         className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 cursor-pointer
                                         ${i === 0 ? 'bg-[var(--color-accent)]/5 border-[var(--color-accent)]/20 shadow-[0_0_20px_rgba(var(--color-accent-rgb),0.05)]' : 'bg-white/[0.01] border-[var(--color-border-subtle)] hover:border-white/20'}`}
                                     >
