@@ -127,12 +127,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <img
                                 src="https://uwuethmbvxomawzyuqfp.supabase.co/storage/v1/object/public/assets/logo.png"
                                 alt="Logo AutoDrive"
-                                width={80}
-                                height={80}
-                                className="relative z-10 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(0,245,255,0.3)]"
+                                width={120}
+                                height={120}
+                                className="relative z-10 w-24 h-24 lg:w-28 lg:h-28 object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(0,245,255,0.3)]"
                             />
                         </div>
-                        <h1 className="text-xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none">
+                        <h1 className="text-2xl lg:text-3xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none">
                             AUTODRIVE
                         </h1>
                     </div>
