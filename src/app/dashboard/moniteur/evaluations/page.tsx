@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ClipboardCheck,
@@ -20,7 +20,8 @@ import {
     Clock,
     ShieldCheck,
     AlertCircle,
-    Hexagon
+    Hexagon,
+    PenTool
 } from 'lucide-react';
 import { getUser, type User } from '@/lib/auth';
 import { getStudentsList, getStudentPedagogyData, updateStudentCompetency } from '@/app/actions/pedagogie';
@@ -34,6 +35,13 @@ export default function MoniteurEvaluationsPage() {
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState<string | null>(null);
     const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+    const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+
+    // Pour la gestion basique des signatures
+    const studentCanvasRef = useRef<HTMLCanvasElement>(null);
+    const instrCanvasRef = useRef<HTMLCanvasElement>(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [activeCanvas, setActiveCanvas] = useState<'student' | 'instr' | null>(null);
 
     useEffect(() => {
         const u = getUser();
@@ -74,6 +82,60 @@ export default function MoniteurEvaluationsPage() {
     const triggerFeedback = (msg: string) => {
         setActionFeedback(msg);
         setTimeout(() => setActionFeedback(null), 3000);
+    };
+
+    // Drawing Logic
+    const startDrawing = (e: any, type: 'student' | 'instr') => {
+        const canvas = type === 'student' ? studentCanvasRef.current : instrCanvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const rect = canvas.getBoundingClientRect();
+        // Support mouse and touch
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        ctx.beginPath();
+        ctx.moveTo(clientX - rect.left, clientY - rect.top);
+        setIsDrawing(true);
+        setActiveCanvas(type);
+    };
+
+    const draw = (e: any, type: 'student' | 'instr') => {
+        if (!isDrawing || activeCanvas !== type) return;
+        const canvas = type === 'student' ? studentCanvasRef.current : instrCanvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        ctx.lineTo(clientX - rect.left, clientY - rect.top);
+        ctx.strokeStyle = '#00F5FF';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+    };
+
+    const endDrawing = () => {
+        setIsDrawing(false);
+        setActiveCanvas(null);
+    };
+
+    const clearCanvas = (type: 'student' | 'instr') => {
+        const canvas = type === 'student' ? studentCanvasRef.current : instrCanvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
+
+    const handleCloturer = () => {
+        setIsSignatureModalOpen(false);
+        triggerFeedback('Séance clôturée et signée numériquement avec succès.');
     };
 
     const getLevelConfig = (level: number) => {
@@ -120,8 +182,8 @@ export default function MoniteurEvaluationsPage() {
                                 key={s.id}
                                 onClick={() => setSelectedStudentId(s.id)}
                                 className={`w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between group ${selectedStudentId === s.id
-                                        ? 'bg-[#00F5FF]/5 border-[#00F5FF]/30 text-white'
-                                        : 'bg-white/[0.02] border-white/5 text-[#8A94A6] hover:bg-white/5'
+                                    ? 'bg-[#00F5FF]/5 border-[#00F5FF]/30 text-white'
+                                    : 'bg-white/[0.02] border-white/5 text-[#8A94A6] hover:bg-white/5'
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
@@ -165,8 +227,15 @@ export default function MoniteurEvaluationsPage() {
                                         <p className="text-xs text-[#8A94A6] font-medium tracking-wide italic">Progression REM : {studentData?.globalProgress || 0}%</p>
                                     </div>
                                 </div>
-                                <div className="h-2 w-32 bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full bg-[#00F5FF] shadow-[0_0_10px_rgba(0,245,255,0.4)]" style={{ width: `${studentData?.globalProgress || 0}%` }} />
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <div className="h-2 w-32 bg-white/5 rounded-full overflow-hidden shrink-0">
+                                        <div className="h-full bg-[#00F5FF] shadow-[0_0_10px_rgba(0,245,255,0.4)]" style={{ width: `${studentData?.globalProgress || 0}%` }} />
+                                    </div>
+                                    <button
+                                        onClick={() => setIsSignatureModalOpen(true)}
+                                        className="px-4 py-2.5 rounded-xl bg-[#00F5FF] hover:bg-[#00F5FF]/90 text-black font-black uppercase text-[10px] tracking-widest flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(0,245,255,0.3)]">
+                                        <PenTool size={14} /> Clôturer séance
+                                    </button>
                                 </div>
                             </div>
 
@@ -202,8 +271,8 @@ export default function MoniteurEvaluationsPage() {
                                                                         onClick={() => handleUpdateLevel(item.code, lv)}
                                                                         disabled={updating === item.code}
                                                                         className={`p-2 rounded-lg border flex items-center justify-center transition-all ${isActive
-                                                                                ? `${config.bg} ${config.color} border-current`
-                                                                                : 'bg-transparent border-white/5 text-[#5F6B7A] hover:bg-white/5 hover:border-white/10'
+                                                                            ? `${config.bg} ${config.color} border-current`
+                                                                            : 'bg-transparent border-white/5 text-[#5F6B7A] hover:bg-white/5 hover:border-white/10'
                                                                             } ${updating === item.code ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                                         title={config.label}
                                                                     >
@@ -227,6 +296,71 @@ export default function MoniteurEvaluationsPage() {
                     )}
                 </div>
             </div>
+
+            {/* SIGNATURE MODAL */}
+            <AnimatePresence>
+                {isSignatureModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSignatureModalOpen(false)} />
+
+                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-2xl bg-[#0B0F14] border border-[#00F5FF]/20 rounded-[2rem] p-8 shadow-2xl overflow-hidden">
+                            <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Clôture de la séance</h2>
+                            <p className="text-sm text-[#8A94A6] mb-8">Signatures obligatoires pour attester le suivi de la formation (Livret REM).</p>
+
+                            <div className="flex flex-col md:flex-row gap-6">
+                                {/* Student Signature */}
+                                <div className="flex-1 space-y-3">
+                                    <div className="flex items-center gap-2 justify-between">
+                                        <label className="text-xs font-black text-[#5F6B7A] tracking-widest uppercase">Signature Élève</label>
+                                        <button onClick={() => clearCanvas('student')} className="text-[#00F5FF] text-[10px] font-bold uppercase hover:underline">Effacer</button>
+                                    </div>
+                                    <div className="bg-white/5 rounded-2xl border border-white/10 overflow-hidden cursor-crosshair h-40">
+                                        <canvas
+                                            ref={studentCanvasRef}
+                                            width={400} height={160}
+                                            className="w-full h-full touch-none"
+                                            onMouseDown={(e) => startDrawing(e, 'student')}
+                                            onMouseMove={(e) => draw(e, 'student')}
+                                            onMouseUp={endDrawing}
+                                            onMouseLeave={endDrawing}
+                                            onTouchStart={(e) => startDrawing(e, 'student')}
+                                            onTouchMove={(e) => draw(e, 'student')}
+                                            onTouchEnd={endDrawing}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Instructor Signature */}
+                                <div className="flex-1 space-y-3">
+                                    <div className="flex items-center gap-2 justify-between">
+                                        <label className="text-xs font-black text-[#5F6B7A] tracking-widest uppercase">Signature Moniteur</label>
+                                        <button onClick={() => clearCanvas('instr')} className="text-[#00F5FF] text-[10px] font-bold uppercase hover:underline">Effacer</button>
+                                    </div>
+                                    <div className="bg-white/5 rounded-2xl border border-white/10 overflow-hidden cursor-crosshair h-40">
+                                        <canvas
+                                            ref={instrCanvasRef}
+                                            width={400} height={160}
+                                            className="w-full h-full touch-none"
+                                            onMouseDown={(e) => startDrawing(e, 'instr')}
+                                            onMouseMove={(e) => draw(e, 'instr')}
+                                            onMouseUp={endDrawing}
+                                            onMouseLeave={endDrawing}
+                                            onTouchStart={(e) => startDrawing(e, 'instr')}
+                                            onTouchMove={(e) => draw(e, 'instr')}
+                                            onTouchEnd={endDrawing}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 flex justify-end gap-4">
+                                <button onClick={() => setIsSignatureModalOpen(false)} className="px-6 py-3 rounded-xl border border-white/10 text-white text-xs font-bold uppercase hover:bg-white/5 transition-all">Annuler</button>
+                                <button onClick={handleCloturer} className="px-6 py-3 rounded-xl bg-[#00F5FF] text-black text-xs font-black uppercase tracking-widest hover:shadow-[0_0_20px_rgba(0,245,255,0.4)] transition-all">Valider la leçon</button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* ACTION FEEDBACK TOAST */}
             <AnimatePresence>

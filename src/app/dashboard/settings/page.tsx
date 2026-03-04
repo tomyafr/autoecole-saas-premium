@@ -37,6 +37,7 @@ export default function SettingsPage() {
     const [currentTime, setCurrentTime] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [pushEnabled, setPushEnabled] = useState(false);
 
     useEffect(() => {
         const now = new Date();
@@ -50,6 +51,10 @@ export default function SettingsPage() {
         } else {
             // If No user found in Settings, layout will handle logout but let's be safe
             router.replace('/login');
+        }
+
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            setPushEnabled(Notification.permission === 'granted');
         }
     }, [router]);
 
@@ -109,6 +114,28 @@ export default function SettingsPage() {
             };
             reader.readAsDataURL(file);
         }, 1500);
+    };
+
+    const handleEnablePush = async () => {
+        if (!('Notification' in window)) {
+            toast.error("Votre navigateur ne supporte pas les notifications.");
+            return;
+        }
+
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            setPushEnabled(true);
+            toast.success("Notifications natives activées !");
+
+            // On envoie une notification de test direct
+            new Notification('AutoDrive Pro', {
+                body: "Les notifications sont activées avec succès !",
+                icon: "/app-icon-192.png"
+            });
+        } else {
+            setPushEnabled(false);
+            toast.error("Permission refusée. Vous devez l'autoriser dans les réglages.");
+        }
     };
 
     const sections = [
@@ -352,10 +379,22 @@ export default function SettingsPage() {
                                     </div>
 
                                     <div className="space-y-6">
+                                        <div onClick={handleEnablePush} className="p-6 rounded-2xl bg-[var(--color-card)] border border-[#00F5FF]/10 flex items-center justify-between gap-4 transition-all hover:border-[#00F5FF]/40 cursor-pointer shadow-[0_0_15px_rgba(0,245,255,0.05)]">
+                                            <div>
+                                                <h4 className="flex items-center gap-2 text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">
+                                                    <Smartphone size={16} className="text-[#00F5FF]" /> Notifications Push PWA
+                                                </h4>
+                                                <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">Recevez des alertes en temps réel, même application fermée.</p>
+                                            </div>
+                                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${pushEnabled ? 'bg-[#00F5FF]' : 'bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)]'}`}>
+                                                <div className={`w-4 h-4 rounded-full transition-transform ${pushEnabled ? 'translate-x-6 bg-[#0B0F14]' : 'bg-[#5F6B7A]'}`} />
+                                            </div>
+                                        </div>
+
                                         {[
-                                            { title: 'Rappels de leçons (SMS / WhatsApp)', desc: 'Reçois un message 24h avant chaque heure de conduite', active: true },
+                                            { title: 'Factures E-mail Automatiques', desc: 'Envoi des PDF validés sur votre adresse mail.', active: true },
+                                            { title: 'Rappels de leçons à 24h', desc: 'Prévient automatiquement lors d\'une session imminente', active: true },
                                             { title: 'Nouvelles disponibilités', desc: 'Alertes lors de l\'ajout de nouveaux créneaux', active: false },
-                                            { title: 'Rapports hebdomadaires', desc: 'Analyse synthétique de ta progression par email', active: true }
                                         ].map((setting, idx) => (
                                             <div key={idx} className="p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] flex items-center justify-between gap-4 transition-all hover:border-[#00F5FF]/20">
                                                 <div>
@@ -417,6 +456,23 @@ export default function SettingsPage() {
                                                 </div>
                                                 <button className="px-4 py-2.5 rounded-lg border border-red-500/20 text-red-500 text-xs font-bold uppercase hover:bg-red-500/10 transition-colors">
                                                     Forcer la déconnexion
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-6 border-t border-[#00F5FF]/10">
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                                <div>
+                                                    <h4 className="flex items-center gap-2 text-sm font-bold text-[#00F5FF] uppercase tracking-wide">
+                                                        <Shield size={16} /> Registre RGPD & Données
+                                                    </h4>
+                                                    <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">Accédez à votre centralisation de données personnelles.</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => router.push('/dashboard/settings/rgpd')}
+                                                    className="px-4 py-2.5 rounded-lg bg-[#00F5FF]/10 text-[#00F5FF] text-xs font-bold uppercase hover:bg-[#00F5FF]/20 border border-[#00F5FF]/30 transition-all flex items-center gap-2"
+                                                >
+                                                    Ouvrir le registre <ChevronRight size={14} />
                                                 </button>
                                             </div>
                                         </div>

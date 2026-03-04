@@ -64,6 +64,97 @@ export default function ElevePaiementsPage() {
         }
     };
 
+    const generateInvoice = async (invoice: any) => {
+        setActionFeedback("Génération de la facture PDF et envoi par email...");
+
+        try {
+            // Import dynamique pour éviter les erreurs Server-Side Rendering avec Next.js
+            const { jsPDF } = await import('jspdf');
+            const doc = new jsPDF();
+
+            // Design de la Facture
+            doc.setFillColor(11, 15, 20); // Fond sombre AutoDrive
+            doc.rect(0, 0, 210, 40, 'F');
+
+            doc.setTextColor(0, 245, 255); // Cyan
+            doc.setFontSize(24);
+            doc.setFont("helvetica", "bold");
+            doc.text("AUTODRIVE PRO", 14, 25);
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("FACTURE", 170, 25);
+
+            // Contenu
+            doc.setTextColor(50, 50, 50);
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text("Détails de la Facture", 14, 60);
+
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Référence : ${invoice.id}`, 14, 75);
+            doc.text(`Date d'émission : ${invoice.date}`, 14, 85);
+            doc.text(`Élève : ${user?.name || "Client"}`, 14, 95);
+
+            // Ligne de séparation
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, 110, 196, 110);
+
+            // Description
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Désignation", 14, 125);
+            doc.text("Total TTC", 170, 125);
+
+            doc.setFont("helvetica", "normal");
+            doc.text(invoice.type, 14, 140);
+            doc.text(invoice.amount, 170, 140);
+
+            doc.line(14, 160, 196, 160);
+
+            // Total
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text("NET A PAYER", 120, 180);
+            doc.setTextColor(0, 200, 0);
+            doc.text(invoice.amount, 170, 180);
+
+            // Footer
+            doc.setTextColor(150, 150, 150);
+            doc.setFontSize(9);
+            doc.text("AutoDrive Pro - Numéro de SIRET : 123 456 789 00012", 105, 280, { align: "center" });
+
+            // 1) Télécharger sur l'appareil
+            const fileName = `Facture_${invoice.id.replace('#', '')}.pdf`;
+            doc.save(fileName);
+
+            // 2) Génération du Base64 pour l'envoi par email
+            const pdfBase64 = doc.output('datauristring');
+
+            // 3) Envoi à l'API backend
+            fetch('/api/email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    to: 'ton_email@exemple.com', // Remplaçable par l'email de l'élève (user.email)
+                    subject: `Votre facture AutoDrive ${invoice.id}`,
+                    html: `<h3>Bonjour ${user?.name},</h3><p>Veuillez trouver ci-joint votre facture <strong>${invoice.id}</strong> d'un montant de <strong>${invoice.amount}</strong>.</p><p>Cordialement,<br>L'équipe AutoDrive Pro</p>`,
+                    attachmentBase64: pdfBase64,
+                    attachmentName: fileName
+                })
+            });
+
+            setTimeout(() => setActionFeedback(null), 3000);
+
+        } catch (e) {
+            console.error("Erreur PDF:", e);
+            setActionFeedback("Erreur lors de la génération de la facture.");
+            setTimeout(() => setActionFeedback(null), 3000);
+        }
+    };
+
     if (loading || !user || !dbData) {
         return (
             <div className="h-[60vh] flex items-center justify-center">
@@ -186,7 +277,7 @@ export default function ElevePaiementsPage() {
                                                 </div>
                                             </td>
                                             <td className="text-right">
-                                                <button onClick={() => triggerFeedback("Génération de la facture en cours...")} className="p-2.5 rounded-xl bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all">
+                                                <button onClick={() => generateInvoice(inv)} className="p-2.5 rounded-xl bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all" title="Télécharger & Envoyer par email">
                                                     <FileText size={18} />
                                                 </button>
                                             </td>

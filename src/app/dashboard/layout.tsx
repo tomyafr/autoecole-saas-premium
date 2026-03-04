@@ -122,17 +122,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             setMobileMenuOpen(false);
                         }}
                     >
-                        <div className="relative group w-[100px] h-[100px] lg:w-[120px] lg:h-[120px] flex items-center justify-center -ml-4">
+                        <div className="relative group w-12 h-12 lg:w-16 lg:h-16 flex items-center justify-center shrink-0">
                             <div className="absolute inset-0 bg-[#00F5FF]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             <img
                                 src="https://uwuethmbvxomawzyuqfp.supabase.co/storage/v1/object/public/assets/logo.png"
                                 alt="Logo AutoDrive"
-                                width={200}
-                                height={200}
-                                className="relative z-10 w-full h-full object-contain scale-[1.5] lg:scale-[1.8] origin-center transition-transform duration-300 group-hover:scale-[1.6] lg:group-hover:scale-[1.9] drop-shadow-[0_0_15px_rgba(0,245,255,0.3)]"
+                                width={80}
+                                height={80}
+                                className="relative z-10 w-full h-full object-contain origin-center transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(0,245,255,0.3)]"
                             />
                         </div>
-                        <h1 className="text-2xl lg:text-3xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none ml-2">
+                        <h1 className="text-xl lg:text-3xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase italic leading-none whitespace-nowrap overflow-hidden text-ellipsis">
                             AUTODRIVE
                         </h1>
                     </div>
