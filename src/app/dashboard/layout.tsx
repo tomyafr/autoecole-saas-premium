@@ -63,6 +63,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [unreadNotifs, setUnreadNotifs] = useState([
+        { id: 1, title: 'Mise à jour Systémique', desc: 'Les serveurs AutoDrive v2.1 sont déployés avec succès. Navigation fluide garantie.', time: 'Il y a 10 min' },
+        { id: 2, title: 'Rapport Pédagogique généré', desc: 'L\'IA a terminé l\'analyse de votre dernière session de conduite.', time: 'Il y a 2 heures' }
+    ]);
 
     useEffect(() => {
         const checkUser = () => {
@@ -114,9 +118,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="min-h-screen">
             <aside className={`sidebar-layout ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-                <div className="px-6 py-8 pb-10 flex items-center justify-between">
+                <div className="px-4 py-8 pb-10 flex items-center justify-between">
                     <div
-                        className="flex items-center gap-x-4 cursor-pointer"
+                        className="flex items-center gap-x-2 cursor-pointer"
                         onClick={() => {
                             router.push(`/dashboard/${user.role}`);
                             setMobileMenuOpen(false);
@@ -235,7 +239,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 className="relative w-8 h-8 flex items-center justify-center text-[#8A94A6] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-border-subtle)] rounded-full transition-colors z-50"
                             >
                                 <Bell size={20} />
-                                <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#00F5FF] rounded-full shadow-[0_0_8px_rgba(0,245,255,0.8)] border border-[#0B0F14]"></div>
+                                {unreadNotifs.length > 0 && (
+                                    <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#00F5FF] rounded-full shadow-[0_0_8px_rgba(0,245,255,0.8)] border border-[#0B0F14]"></div>
+                                )}
                             </button>
 
                             <AnimatePresence>
@@ -251,7 +257,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                         <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
                                             <div className="flex flex-col">
                                                 <h4 className="text-xs font-bold text-white uppercase tracking-widest">Centre de contrôle</h4>
-                                                <span className="text-[10px] text-[#00F5FF] font-black uppercase mt-0.5">2 Nouvelles</span>
+                                                <span className="text-[10px] font-black uppercase mt-0.5 text-[#00F5FF]">
+                                                    {unreadNotifs.length > 0 ? `${unreadNotifs.length} NOUVELLES` : '0 NOUVELLES'}
+                                                </span>
                                             </div>
                                             <button
                                                 onClick={() => setNotificationsOpen(false)}
@@ -260,21 +268,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                                 <X size={14} />
                                             </button>
                                         </div>
+
                                         <div className="space-y-3">
-                                            <div className="p-3 rounded-lg bg-[#00F5FF]/5 border border-[#00F5FF]/10 hover:bg-[#00F5FF]/10 transition-colors cursor-pointer">
-                                                <p className="text-xs font-bold text-white">Mise à jour Systémique</p>
-                                                <p className="text-[10px] text-[#8A94A6] mt-1 leading-relaxed">Les serveurs AutoDrive v2.1 sont déployés avec succès. Navigation fluide garantie.</p>
-                                                <span className="text-[8px] text-[#5F6B7A] uppercase font-black tracking-widest mt-2 block">Il y a 10 min</span>
-                                            </div>
-                                            <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/5 transition-colors cursor-pointer">
-                                                <p className="text-xs font-bold text-white">Rapport Pédagogique généré</p>
-                                                <p className="text-[10px] text-[#8A94A6] mt-1 leading-relaxed">L'IA a terminé l'analyse de votre dernière session de conduite.</p>
-                                                <span className="text-[8px] text-[#5F6B7A] uppercase font-black tracking-widest mt-2 block">Il y a 2 heures</span>
-                                            </div>
+                                            {unreadNotifs.length > 0 ? (
+                                                unreadNotifs.map(notif => (
+                                                    <div
+                                                        key={notif.id}
+                                                        onClick={() => setUnreadNotifs(prev => prev.filter(n => n.id !== notif.id))}
+                                                        className="p-3 rounded-lg bg-[#00F5FF]/5 border border-[#00F5FF]/10 hover:bg-[#00F5FF]/10 transition-colors cursor-pointer"
+                                                    >
+                                                        <p className="text-xs font-bold text-white">{notif.title}</p>
+                                                        <p className="text-[10px] text-[#8A94A6] mt-1 leading-relaxed">{notif.desc}</p>
+                                                        <span className="text-[8px] text-[#5F6B7A] uppercase font-black tracking-widest mt-2 block">{notif.time}</span>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="p-4 rounded-lg bg-white/5 text-center flex flex-col items-center justify-center">
+                                                    <Bell size={24} className="text-[#5F6B7A] mb-2 opacity-30" />
+                                                    <p className="text-xs text-[#8A94A6] font-medium">Vous êtes à jour.</p>
+                                                    <p className="text-[10px] text-[#5F6B7A] mt-1">Aucune nouvelle notification.</p>
+                                                </div>
+                                            )}
                                         </div>
-                                        <button className="w-full mt-4 py-2 text-[10px] font-black text-[#5F6B7A] uppercase tracking-[0.2em] hover:text-white transition-colors border-t border-white/5">
-                                            Tout marquer comme lu
-                                        </button>
+
+                                        {unreadNotifs.length > 0 && (
+                                            <button
+                                                onClick={() => setUnreadNotifs([])}
+                                                className="w-full mt-4 py-2 text-[10px] font-black text-[#5F6B7A] uppercase tracking-[0.2em] hover:text-white transition-colors border-t border-white/5"
+                                            >
+                                                Tout marquer comme lu
+                                            </button>
+                                        )}
                                     </motion.div>
                                 )}
                             </AnimatePresence>
