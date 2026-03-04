@@ -39,6 +39,11 @@ export default function SettingsPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [pushEnabled, setPushEnabled] = useState(false);
 
+    // Etats des alertes supplementaires
+    const [emailInvoicesEnabled, setEmailInvoicesEnabled] = useState(true);
+    const [lessonRemindersEnabled, setLessonRemindersEnabled] = useState(true);
+    const [newSlotsEnabled, setNewSlotsEnabled] = useState(false);
+
     useEffect(() => {
         const now = new Date();
         setCurrentTime(`Aujourd'hui, ${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`);
@@ -392,16 +397,16 @@ export default function SettingsPage() {
                                         </div>
 
                                         {[
-                                            { title: 'Factures E-mail Automatiques', desc: 'Envoi des PDF validés sur votre adresse mail.', active: true },
-                                            { title: 'Rappels de leçons à 24h', desc: 'Prévient automatiquement lors d\'une session imminente', active: true },
-                                            { title: 'Nouvelles disponibilités', desc: 'Alertes lors de l\'ajout de nouveaux créneaux', active: false },
-                                        ].map((setting, idx) => (
-                                            <div key={idx} className="p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] flex items-center justify-between gap-4 transition-all hover:border-[#00F5FF]/20">
+                                            { id: 'emailIn', title: 'Factures E-mail Automatiques', desc: 'Envoi des PDF validés sur votre adresse mail.', active: emailInvoicesEnabled, toggle: () => setEmailInvoicesEnabled(!emailInvoicesEnabled) },
+                                            { id: 'lessonRm', title: 'Rappels de leçons à 24h', desc: 'Prévient automatiquement lors d\'une session imminente', active: lessonRemindersEnabled, toggle: () => setLessonRemindersEnabled(!lessonRemindersEnabled) },
+                                            { id: 'newSlots', title: 'Nouvelles disponibilités', desc: 'Alertes lors de l\'ajout de nouveaux créneaux', active: newSlotsEnabled, toggle: () => setNewSlotsEnabled(!newSlotsEnabled) },
+                                        ].map((setting) => (
+                                            <div key={setting.id} onClick={setting.toggle} className="p-6 rounded-2xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] flex items-center justify-between gap-4 transition-all hover:border-[#00F5FF]/20 cursor-pointer">
                                                 <div>
                                                     <h4 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">{setting.title}</h4>
                                                     <p className="text-[10px] text-[#5F6B7A] font-medium mt-1">{setting.desc}</p>
                                                 </div>
-                                                <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${setting.active ? 'bg-[#00F5FF]' : 'bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)]'}`}>
+                                                <div className={`shrink-0 w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${setting.active ? 'bg-[#00F5FF]' : 'bg-[var(--color-sidebar)] border border-[var(--color-border-subtle)]'}`}>
                                                     <div className={`w-4 h-4 rounded-full transition-transform ${setting.active ? 'translate-x-6 bg-[#0B0F14]' : 'bg-[#5F6B7A]'}`} />
                                                 </div>
                                             </div>
