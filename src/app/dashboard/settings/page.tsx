@@ -258,7 +258,7 @@ export default function SettingsPage() {
                                             />
                                         </div>
                                         <div className="text-center sm:text-left flex-1 min-w-0">
-                                            <h3 className="text-3xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase">{user.name}</h3>
+                                            <h3 className="text-3xl font-black text-[var(--color-text-primary)] tracking-tighter uppercase">{name}</h3>
                                             <div className="flex flex-wrap justify-center sm:justify-start gap-4 mt-8">
                                                 <div className="px-4 py-2 rounded-xl bg-[#00F5FF]/10 border border-[#00F5FF]/20 text-[#00F5FF] text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                                                     <Hexagon size={12} fill="currentColor" />
