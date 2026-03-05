@@ -13,7 +13,8 @@ import {
     Hexagon,
     FileText,
     Clock,
-    AlertCircle
+    AlertCircle,
+    X
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -21,7 +22,6 @@ import { getUser, type User } from '@/lib/auth';
 import { getStudentDashboard } from '@/app/actions/dashboard';
 import Link from 'next/link';
 import { AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
 import { getStudentPedagogyData } from '@/app/actions/pedagogie';
 
 export default function EleveDashboard() {
@@ -58,15 +58,12 @@ export default function EleveDashboard() {
             const data = parsed.data;
 
             if (!data) {
-                // This means the user ID in localStorage does not exist in the DB (like after a DB reset/seed)
-                // Force logout to re-authenticate with the correct Database IDs.
                 localStorage.removeItem('autodrive_user');
                 router.replace('/login');
                 return;
             }
             setDbData(data);
 
-            // Fetch pedagogy data
             const peda = await getStudentPedagogyData(userId);
             if (peda) setPedagogyData(peda);
         } catch (error: any) {
@@ -104,10 +101,16 @@ export default function EleveDashboard() {
     }
 
     // Derived stats from DB
-    const hoursDone = dbData.lessons?.length || 0;
-    const nextLesson = dbData.appointmentsAsStudent?.[0];
-    const rawAvgScore = dbData.lessons?.length > 0
-        ? (dbData.lessons.reduce((acc: number, l: any) => acc + (l.score || 0), 0) / dbData.lessons.length)
+    const completedAppts = dbData.appointmentsAsStudent?.filter((a: any) => a.status === 'completed') || [];
+    const pendingAppts = dbData.appointmentsAsStudent?.filter((a: any) => a.status === 'pending') || [];
+
+    // On additionne les leçons validées et les rendez-vous marqués terminés (par précaution)
+    const hoursDone = (dbData.lessons?.length || 0) + completedAppts.length;
+    const nextLesson = pendingAppts[0];
+
+    const lessonsWithScores = dbData.lessons?.filter((l: any) => l.score != null) || [];
+    const rawAvgScore = lessonsWithScores.length > 0
+        ? (lessonsWithScores.reduce((acc: number, l: any) => acc + l.score, 0) / lessonsWithScores.length)
         : 0;
     const avgScore = rawAvgScore % 1 === 0 ? rawAvgScore.toFixed(0) : rawAvgScore.toFixed(1);
 
@@ -120,43 +123,29 @@ export default function EleveDashboard() {
 
     return (
         <div className="space-y-10 group/dashboard">
-            {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
                     <h1 className="page-title">Tableau de bord</h1>
                     <p className="text-sm text-[#8A94A6] mt-1 font-medium">Bon retour parmi nous, {dbData.name?.split(' ')[0] || user.name}. Voici votre progression en temps réel.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4 md:mt-0 w-full md:w-auto">
-                    <button
-                        onClick={() => router.push('/dashboard/eleve/documents')}
-                        className="btn-secondary"
-                    >
+                    <button onClick={() => router.push('/dashboard/eleve/documents')} className="btn-secondary">
                         <FileText size={16} />
                         Documents
                     </button>
-                    <button
-                        onClick={() => router.push('/dashboard/eleve/livret')}
-                        className="btn-secondary"
-                    >
+                    <button onClick={() => router.push('/dashboard/eleve/livret')} className="btn-secondary">
                         <Hexagon size={16} />
                         Dossier Pédagogique
                     </button>
-                    <button
-                        onClick={() => router.push('/dashboard/eleve/reservation')}
-                        className="btn-primary"
-                    >
+                    <button onClick={() => router.push('/dashboard/eleve/reservation')} className="btn-primary">
                         Nouvelle session
                     </button>
                 </div>
             </div>
 
-            {/* Tactical Grid Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
-                    <div
-                        key={i}
-                        className="premium-card p-6 flex flex-col justify-between space-y-4 min-h-[160px]"
-                    >
+                    <div key={i} className="premium-card p-6 flex flex-col justify-between space-y-4 min-h-[160px]">
                         <div className="flex justify-between items-start">
                             <div className={`p-2.5 rounded-xl bg-white/[0.03] border border-white/5 ${stat.color}`}>
                                 {stat.icon}
@@ -172,7 +161,6 @@ export default function EleveDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Visual Training Arc */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="premium-card p-8">
                         <div className="flex justify-between items-center mb-10">
@@ -228,10 +216,7 @@ export default function EleveDashboard() {
                     <div className="premium-card overflow-hidden">
                         <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
                             <h3 className="section-title">Dernières missions</h3>
-                            <Link
-                                href="/dashboard/eleve/lecons"
-                                className="text-xs font-bold text-[#00F5FF] hover:underline uppercase tracking-wider"
-                            >
+                            <Link href="/dashboard/eleve/lecons" className="text-xs font-bold text-[#00F5FF] hover:underline uppercase tracking-wider">
                                 Toutes
                             </Link>
                         </div>
@@ -263,7 +248,7 @@ export default function EleveDashboard() {
                                             <td><span className={`status-badge ${lesson.status === 'done' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/10 text-white'}`}>{lesson.status === 'done' ? 'Effectué' : 'Prévu'}</span></td>
                                         </tr>
                                     ))}
-                                    {dbData.lessons.length === 0 && (
+                                    {dbData.lessons?.length === 0 && (
                                         <tr>
                                             <td colSpan={4} className="text-center py-10 text-xs text-[#5F6B7A]">Aucune leçon effectuée</td>
                                         </tr>
@@ -274,7 +259,6 @@ export default function EleveDashboard() {
                     </div>
                 </div>
 
-                {/* Right Rail Context */}
                 <div className="space-y-6">
                     <div className="premium-card p-6 border-l-4 border-l-[#00F5FF] shadow-[0_0_40px_rgba(0,245,255,0.02)]">
                         <div className="flex items-center gap-2.5 mb-8">
@@ -290,10 +274,7 @@ export default function EleveDashboard() {
                                 <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                                     <div className="h-full bg-[#00F5FF]" style={{ width: '33%' }} />
                                 </div>
-                                <button
-                                    onClick={() => router.push('/dashboard/eleve/documents')}
-                                    className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-[#8A94A6] hover:text-white transition-all border border-white/5"
-                                >
+                                <button onClick={() => router.push('/dashboard/eleve/documents')} className="w-full py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest text-[#8A94A6] hover:text-white transition-all border border-white/5">
                                     Compléter mon dossier
                                 </button>
                             </div>
@@ -304,10 +285,7 @@ export default function EleveDashboard() {
                                     <span className="text-[10px] font-black uppercase tracking-widest">Action requise</span>
                                 </div>
                                 <p className="text-[11px] text-[#8A94A6] leading-relaxed">Vous avez 1 leçon en attente de signature pour valider vos heures REM.</p>
-                                <button
-                                    onClick={() => router.push('/dashboard/eleve/livret')}
-                                    className="text-[10px] font-bold text-amber-500 hover:underline underline-offset-4"
-                                >
+                                <button onClick={() => router.push('/dashboard/eleve/livret')} className="text-[10px] font-bold text-amber-500 hover:underline underline-offset-4">
                                     Signer maintenant →
                                 </button>
                             </div>
@@ -344,10 +322,7 @@ export default function EleveDashboard() {
                                     <p className="secondary-info mt-1.5 font-medium">Réservez votre prochain créneau pour progresser.</p>
                                 </div>
                             )}
-                            <button
-                                onClick={() => nextLesson ? setSelectedDetails(nextLesson) : router.push('/dashboard/eleve/reservation')}
-                                className="w-full btn-primary"
-                            >
+                            <button onClick={() => nextLesson ? setSelectedDetails(nextLesson) : router.push('/dashboard/eleve/reservation')} className="w-full btn-primary">
                                 {nextLesson ? 'Détails de la session' : 'Réserver maintenant'}
                                 <ArrowUpRight size={16} />
                             </button>
@@ -358,7 +333,7 @@ export default function EleveDashboard() {
                         <h3 className="card-title mb-6">Centre de ressources</h3>
                         <div className="space-y-2">
                             {['Règlementation Autoroute', 'Les contrôles visuels', 'Mécanique & Sécurité'].map((item, i) => (
-                                <Link key={i} href="#" target="_blank" className="w-full flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-xs font-medium text-[#8A94A6] hover:text-white group border border-transparent hover:border-white/5">
+                                <Link key={i} href="#" className="w-full flex items-center justify-between p-3.5 rounded-xl hover:bg-white/5 transition-all text-xs font-medium text-[#8A94A6] hover:text-white group border border-transparent hover:border-white/5">
                                     <span>{item}</span>
                                     <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-[#00F5FF]" />
                                 </Link>
@@ -384,19 +359,8 @@ export default function EleveDashboard() {
             <AnimatePresence>
                 {selectedDetails && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setSelectedDetails(null)}
-                            className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm"
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="relative w-full max-w-sm premium-card overflow-hidden flex flex-col"
-                        >
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedDetails(null)} className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm" />
+                        <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-sm premium-card overflow-hidden flex flex-col">
                             <div className="p-6 border-b border-white/5 flex items-center justify-between">
                                 <h3 className="text-lg font-black text-white uppercase">Détails de la Session</h3>
                                 <button onClick={() => setSelectedDetails(null)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#8A94A6] hover:text-white transition-colors">
@@ -427,19 +391,8 @@ export default function EleveDashboard() {
             <AnimatePresence>
                 {boosterModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setBoosterModal(false)}
-                            className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm"
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="relative w-full max-w-sm premium-card border-[#00F5FF]/30 overflow-hidden flex flex-col text-center p-8"
-                        >
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setBoosterModal(false)} className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm" />
+                        <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative w-full max-w-sm premium-card border-[#00F5FF]/30 overflow-hidden flex flex-col text-center p-8">
                             <div className="w-16 h-16 rounded-full bg-[#00F5FF]/10 text-[#00F5FF] flex items-center justify-center mx-auto mb-6">
                                 <Zap size={32} fill="currentColor" />
                             </div>

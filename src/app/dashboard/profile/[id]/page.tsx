@@ -380,120 +380,154 @@ export default function PublicProfilePage() {
             <AnimatePresence>
                 {selectedHistoryItem && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedHistoryItem(null)} />
-                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-2xl bg-[#0B0F14] border border-[#00F5FF]/20 rounded-[2rem] p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-2xl bg-[#00F5FF]/10 flex items-center justify-center text-[#00F5FF]">
-                                        <FileText size={20} />
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setSelectedHistoryItem(null)} />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 30 }}
+                            className="relative w-full max-w-2xl bg-[#0B0F14] border border-[#00F5FF]/30 rounded-[2.5rem] shadow-[0_0_100px_rgba(0,245,255,0.15)] overflow-hidden max-h-[90vh] flex flex-col"
+                        >
+                            {/* Modal Header */}
+                            <div className="p-8 pb-6 border-b border-white/5 flex items-center justify-between bg-gradient-to-b from-white/[0.02] to-transparent">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-14 h-14 rounded-2xl bg-[#00F5FF]/10 flex items-center justify-center text-[#00F5FF] shadow-[0_0_20px_rgba(0,245,255,0.1)]">
+                                        <FileText size={28} />
                                     </div>
                                     <div>
-                                        <h2 className="text-xl font-black text-white uppercase tracking-tighter">Détails de la séance</h2>
-                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                                            <p className="text-[10px] text-[#8A94A6] uppercase font-bold tracking-widest leading-none">
-                                                {new Date(selectedHistoryItem.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                                                {selectedHistoryItem.time && ` — ${selectedHistoryItem.time}`}
-                                            </p>
-                                            {selectedHistoryItem.signed_at && (
-                                                <>
-                                                    <div className="w-1 h-1 rounded-full bg-white/20" />
-                                                    <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest leading-none">
-                                                        Réalisée à {new Date(selectedHistoryItem.signed_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                                                    </p>
-                                                </>
+                                        <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Bilan de Séance</h2>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-[10px] font-black text-[#8A94A6] uppercase tracking-[0.2em] bg-white/5 px-2 py-0.5 rounded">
+                                                {new Date(selectedHistoryItem.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                            </span>
+                                            {selectedHistoryItem.time && (
+                                                <span className="text-[10px] font-black text-[#00F5FF] uppercase tracking-[0.2em] bg-[#00F5FF]/5 px-2 py-0.5 rounded">
+                                                    {selectedHistoryItem.time}
+                                                </span>
                                             )}
                                         </div>
                                     </div>
                                 </div>
-                                <button onClick={() => setSelectedHistoryItem(null)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#5F6B7A] hover:text-white transition-colors">
+                                <button onClick={() => setSelectedHistoryItem(null)} className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-[#5F6B7A] hover:text-white transition-all">
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                                    <p className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest mb-1 text-center">Note</p>
-                                    <p className="text-2xl font-black text-white text-center">{selectedHistoryItem.score ? `${selectedHistoryItem.score}/20` : 'N/A'}</p>
+                            <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
+                                {/* Core Stats Row */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col items-center justify-center relative overflow-hidden group">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-[#00F5FF]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <p className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-[0.2em] mb-2 relative">Note Globale</p>
+                                        <p className="text-4xl font-black text-white relative flex items-baseline gap-1">
+                                            {selectedHistoryItem.score || '-'}
+                                            <span className="text-sm text-[#5F6B7A]">/20</span>
+                                        </p>
+                                    </div>
+                                    <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 md:col-span-2 flex items-center gap-6">
+                                        <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xl font-black text-[#5F6B7A]">
+                                            {selectedHistoryItem.person.split(' ').map((n: string) => n[0]).join('')}
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-[0.2em] mb-1">{isStudent ? 'Votre Moniteur' : 'Votre Élève'}</p>
+                                            <p className="text-xl font-black text-white uppercase tracking-tight">{selectedHistoryItem.person}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 md:col-span-2">
-                                    <p className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest mb-1">{isStudent ? 'Moniteur' : 'Élève'}</p>
-                                    <p className="text-sm font-bold text-white uppercase">{selectedHistoryItem.person}</p>
+
+                                {/* Comments Section */}
+                                <div className="space-y-6">
+                                    {selectedHistoryItem.note && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                                                    <Star size={16} fill="currentColor" />
+                                                </div>
+                                                <h3 className="text-xs font-black text-white uppercase tracking-widest">Points forts & Feedback</h3>
+                                            </div>
+                                            <div className="p-6 rounded-3xl bg-[#00F5FF]/[0.02] border border-[#00F5FF]/10 text-base italic text-[#8A94A6] leading-relaxed shadow-inner">
+                                                "{selectedHistoryItem.note}"
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {selectedHistoryItem.negative_points && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                                                    <AlertTriangle size={16} />
+                                                </div>
+                                                <h3 className="text-xs font-black text-white uppercase tracking-widest">Axes de progression</h3>
+                                            </div>
+                                            <div className="p-6 rounded-3xl bg-amber-500/[0.02] border border-amber-500/10 text-base text-[#8A94A6] leading-relaxed shadow-inner">
+                                                {selectedHistoryItem.negative_points}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
+
+                                {/* Signatures Area */}
+                                {selectedHistoryItem.signature && (
+                                    <div className="pt-8 border-t border-white/5 space-y-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                                                    <PenTool size={16} />
+                                                </div>
+                                                <h3 className="text-xs font-black text-white uppercase tracking-widest">Signatures numériques</h3>
+                                            </div>
+                                            {selectedHistoryItem.signed_at && (
+                                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/5 px-3 py-1 rounded-full border border-emerald-500/10">
+                                                    Validé le {new Date(selectedHistoryItem.signed_at).toLocaleDateString('fr-FR')} • {new Date(selectedHistoryItem.signed_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-3">
+                                                <div className="h-32 bg-white/[0.02] rounded-[1.5rem] border border-white/5 flex items-center justify-center overflow-hidden p-4 relative group">
+                                                    <div className="absolute top-2 left-3 text-[8px] font-black text-[#5F6B7A] uppercase tracking-widest">Élève</div>
+                                                    {(() => {
+                                                        try {
+                                                            if (!selectedHistoryItem.signature) return <span className="text-[10px]">Indisponible</span>;
+                                                            let src = selectedHistoryItem.signature;
+                                                            if (src.startsWith('{')) src = JSON.parse(src).student;
+                                                            return <img src={src} alt="Signature Eleve" className="max-h-full max-w-full opacity-60 invert brightness-200 contrast-125" />;
+                                                        } catch (e) { return <span className="text-[10px]">Corrompu</span>; }
+                                                    })()}
+                                                </div>
+                                            </div>
+                                            <div className="space-y-3">
+                                                <div className="h-32 bg-white/[0.02] rounded-[1.5rem] border border-white/5 flex items-center justify-center overflow-hidden p-4 relative">
+                                                    <div className="absolute top-2 left-3 text-[8px] font-black text-[#5F6B7A] uppercase tracking-widest">Formateur</div>
+                                                    {(() => {
+                                                        try {
+                                                            if (!selectedHistoryItem.signature) return <span className="text-[10px]">Indisponible</span>;
+                                                            if (!selectedHistoryItem.signature.startsWith('{')) return <span className="text-[10px] opacity-20">Auto-validé</span>;
+                                                            const src = JSON.parse(selectedHistoryItem.signature).instructor;
+                                                            return <img src={src} alt="Signature Moniteur" className="max-h-full max-w-full opacity-60 invert brightness-200 contrast-125" />;
+                                                        } catch (e) { return <span className="text-[10px]">Corrompu</span>; }
+                                                    })()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="space-y-6">
-                                {selectedHistoryItem.note && (
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <Star size={14} className="text-[#00F5FF]" />
-                                            <label className="text-xs font-black text-[#5F6B7A] tracking-widest uppercase">Commentaire Global</label>
-                                        </div>
-                                        <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 border-l-2 border-l-[#00F5FF]/50 text-sm italic text-[#8A94A6] leading-relaxed">
-                                            "{selectedHistoryItem.note}"
-                                        </div>
-                                    </div>
-                                )}
-
-                                {selectedHistoryItem.negative_points && (
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <AlertTriangle size={14} className="text-amber-400" />
-                                            <label className="text-xs font-black text-[#5F6B7A] tracking-widest uppercase">Points à améliorer</label>
-                                        </div>
-                                        <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 border-l-2 border-l-amber-500/50 text-sm text-[#8A94A6] leading-relaxed">
-                                            {selectedHistoryItem.negative_points}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {selectedHistoryItem.signature && (
-                                    <div className="space-y-4 pt-4 border-t border-white/5">
-                                        <div className="flex items-center gap-2">
-                                            <PenTool size={14} className="text-emerald-400" />
-                                            <label className="text-xs font-black text-[#5F6B7A] tracking-widest uppercase">Signatures formation</label>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <p className="text-[8px] font-bold text-[#5F6B7A] uppercase text-center">Élève</p>
-                                                <div className="h-24 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
-                                                    {(() => {
-                                                        try {
-                                                            if (!selectedHistoryItem.signature) return <span className="text-[10px]">Indisponible</span>;
-                                                            // Si c'est un objet stringifié (format récent)
-                                                            if (selectedHistoryItem.signature.startsWith('{')) {
-                                                                const sig = JSON.parse(selectedHistoryItem.signature);
-                                                                return <img src={sig.student} alt="Signature Eleve" className="max-h-full max-w-full opacity-80 invert brightness-200" />;
-                                                            }
-                                                            // Si c'est directement un dataURL (format ancien ou pedagogie.ts)
-                                                            return <img src={selectedHistoryItem.signature} alt="Signature Eleve" className="max-h-full max-w-full opacity-80 invert brightness-200" />;
-                                                        } catch (e) { return <span className="text-[10px]">Image corrompue</span>; }
-                                                    })()}
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <p className="text-[8px] font-bold text-[#5F6B7A] uppercase text-center">Moniteur</p>
-                                                <div className="h-24 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
-                                                    {(() => {
-                                                        try {
-                                                            if (!selectedHistoryItem.signature) return <span className="text-[10px]">Indisponible</span>;
-                                                            if (selectedHistoryItem.signature.startsWith('{')) {
-                                                                const sig = JSON.parse(selectedHistoryItem.signature);
-                                                                return <img src={sig.instructor} alt="Signature Moniteur" className="max-h-full max-w-full opacity-80 invert brightness-200" />;
-                                                            }
-                                                            // Dans l'ancien format, on n'a qu'une seule signature
-                                                            return <span className="text-[9px] text-[#5F6B7A]">Non spécifié</span>;
-                                                        } catch (e) { return <span className="text-[10px]">Image corrompue</span>; }
-                                                    })()}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                            {/* Modal Footer */}
+                            <div className="p-8 bg-white/[0.02] border-t border-white/5 flex justify-end">
+                                <button
+                                    onClick={() => setSelectedHistoryItem(null)}
+                                    className="px-8 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white text-xs font-black uppercase tracking-widest transition-all"
+                                >
+                                    Fermer le bilan
+                                </button>
                             </div>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
+            Broadway
         </div>
     );
 }

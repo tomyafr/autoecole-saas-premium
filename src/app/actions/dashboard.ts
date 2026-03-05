@@ -25,7 +25,7 @@ export async function getStudentDashboard(studentId: string) {
             .from('appointments')
             .select('*, instructor:users!instructor_id(*)')
             .eq('student_id', studentId)
-            .eq('status', 'pending')
+            .in('status', ['pending', 'completed'])
             .order('date', { ascending: true });
 
         // Obtenir les paiements

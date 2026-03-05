@@ -12,7 +12,9 @@ import {
     CheckCircle2,
     ShieldCheck,
     ArrowRight,
-    Car
+    Car,
+    X,
+    RotateCcw
 } from 'lucide-react';
 import { getUser, type User as UserType } from '@/lib/auth';
 import { createAppointment, getBookedSlots } from '@/app/actions/appointment';
@@ -33,10 +35,11 @@ export default function ReservationPage() {
     const [loading, setLoading] = useState(true);
 
     // Multi-step state
-    const [selectedInstructorId, setSelectedInstructorId] = useState<string>(INSTRUCTORS[0].id);
+    const [selectedInstructorId, setSelectedInstructorId] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date>(() => {
         const d = new Date();
         d.setHours(12, 0, 0, 0);
+        d.setDate(d.getDate() + 1); // Demain par défaut
         return d;
     });
     const [weekOffset, setWeekOffset] = useState(0);
@@ -87,16 +90,14 @@ export default function ReservationPage() {
             }
             setAvailableDates(dates);
             if (weekOffset !== 0 || !selectedDate || dates.findIndex(d => d.date.toDateString() === selectedDate.toDateString()) === -1) {
-                setSelectedDate(dates[0].date);
+                // Only auto-select if we shifted weeks and the current selection is lost
+                if (weekOffset !== 0) setSelectedDate(dates[0].date);
             }
 
         } else {
             router.replace('/login');
         }
     }, [router, weekOffset]);
-
-    // Return ALL_HOURS so we can render booked ones as disabled blocks
-    const currentSlots = ALL_HOURS;
 
     const handleConfirm = async () => {
         if (!selectedTime || !user || !selectedDate || !selectedInstructor) return;
@@ -112,8 +113,6 @@ export default function ReservationPage() {
 
         if (result.success) {
             setIsConfirmed(true);
-
-            // Immediately update visually to prevent double clicks and confusion
             const newBooked = [...bookedSlots, selectedTime];
             if (selectedDuration === 2) {
                 const hour = parseInt(selectedTime.split(':')[0], 10);
@@ -131,7 +130,7 @@ export default function ReservationPage() {
     if (loading || !user) {
         return (
             <div className="h-[60vh] flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-2 border-[#00F5FF] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -142,38 +141,52 @@ export default function ReservationPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
                     <h1 className="page-title">Réserver une mission</h1>
-                    <p className="text-sm text-[var(--color-text-secondary)] mt-1 font-medium">Configurez votre prochaine session d'apprentissage sur-mesure.</p>
+                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Configurez votre prochaine session d'apprentissage sur-mesure.</p>
                 </div>
+                {selectedInstructorId && (
+                    <button
+                        onClick={() => { setSelectedInstructorId(null); setSelectedTime(null); }}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest text-[#5F6B7A] hover:text-white transition-all border border-white/5"
+                    >
+                        <RotateCcw size={12} />
+                        Changer de formateur
+                    </button>
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                {/* Tactical Selection Column */}
                 <div className="lg:col-span-3 space-y-8">
 
                     {/* STEP 1: Instructor */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-4">
-                            <span className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-[0.2em]">Étape 1</span>
-                            <span className="text-sm font-bold text-[var(--color-text-primary)]">Choisir un Formateur</span>
-                            <div className="h-px flex-1 bg-[var(--color-sidebar)]" />
+                            <span className="text-xs font-bold text-[#00F5FF] uppercase tracking-[0.2em]">Étape 1</span>
+                            <span className="text-sm font-bold text-white">Choisir un Formateur</span>
+                            <div className="h-px flex-1 bg-white/5" />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                             {INSTRUCTORS.map(inst => (
                                 <button
                                     key={inst.id}
                                     onClick={() => { setSelectedInstructorId(inst.id); setSelectedTime(null); }}
-                                    className={`premium-card p-4 flex items-center gap-4 transition-all relative overflow-hidden ${selectedInstructorId === inst.id ? 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-background)] bg-[var(--color-accent)]/[0.05] shadow-[0_0_20px_rgba(0,245,255,0.2)]' : 'hover:border-white/20'}`}
+                                    className={`premium-card p-6 flex items-center gap-5 transition-all relative overflow-hidden ${selectedInstructorId === inst.id ? 'border-[#00F5FF] ring-2 ring-[#00F5FF]/20 bg-[#00F5FF]/[0.05] shadow-[0_0_30px_rgba(0,245,255,0.1)]' : 'hover:border-white/20'}`}
                                 >
-                                    {selectedInstructorId === inst.id && <div className="absolute top-2 right-2 text-[var(--color-accent)]"><CheckCircle2 size={16} /></div>}
-                                    <div className="w-12 h-12 rounded-xl bg-[var(--color-sidebar)] flex items-center justify-center text-xs font-bold text-[var(--color-text-secondary)]">
+                                    {selectedInstructorId === inst.id && (
+                                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-3 right-3 text-[#00F5FF]">
+                                            <CheckCircle2 size={20} fill="currentColor" className="text-[#0B0F14]" />
+                                        </motion.div>
+                                    )}
+                                    <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-lg font-black text-[#5F6B7A]">
                                         {inst.avatar}
                                     </div>
                                     <div className="text-left">
-                                        <p className="text-sm font-semibold text-[var(--color-text-primary)]">{inst.name}</p>
-                                        <div className="flex items-center gap-1 mt-0.5">
-                                            <Star size={10} className="text-amber-500 fill-amber-500" />
-                                            <span className="text-[10px] font-bold text-[var(--color-text-primary)]">{inst.rating}</span>
-                                            <span className="text-[9px] text-[var(--color-text-muted)] ml-1 uppercase tracking-wider">{inst.exp}</span>
+                                        <p className="text-lg font-black text-white uppercase tracking-tight">{inst.name}</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <div className="flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-lg">
+                                                <Star size={10} className="text-amber-500 fill-amber-500" />
+                                                <span className="text-[10px] font-black text-amber-500">{inst.rating}</span>
+                                            </div>
+                                            <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-wider">{inst.exp}</span>
                                         </div>
                                     </div>
                                 </button>
@@ -181,104 +194,134 @@ export default function ReservationPage() {
                         </div>
                     </div>
 
-                    {/* STEP 2: Date */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <span className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-[0.2em]">Étape 2</span>
-                            <span className="text-sm font-bold text-[var(--color-text-primary)]">Choisir la date</span>
-                            <div className="h-px flex-1 bg-[var(--color-sidebar)]" />
-                            <div className="flex gap-2">
-                                <button disabled={weekOffset === 0} onClick={() => setWeekOffset(prev => Math.max(0, prev - 1))} className={`p-1.5 rounded-lg border ${weekOffset === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/5 border-[var(--color-border-subtle)] hover:text-[#00F5FF]'}`}>
-                                    <ChevronRight size={16} className="rotate-180" />
-                                </button>
-                                <button onClick={() => setWeekOffset(prev => prev + 1)} className="p-1.5 rounded-lg border border-[var(--color-border-subtle)] hover:bg-white/5 hover:text-[#00F5FF]">
-                                    <ChevronRight size={16} />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="flex gap-3 overflow-x-auto pb-2">
-                            {availableDates.map((dayItem, idx) => {
-                                const isSelected = selectedDate.getDate() === dayItem.date.getDate();
-                                return (
-                                    <button
-                                        key={idx}
-                                        onClick={() => { setSelectedDate(dayItem.date); setSelectedTime(null); }}
-                                        className={`flex-1 min-w-[100px] p-4 rounded-xl text-center border transition-all ${isSelected ? 'bg-[var(--color-sidebar)] border-[var(--color-border-subtle)] text-[var(--color-accent)]' : 'border-transparent text-[var(--color-text-muted)] bg-[var(--color-card)] hover:text-[var(--color-text-primary)]'}`}
-                                    >
-                                        <p className="text-xs font-bold uppercase tracking-widest">{dayItem.label.split(' ')[0]}</p>
-                                        <p className={`text-xl font-black mt-1 ${isSelected ? 'text-[var(--color-text-primary)]' : ''}`}>{dayItem.label.split(' ')[1]}</p>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* STEP 3: Duration & Slots */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <span className="text-xs font-bold text-[var(--color-accent)] uppercase tracking-[0.2em]">Étape 3</span>
-                            <span className="text-sm font-bold text-[var(--color-text-primary)]">Disponibilités de {selectedInstructor?.name.split(' ')[0]}</span>
-                            <div className="h-px flex-1 bg-[var(--color-sidebar)]" />
-                        </div>
-
-                        <div className="flex gap-4 mb-4">
-                            <button
-                                onClick={() => { setSelectedDuration(1); setSelectedTime(null); }}
-                                className={`flex-1 py-3 rounded-xl border text-xs font-bold uppercase tracking-widest transition-all ${selectedDuration === 1 ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/[0.05] text-[var(--color-text-primary)] shadow-[0_0_15px_rgba(0,245,255,0.1)]' : 'border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:border-white/20'}`}
+                    <AnimatePresence mode="wait">
+                        {selectedInstructorId ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-8"
                             >
-                                1 Heure
-                            </button>
-                            <button
-                                onClick={() => { setSelectedDuration(2); setSelectedTime(null); }}
-                                className={`flex-1 py-3 rounded-xl border text-xs font-bold uppercase tracking-widest transition-all ${selectedDuration === 2 ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/[0.05] text-[var(--color-text-primary)] shadow-[0_0_15px_rgba(0,245,255,0.1)]' : 'border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:border-white/20'}`}
-                            >
-                                2 Heures
-                            </button>
-                        </div>
-
-                        {currentSlots.length > 0 ? (
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {currentSlots.map((time, idx) => {
-                                    // A slot is effectively booked if it's natively booked, OR if we need 2H and the next slot is unavailable
-                                    let isBooked = bookedSlots.includes(time);
-                                    if (!isBooked && selectedDuration === 2) {
-                                        const nextHour = currentSlots[idx + 1];
-                                        if (!nextHour || bookedSlots.includes(nextHour)) {
-                                            isBooked = true;
-                                        }
-                                    }
-
-                                    return (
-                                        <button
-                                            key={idx}
-                                            disabled={isBooked}
-                                            onClick={() => !isBooked && setSelectedTime(time)}
-                                            className={`premium-card p-4 flex flex-col gap-2 text-left transition-all ${isBooked ? 'opacity-40 cursor-not-allowed bg-[var(--color-card)]' : selectedTime === time ? 'border-[var(--color-accent)] ring-1 ring-[var(--color-accent)] bg-[var(--color-accent)]/[0.03] shadow-[0_0_20px_rgba(0,245,255,0.05)]' : 'hover:border-white/20'}`}
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <span className={`text-xl font-semibold ${isBooked ? 'text-[var(--color-text-muted)] line-through' : 'text-[var(--color-text-primary)]'}`}>{time}</span>
-                                                {selectedTime === time ? (
-                                                    <CheckCircle2 size={16} className="text-[var(--color-accent)]" />
-                                                ) : isBooked ? (
-                                                    <span className="text-[10px] font-bold text-red-500 text-right uppercase tracking-[0.2em] bg-red-500/10 px-1 py-0.5 rounded">Réservé</span>
-                                                ) : (
-                                                    <Clock size={14} className="text-[var(--color-text-muted)]" />
-                                                )}
+                                {/* STEP 2: Date */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4 flex-1">
+                                            <span className="text-xs font-bold text-[#00F5FF] uppercase tracking-[0.2em]">Étape 2</span>
+                                            <span className="text-sm font-bold text-white">Choisir la date</span>
+                                            <div className="h-px flex-1 bg-white/5" />
+                                        </div>
+                                        <div className="flex items-center gap-2 ml-4">
+                                            <div className="relative">
+                                                <input
+                                                    type="date"
+                                                    className="absolute inset-0 opacity-0 cursor-pointer z-20 w-8"
+                                                    min={new Date().toISOString().split('T')[0]}
+                                                    onChange={(e) => {
+                                                        const d = new Date(e.target.value);
+                                                        d.setHours(12, 0, 0, 0);
+                                                        setSelectedDate(d);
+                                                        setSelectedTime(null);
+                                                        setWeekOffset(0);
+                                                    }}
+                                                />
+                                                <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#00F5FF]/50 hover:text-[#00F5FF] transition-all">
+                                                    <CalendarIcon size={14} />
+                                                    <span className="text-[10px] font-black uppercase tracking-wider">Calendrier</span>
+                                                </button>
                                             </div>
-                                            <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{selectedDuration === 1 ? '1 Heure' : '2 Heures'}</span>
+                                            <div className="w-px h-6 bg-white/10 mx-2" />
+                                            <div className="flex gap-1">
+                                                <button disabled={weekOffset === 0} onClick={() => setWeekOffset(prev => Math.max(0, prev - 1))} className={`p-1.5 rounded-lg border ${weekOffset === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:bg-white/5 border-white/10 hover:text-[#00F5FF]'}`}>
+                                                    <ChevronRight size={14} className="rotate-180" />
+                                                </button>
+                                                <button onClick={() => setWeekOffset(prev => prev + 1)} className="p-1.5 rounded-lg border border-white/10 hover:bg-white/5 hover:text-[#00F5FF]">
+                                                    <ChevronRight size={14} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+                                        {availableDates.map((dayItem, idx) => {
+                                            const isSelected = selectedDate.getDate() === dayItem.date.getDate() && selectedDate.getMonth() === dayItem.date.getMonth();
+                                            return (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => { setSelectedDate(dayItem.date); setSelectedTime(null); }}
+                                                    className={`flex-1 min-w-[110px] p-5 rounded-[1.5rem] text-center border transition-all duration-300 ${isSelected ? 'bg-white/5 border-[#00F5FF] text-[#00F5FF] shadow-[0_10px_30px_rgba(0,245,255,0.1)] scale-105' : 'border-white/5 text-[#5F6B7A] bg-[#0B0F14] hover:border-white/20'}`}
+                                                >
+                                                    <p className="text-[10px] font-black uppercase tracking-[0.2em]">{dayItem.label.split(' ')[0]}</p>
+                                                    <p className={`text-2xl font-black mt-1 ${isSelected ? 'text-white' : ''}`}>{dayItem.label.split(' ')[1]}</p>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* STEP 3: Slots */}
+                                <div className="space-y-4 pt-4">
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-xs font-bold text-[#00F5FF] uppercase tracking-[0.2em]">Étape 3</span>
+                                        <span className="text-sm font-bold text-white">Disponibilités de {selectedInstructor?.name.split(' ')[0]}</span>
+                                        <div className="h-px flex-1 bg-white/5" />
+                                    </div>
+
+                                    <div className="flex gap-4 mb-6">
+                                        <button
+                                            onClick={() => { setSelectedDuration(1); setSelectedTime(null); }}
+                                            className={`flex-1 py-3 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all ${selectedDuration === 1 ? 'border-[#00F5FF] bg-[#00F5FF]/10 text-white shadow-[0_0_20px_rgba(0,245,255,0.1)]' : 'border-white/5 text-[#5F6B7A] hover:bg-white/5'}`}
+                                        >
+                                            Session 1 Heure
                                         </button>
-                                    )
-                                })}
-                            </div>
+                                        <button
+                                            onClick={() => { setSelectedDuration(2); setSelectedTime(null); }}
+                                            className={`flex-1 py-3 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all ${selectedDuration === 2 ? 'border-[#00F5FF] bg-[#00F5FF]/10 text-white shadow-[0_0_20px_rgba(0,245,255,0.1)]' : 'border-white/5 text-[#5F6B7A] hover:bg-white/5'}`}
+                                        >
+                                            Session 2 Heures
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        {ALL_HOURS.map((time, idx) => {
+                                            let isBooked = bookedSlots.includes(time);
+                                            if (!isBooked && selectedDuration === 2) {
+                                                const nextHour = ALL_HOURS[idx + 1];
+                                                if (!nextHour || bookedSlots.includes(nextHour)) isBooked = true;
+                                            }
+
+                                            return (
+                                                <button
+                                                    key={idx}
+                                                    disabled={isBooked}
+                                                    onClick={() => !isBooked && setSelectedTime(time)}
+                                                    className={`premium-card p-5 group transition-all duration-300 ${isBooked ? 'opacity-20 cursor-not-allowed grayscale' : selectedTime === time ? 'border-[#00F5FF] bg-[#00F5FF]/5 shadow-[0_0_25px_rgba(0,245,255,0.05)] scale-[1.02]' : 'hover:border-white/20 hover:bg-white/[0.02]'}`}
+                                                >
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <span className={`text-2xl font-black ${selectedTime === time ? 'text-white' : 'text-[#8A94A6]'}`}>{time}</span>
+                                                        {selectedTime === time ? (
+                                                            <CheckCircle2 size={16} className="text-[#00F5FF]" />
+                                                        ) : (
+                                                            <Clock size={16} className="text-[#5F6B7A] opacity-20 group-hover:opacity-100 transition-opacity" />
+                                                        )}
+                                                    </div>
+                                                    <span className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest">{selectedDuration}H DISPONIBLE</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </motion.div>
                         ) : (
-                            <div className="p-8 text-center rounded-2xl border border-dashed border-[var(--color-border-subtle)]">
-                                <p className="text-sm font-medium text-[var(--color-text-secondary)]">Aucun créneau de {selectedDuration}H n'est disponible pour ce jour avec ce formateur.</p>
+                            <div className="lg:col-span-3 py-24 text-center rounded-[2.5rem] border border-dashed border-white/5 bg-white/[0.01]">
+                                <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center mx-auto mb-6 text-[#5F6B7A]">
+                                    <User size={32} strokeWidth={1} />
+                                </div>
+                                <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">En attente de formateur</h3>
+                                <p className="text-sm text-[#5F6B7A] max-w-[280px] mx-auto italic leading-relaxed">Veuillez sélectionner votre moniteur préféré pour accéder à son planning de conduite et réserver votre session.</p>
                             </div>
                         )}
-                    </div>
+                    </AnimatePresence>
                 </div>
 
-                {/* Right Context & Confirmation */}
                 <div className="space-y-6">
                     <AnimatePresence mode="wait">
                         {isConfirmed ? (
@@ -286,25 +329,21 @@ export default function ReservationPage() {
                                 key="success"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                className="premium-card p-10 flex flex-col justify-center space-y-6 min-h-[400px] border-[var(--color-accent)]/20 shadow-[0_0_40px_rgba(0,245,255,0.05)]"
+                                className="premium-card p-10 flex flex-col justify-center space-y-8 min-h-[450px] border-[#00F5FF]/20 shadow-[0_0_50px_rgba(0,245,255,0.05)]"
                             >
                                 <div className="flex flex-col items-center text-center">
-                                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6">
-                                        <CheckCircle2 size={32} />
+                                    <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-8 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                                        <CheckCircle2 size={40} />
                                     </div>
-                                    <h3 className="section-title mb-2">Session Confirmée</h3>
-                                    <p className="secondary-info max-w-[200px] mx-auto">Votre mission a été enregistrée avec succès dans votre planning.</p>
+                                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">C'est validé !</h3>
+                                    <p className="text-sm text-[#8A94A6] leading-relaxed">Votre session a été enregistrée. Retrouvez là dans votre historique.</p>
                                 </div>
-                                <div className="space-y-3 mt-8">
-                                    <button onClick={() => setCalendarAdded(true)} className={`w-full flex items-center justify-center gap-2 btn-secondary py-3 text-xs font-bold uppercase tracking-widest border transition-colors ${calendarAdded ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10'}`}>
-                                        <CalendarIcon size={14} /> {calendarAdded ? 'Ajouté ✔' : 'Ajouter au calendrier'}
+                                <div className="space-y-3">
+                                    <button onClick={() => setCalendarAdded(true)} className={`w-full flex items-center justify-center gap-3 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${calendarAdded ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}>
+                                        <CalendarIcon size={14} /> {calendarAdded ? "Ajouté à l'agenda" : "Ajouter au calendrier"}
                                     </button>
-                                    <button onClick={() => router.push('/dashboard/eleve')} className="w-full btn-primary py-3 flex items-center justify-center gap-2">
-                                        Retour au tableau de bord <ArrowRight size={14} />
-                                    </button>
-                                    <button onClick={() => { setIsConfirmed(false); setSelectedTime(null); setCalendarAdded(false); }} className="w-full btn-secondary py-3 text-xs font-bold uppercase tracking-widest bg-transparent border-none text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
-                                        Nouvelle réservation
+                                    <button onClick={() => router.push('/dashboard/eleve')} className="w-full btn-primary py-4 justify-center">
+                                        Tableau de bord <ArrowRight size={14} />
                                     </button>
                                 </div>
                             </motion.div>
@@ -313,112 +352,95 @@ export default function ReservationPage() {
                                 key="selection"
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20 }}
-                                className="premium-card p-6 flex flex-col justify-between space-y-6 min-h-[400px] border-l-4 border-l-[var(--color-accent)] shadow-[0_0_40px_rgba(0,245,255,0.03)]"
+                                className="premium-card p-8 flex flex-col justify-between space-y-8 min-h-[450px] border-l-4 border-l-[#00F5FF] shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
                             >
                                 <div className="space-y-8">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-1 h-4 bg-[var(--color-accent)] rounded-full" />
-                                        <h3 className="section-title">Validation session</h3>
+                                        <div className="w-1.5 h-6 bg-[#00F5FF] rounded-full" />
+                                        <h3 className="text-xs font-black text-white uppercase tracking-widest">Confirmation</h3>
                                     </div>
 
                                     <div className="space-y-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
-                                                <CalendarIcon size={24} />
+                                        <div className="flex items-center gap-5">
+                                            <div className="w-14 h-14 rounded-2xl bg-[#00F5FF]/10 flex items-center justify-center text-[#00F5FF]">
+                                                <CalendarIcon size={28} />
                                             </div>
                                             <div>
-                                                <p className="secondary-info font-medium uppercase tracking-widest text-[10px]">Date & Heure</p>
-                                                <p className="text-lg font-semibold text-[var(--color-text-primary)]">
-                                                    {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' }).replace(/^\w/, (c) => c.toUpperCase())} • {selectedTime}
+                                                <p className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest mb-1">Date & Heure</p>
+                                                <p className="text-lg font-black text-white leading-tight">
+                                                    {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' }).replace(/^\w/, (c) => c.toUpperCase())}
+                                                    <br /><span className="text-[#00F5FF]">{selectedTime}</span>
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-[var(--color-sidebar)] flex items-center justify-center text-[var(--color-text-secondary)]">
-                                                <User size={24} />
+                                        <div className="flex items-center gap-5">
+                                            <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-[#8A94A6]">
+                                                <User size={28} />
                                             </div>
                                             <div>
-                                                <p className="secondary-info font-medium uppercase tracking-widest text-[10px]">Formateur</p>
-                                                <p className="text-lg font-semibold text-[var(--color-text-primary)]">{selectedInstructor?.name}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-[var(--color-sidebar)] flex items-center justify-center text-[var(--color-text-secondary)]">
-                                                <Car size={24} />
-                                            </div>
-                                            <div>
-                                                <p className="secondary-info font-medium uppercase tracking-widest text-[10px]">Type de mission</p>
-                                                <p className="text-lg font-semibold text-[var(--color-text-primary)]">Leçon de conduite</p>
+                                                <p className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest mb-1">Formateur</p>
+                                                <p className="text-lg font-black text-white">{selectedInstructor?.name}</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="p-4 rounded-xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] space-y-3">
-                                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
-                                            <span>Prix session</span>
-                                            <span className="text-[var(--color-text-primary)]">Inclus dans pack</span>
+                                    <div className="p-5 rounded-3xl bg-white/[0.02] border border-white/5 space-y-4">
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-[#5F6B7A]">
+                                            <span>Session</span>
+                                            <span className="text-white">{selectedDuration}H CONDUITE</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
-                                            <span>Temps estimé</span>
-                                            <span className="text-[var(--color-text-primary)]">{selectedDuration === 1 ? '60' : '120'} min</span>
+                                        <div className="h-px bg-white/5" />
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-[#5F6B7A]">
+                                            <span>Prix</span>
+                                            <span className="text-[#00F5FF]">INCLUS PACK</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-3">
-                                    <button
-                                        onClick={handleConfirm}
-                                        className="w-full btn-primary py-4"
-                                    >
-                                        Confirmer la session
-                                        <ArrowRight size={18} />
+                                <div className="space-y-4">
+                                    <button onClick={handleConfirm} className="w-full btn-primary py-5 justify-center text-xs font-black tracking-[0.2em]">
+                                        CONFIRMER <ArrowRight size={18} />
                                     </button>
-                                    <button
-                                        onClick={() => setSelectedTime(null)}
-                                        className="w-full btn-secondary py-4 text-xs font-bold uppercase tracking-widest bg-transparent border-none text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
-                                    >
-                                        Annuler la sélection
+                                    <button onClick={() => setSelectedTime(null)} className="w-full text-[10px] font-bold text-[#5F6B7A] uppercase tracking-widest hover:text-white transition-colors">
+                                        ANNULER
                                     </button>
                                 </div>
                             </motion.div>
                         ) : (
-                            <div className="premium-card p-12 flex flex-col items-center justify-center text-center space-y-6 min-h-[400px]">
-                                <div className="w-20 h-20 rounded-3xl bg-[var(--color-card)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[var(--color-text-muted)]">
-                                    <CalendarIcon size={32} className="opacity-20" />
+                            <div className="premium-card p-12 flex flex-col items-center justify-center text-center space-y-8 min-h-[450px]">
+                                <div className="w-24 h-24 rounded-[2rem] bg-white/[0.02] border border-white/5 flex items-center justify-center text-[#5F6B7A]">
+                                    <CalendarIcon size={40} strokeWidth={1} className="opacity-10" />
                                 </div>
-                                <div>
-                                    <h3 className="section-title mb-2">En attente de sélection</h3>
-                                    <p className="secondary-info max-w-[200px] mx-auto">Veuillez sélectionner un créneau dans la grille de disponibilité.</p>
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-black text-white uppercase tracking-widest">Sélection incomplète</h3>
+                                    <p className="text-[11px] text-[#5F6B7A] leading-relaxed px-4 italic">Choisissez un créneau horaire sur le planning pour finaliser votre réservation.</p>
                                 </div>
                             </div>
                         )}
                     </AnimatePresence>
 
-                    <div className="premium-card p-6 space-y-4">
-                        <div className="flex items-center gap-3">
-                            <ShieldCheck size={18} className="text-[var(--color-text-secondary)]" />
-                            <span className="card-title">Sécurité garantie</span>
+                    <div className="premium-card p-6 border-l-2 border-l-emerald-500/50">
+                        <div className="flex items-center gap-3 mb-3 text-emerald-400">
+                            <ShieldCheck size={18} />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Protection Premium</span>
                         </div>
-                        <p className="text-[10px] text-[var(--color-text-muted)] leading-relaxed font-medium">
-                            Toutes nos sessions sont assurées. Rappel : vous pouvez annuler sans frais jusqu'à 24h avant le début de la mission.
+                        <p className="text-[10px] text-[#5F6B7A] leading-relaxed font-bold italic">
+                            Annulation gratuite jusqu'à 24h avant. Mission assurée par AXA Pro.
                         </p>
                     </div>
                 </div>
             </div>
-            {/* ACTION FEEDBACK TOAST */}
+
             <AnimatePresence>
                 {actionFeedback && (
                     <motion.div
-                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#0B0F14] border border-[var(--color-border-subtle)] shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                        initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-8 py-5 rounded-[2rem] bg-[#0B0F14] border border-[#00F5FF]/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                     >
-                        <div className="w-8 h-8 rounded-full bg-[var(--color-accent)]/10 flex items-center justify-center text-[var(--color-accent)]">
-                            <CheckCircle2 size={16} />
+                        <div className="w-10 h-10 rounded-full bg-[#00F5FF]/10 flex items-center justify-center text-[#00F5FF]">
+                            <CheckCircle2 size={20} />
                         </div>
-                        <p className="text-sm font-medium text-[var(--color-text-primary)]">{actionFeedback}</p>
+                        <p className="text-sm font-bold text-white uppercase tracking-tighter">{actionFeedback}</p>
                     </motion.div>
                 )}
             </AnimatePresence>

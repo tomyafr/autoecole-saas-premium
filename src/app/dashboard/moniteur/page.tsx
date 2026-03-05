@@ -128,8 +128,9 @@ export default function MoniteurDashboard() {
     const studentsCount = dbData.totalStudents || 0;
     const hoursTotal = dbData.lessons?.length || 0;
 
-    const avgScoreInst = dbData.lessons?.length > 0
-        ? dbData.lessons.reduce((acc: number, l: any) => acc + (l.score || 0), 0) / dbData.lessons.length
+    const lessonsWithScores = dbData.lessons?.filter((l: any) => l.score != null) || [];
+    const avgScoreInst = lessonsWithScores.length > 0
+        ? lessonsWithScores.reduce((acc: number, l: any) => acc + l.score, 0) / lessonsWithScores.length
         : 0;
     const successRate = avgScoreInst > 0 ? Math.round((avgScoreInst / 20) * 100) : 0;
 
