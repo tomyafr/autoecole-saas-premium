@@ -52,7 +52,7 @@ export default function SettingsPage() {
         if (u) {
             setUser(u);
             setName(u.name || '');
-            setEmail(u.username || '');
+            setEmail(u.email || u.username || '');
             setPhone(u.phone || '');
             setLoading(false);
         } else {
@@ -74,10 +74,10 @@ export default function SettingsPage() {
         if (!user) return;
         setIsSaving(true);
         try {
-            const res = await updateUserProfile(user.id, { name, phone, username: email });
+            const res = await updateUserProfile(user.id, { name, phone, email });
             if (res.success) {
                 // IMPORTANT: Mettre à jour le localStorage pour que les changements persistent au refresh
-                const updatedUser = { ...user, name, phone, username: email };
+                const updatedUser = { ...user, name, phone, email };
                 if (typeof window !== 'undefined') {
                     localStorage.setItem('autodrive_user', JSON.stringify(updatedUser));
                 }

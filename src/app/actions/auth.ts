@@ -47,6 +47,7 @@ export async function authenticateServer(
             avatar: found.avatar || (found.name ? found.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : '??'),
             username: found.username,
             phone: found.phone,
+            email: found.email,
         };
     } catch (globalError: any) {
         console.error("CRITICAL AUTH SERVER ERROR:", globalError);
@@ -78,7 +79,7 @@ export async function logoutServer() {
     await deleteSession();
 }
 
-export async function updateUserProfile(userId: string, data: { name?: string, phone?: string, username?: string }) {
+export async function updateUserProfile(userId: string, data: { name?: string, phone?: string, username?: string, email?: string }) {
     try {
         const { error } = await supabase
             .from('users')

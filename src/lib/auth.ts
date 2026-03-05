@@ -7,6 +7,7 @@ export interface User {
     avatar: string;
     username?: string;
     phone?: string;
+    email?: string;
 }
 
 export function getDashboardPath(role: UserRole): string {
