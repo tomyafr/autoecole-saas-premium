@@ -3,9 +3,9 @@
 import { supabase } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 
-export async function createAppointment(studentId: string, instructorName: string, date: Date, time: string, type: string) {
+export async function createAppointment(studentId: string, instructorName: string, date: string | Date, time: string, type: string) {
     try {
-        // 1. Trouver le moniteur par nom
+        // ... previous code finding instructor ...
         const { data: instructor, error: instructorError } = await supabase
             .from('users')
             .select('id')
@@ -22,7 +22,7 @@ export async function createAppointment(studentId: string, instructorName: strin
             .insert({
                 student_id: studentId,
                 instructor_id: instructor.id,
-                date: date.toISOString(),
+                date: new Date(date).toISOString(),
                 time,
                 type,
                 status: 'pending',
@@ -59,12 +59,12 @@ export async function cancelAppointment(appointmentId: string) {
     }
 }
 
-export async function rescheduleAppointment(appointmentId: string, newDate: Date, newTime: string) {
+export async function rescheduleAppointment(appointmentId: string, newDate: string | Date, newTime: string) {
     try {
         const { error } = await supabase
             .from('appointments')
             .update({
-                date: newDate.toISOString(),
+                date: new Date(newDate).toISOString(),
                 time: newTime
             })
             .eq('id', appointmentId)

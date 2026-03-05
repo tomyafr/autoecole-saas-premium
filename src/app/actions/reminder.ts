@@ -64,3 +64,21 @@ export async function sendManualReminder(appointmentId: string) {
         return { success: false, error: e.message };
     }
 }
+export async function getAdminReminders() {
+    try {
+        const { data, error } = await supabase
+            .from('appointments')
+            .select(`
+                *,
+                student:users!student_id(id, name, email, phone),
+                instructor:users!instructor_id(id, name)
+            `)
+            .eq('status', 'pending')
+            .order('date', { ascending: true });
+
+        if (error) throw error;
+        return { success: true, data: data || [] };
+    } catch (e: any) {
+        return { success: false, error: e.message };
+    }
+}

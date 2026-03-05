@@ -1,0 +1,1 @@
+﻿test.ts(4,41): error TS2307: Cannot find module './src/lib/db/queries' or its corresponding type declarations.

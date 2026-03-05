@@ -19,7 +19,8 @@ import {
     Hexagon,
     Car,
     Menu,
-    X
+    X,
+    FileText
 } from 'lucide-react';
 import Image from 'next/image';
 import { getUser, logout, type User, type UserRole } from '@/lib/auth';
@@ -45,6 +46,8 @@ const NAV_CONFIG: Record<UserRole, NavItem[]> = {
     ],
     admin: [
         { label: 'Vue d\'ensemble', href: '/dashboard/admin', icon: <LayoutDashboard size={18} /> },
+        { label: 'Gestion des Rappels', href: '/dashboard/admin/rappels', icon: <Bell size={18} /> },
+        { label: 'Validation Documents', href: '/dashboard/admin/documents', icon: <FileText size={18} /> },
         { label: 'Centres de Conduite', href: '/dashboard/admin/centres', icon: <MapPin size={18} /> },
         { label: 'Gestion des Véhicules', href: '/dashboard/admin/vehicules', icon: <Car size={18} /> },
         { label: 'Équipe Pédagogique', href: '/dashboard/admin/moniteurs', icon: <UserCircle size={18} /> },

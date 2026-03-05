@@ -19,9 +19,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUser, type User as UserType } from '@/lib/auth';
 import { getStudentDashboard } from '@/app/actions/dashboard';
-import { cancelAppointment } from '@/app/actions/appointment';
+import { cancelAppointment, rescheduleAppointment } from '@/app/actions/appointment';
 import { AnimatePresence } from 'framer-motion';
-import { X, Calendar as CalendarIcon, Edit3, Trash2 } from 'lucide-react';
+import { X, Calendar as CalendarIcon, Edit3, Trash2, Save } from 'lucide-react';
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().toLocaleDateString('fr-FR', { month: 'short' });
@@ -34,9 +34,11 @@ export default function LeconsPage() {
     const [pendingAppointments, setPendingAppointments] = useState<any[]>([]);
 
     const [selectedLesson, setSelectedLesson] = useState<any>(null);
+    const [rescheduleData, setRescheduleData] = useState<{ id: string, date: string, time: string } | null>(null);
     const [iaReportModal, setIaReportModal] = useState(false);
     const [actionFeedback, setActionFeedback] = useState<string | null>(null);
     const [isCanceling, setIsCanceling] = useState<string | null>(null);
+    const [isRescheduling, setIsRescheduling] = useState(false);
 
     const triggerFeedback = (msg: string) => {
         setActionFeedback(msg);
@@ -77,6 +79,20 @@ export default function LeconsPage() {
             triggerFeedback('Erreur lors de l\'annulation');
         }
         setIsCanceling(null);
+    };
+
+    const handleReschedule = async () => {
+        if (!rescheduleData) return;
+        setIsRescheduling(true);
+        const res = await rescheduleAppointment(rescheduleData.id, rescheduleData.date, rescheduleData.time);
+        if (res.success) {
+            triggerFeedback('Date modifiée avec succès');
+            setRescheduleData(null);
+            if (user) await fetchData(user.id);
+        } else {
+            triggerFeedback('Erreur lors de la modification');
+        }
+        setIsRescheduling(false);
     };
 
     if (loading || !user) {
@@ -202,7 +218,7 @@ export default function LeconsPage() {
                                             </td>
                                             <td className="text-right flex items-center justify-end gap-2 pr-4 pt-4">
                                                 <button
-                                                    onClick={() => triggerFeedback('Modification bientôt disponible')}
+                                                    onClick={() => setRescheduleData({ id: appt.id, date: appt.date, time: appt.time })}
                                                     className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[var(--color-text-muted)] hover:text-white transition-colors"
                                                     title="Modifier"
                                                 >
@@ -429,6 +445,81 @@ export default function LeconsPage() {
                                 <button onClick={() => setIaReportModal(false)} className="btn-primary w-full justify-center">
                                     Terminer
                                 </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Modal Modification Date */}
+            <AnimatePresence>
+                {rescheduleData && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setRescheduleData(null)}
+                            className="absolute inset-0 bg-[#0B0F14]/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-md premium-card overflow-hidden flex flex-col"
+                        >
+                            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-[var(--color-card)]">
+                                <h3 className="text-lg font-black text-white uppercase tracking-wider">Modifier Session</h3>
+                                <button onClick={() => setRescheduleData(null)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[var(--color-text-muted)] hover:text-white transition-colors">
+                                    <X size={16} />
+                                </button>
+                            </div>
+                            <div className="p-8 space-y-6 bg-[var(--color-background)]">
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">Nouvelle Date</label>
+                                        <div className="relative">
+                                            <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-accent)]" size={16} />
+                                            <input
+                                                type="date"
+                                                value={rescheduleData.date}
+                                                onChange={(e) => setRescheduleData({ ...rescheduleData, date: e.target.value })}
+                                                className="w-full pl-12 pr-4 py-3 bg-[var(--color-card)] border border-white/5 rounded-xl text-sm font-medium text-white focus:outline-none focus:border-[var(--color-accent)]/20"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">Nouvel Horaire</label>
+                                        <div className="relative">
+                                            <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-accent)]" size={16} />
+                                            <select
+                                                value={rescheduleData.time}
+                                                onChange={(e) => setRescheduleData({ ...rescheduleData, time: e.target.value })}
+                                                className="w-full pl-12 pr-4 py-3 bg-[var(--color-card)] border border-white/5 rounded-xl text-sm font-medium text-white appearance-none focus:outline-none focus:border-[var(--color-accent)]/20"
+                                            >
+                                                {['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map(t => (
+                                                    <option key={t} value={t}>{t}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4 mt-6">
+                                    <button
+                                        onClick={() => setRescheduleData(null)}
+                                        className="flex-1 btn-secondary justify-center py-4"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        onClick={handleReschedule}
+                                        disabled={isRescheduling}
+                                        className="flex-1 btn-primary justify-center py-4"
+                                    >
+                                        {isRescheduling ? <Clock size={16} className="animate-spin" /> : <Save size={16} />}
+                                        Sauvegarder
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     </div>
