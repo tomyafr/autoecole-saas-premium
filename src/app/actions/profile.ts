@@ -68,11 +68,11 @@ export async function getUserProfile(targetId: string, requestorId: string, requ
                     .select('name, type, status')
                     .eq('student_id', targetId);
 
-                // Stats
-                const completedAppts = (appts || []).filter((a: any) => a.status === 'completed').length;
+                // Stats - On n'utilise que les leçons validées pour les heures effectuées
+                const totalLessons = (lessons || [])?.filter((l: any) => l.status === 'done').length;
+                const totalHours = totalLessons; // On considère 1 leçon = 1 heure ici, à affiner si besoin
                 const pendingAppts = (appts || []).filter((a: any) => a.status === 'pending').length;
-                const totalLessons = (lessons || []).length;
-                const totalHours = completedAppts + totalLessons;
+
                 const avgScore = totalLessons > 0
                     ? Math.round((lessons || []).reduce((sum: number, l: any) => sum + (l.score || 0), 0) / totalLessons * 10) / 10
                     : null;
@@ -105,7 +105,7 @@ export async function getUserProfile(targetId: string, requestorId: string, requ
                 profile.stats = {
                     totalHours,
                     totalTarget: 35,
-                    completedSessions: completedAppts,
+                    completedSessions: totalLessons, // Renommé mentalement en sessions de conduite validées
                     pendingSessions: pendingAppts,
                     totalLessons,
                     avgScore,

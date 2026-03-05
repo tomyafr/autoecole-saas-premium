@@ -25,6 +25,7 @@ export default function MoniteurStudentsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [students, setStudents] = useState<any[]>([]);
+    const [statusFilter, setStatusFilter] = useState<'all' | 'examen' | 'en_cours' | 'debutant'>('all');
 
     useEffect(() => {
         const fetchStudents = async () => {
@@ -185,8 +186,15 @@ export default function MoniteurStudentsPage() {
                                 className="pl-10 pr-4 py-2 bg-white/[0.02] border border-white/5 rounded-xl text-sm font-medium text-white focus:outline-none focus:border-[#00F5FF]/20 transition-all w-full md:w-64"
                             />
                         </div>
-                        <button className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-[#8A94A6] hover:text-white transition-colors">
+                        <button
+                            onClick={() => {
+                                const next: any = { all: 'examen', examen: 'en_cours', en_cours: 'debutant', debutant: 'all' };
+                                setStatusFilter(next[statusFilter]);
+                            }}
+                            className={`p-2.5 rounded-xl border transition-all flex items-center gap-2 ${statusFilter !== 'all' ? 'bg-[#00F5FF]/10 border-[#00F5FF]/20 text-[#00F5FF]' : 'bg-white/[0.02] border-white/5 text-[#8A94A6] hover:text-white'}`}
+                        >
                             <Filter size={18} />
+                            {statusFilter !== 'all' && <span className="text-[10px] font-black uppercase">{statusFilter.replace('_', ' ')}</span>}
                         </button>
                     </div>
                 </div>
@@ -204,68 +212,78 @@ export default function MoniteurStudentsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {students.filter((s: any) => s.name.toLowerCase().includes(searchQuery.toLowerCase())).map((student: any) => (
-                                <tr
-                                    key={student.id}
-                                    className="group cursor-pointer hover:bg-white/[0.02] transition-colors"
-                                    onClick={() => router.push(`/dashboard/profile/${student.id}`)}
-                                >
-                                    <td>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#8A94A6] group-hover:text-[#00F5FF] transition-colors">
-                                                {student.name.split(' ').map((n: string) => n[0]).join('')}
+                            {students
+                                .filter((s: any) => {
+                                    const matchSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase());
+                                    const matchStatus = statusFilter === 'all'
+                                        ? true
+                                        : statusFilter === 'examen' ? s.status === 'Prêt examen'
+                                            : statusFilter === 'en_cours' ? s.status === 'En cours'
+                                                : s.status === 'Débutant';
+                                    return matchSearch && matchStatus;
+                                })
+                                .map((student: any) => (
+                                    <tr
+                                        key={student.id}
+                                        className="group cursor-pointer hover:bg-white/[0.02] transition-colors"
+                                        onClick={() => router.push(`/dashboard/profile/${student.id}`)}
+                                    >
+                                        <td>
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#8A94A6] group-hover:text-[#00F5FF] transition-colors">
+                                                    {student.name.split(' ').map((n: string) => n[0]).join('')}
+                                                </div>
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className="text-sm font-semibold text-white group-hover:text-[#00F5FF] transition-colors truncate">{student.name}</span>
+                                                    <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-0.5">{student.hours} validées</span>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-col min-w-0">
-                                                <span className="text-sm font-semibold text-white group-hover:text-[#00F5FF] transition-colors truncate">{student.name}</span>
-                                                <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-0.5">{student.hours} validées</span>
+                                        </td>
+                                        <td>
+                                            <div className="w-32 space-y-2">
+                                                <div className="flex justify-between items-center text-[9px] font-black text-[#5F6B7A] uppercase tracking-tighter">
+                                                    <span>Progression</span>
+                                                    <span className="text-white">{student.progress}%</span>
+                                                </div>
+                                                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${student.progress}%` }}
+                                                        transition={{ duration: 1, ease: "easeOut" }}
+                                                        className="h-full bg-gradient-to-r from-blue-600 to-[#00F5FF]"
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="w-32 space-y-2">
-                                            <div className="flex justify-between items-center text-[9px] font-black text-[#5F6B7A] uppercase tracking-tighter">
-                                                <span>Progression</span>
-                                                <span className="text-white">{student.progress}%</span>
+                                        </td>
+                                        <td>
+                                            <div className="flex items-center gap-2">
+                                                <Calendar size={14} className="text-[#5F6B7A]" />
+                                                <span className="text-xs font-medium text-[#8A94A6]">{student.lastSession || '-'}</span>
                                             </div>
-                                            <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: `${student.progress}%` }}
-                                                    transition={{ duration: 1, ease: "easeOut" }}
-                                                    className="h-full bg-gradient-to-r from-blue-600 to-[#00F5FF]"
-                                                />
+                                        </td>
+                                        <td>
+                                            <span className={`status-badge ${student.status === 'En retard' ? 'bg-red-500/10 text-red-400' :
+                                                student.status === 'Prêt examen' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                                    'status-badge-gray'
+                                                }`}>
+                                                {student.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="p-1 rounded bg-white/5">
+                                                    <TrendingUp size={10} className={student.score !== '-' && student.score >= 8 ? 'text-emerald-400' : 'text-amber-400'} />
+                                                </div>
+                                                <span className="text-xs font-bold text-white font-mono">{student.score}</span>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="flex items-center gap-2">
-                                            <Calendar size={14} className="text-[#5F6B7A]" />
-                                            <span className="text-xs font-medium text-[#8A94A6]">{student.lastSession || '-'}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span className={`status-badge ${student.status === 'En retard' ? 'bg-red-500/10 text-red-400' :
-                                            student.status === 'Prêt examen' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                                'status-badge-gray'
-                                            }`}>
-                                            {student.status}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div className="flex items-center gap-1.5">
-                                            <div className="p-1 rounded bg-white/5">
-                                                <TrendingUp size={10} className={student.score !== '-' && student.score >= 8 ? 'text-emerald-400' : 'text-amber-400'} />
-                                            </div>
-                                            <span className="text-xs font-bold text-white font-mono">{student.score}</span>
-                                        </div>
-                                    </td>
-                                    <td className="text-right">
-                                        <button className="w-9 h-9 rounded-lg flex items-center justify-center text-[#5F6B7A] hover:bg-[#00F5FF]/10 hover:text-[#00F5FF] transition-all">
-                                            <ChevronRight size={18} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="text-right">
+                                            <button className="w-9 h-9 rounded-lg flex items-center justify-center text-[#5F6B7A] hover:bg-[#00F5FF]/10 hover:text-[#00F5FF] transition-all">
+                                                <ChevronRight size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
                             {students.length === 0 && (
                                 <tr>
                                     <td colSpan={6} className="text-center py-10 text-xs text-[#5F6B7A]">Aucun élève identifié</td>

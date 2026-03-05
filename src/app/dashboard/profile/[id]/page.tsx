@@ -102,12 +102,12 @@ export default function PublicProfilePage() {
                     </div>
                 </div>
                 {/* TABS */}
-                <div className="flex items-center gap-1 bg-white/[0.02] border border-white/5 rounded-xl p-1">
+                <div className="flex items-center gap-1 bg-white/[0.02] border border-white/5 rounded-xl p-1 overflow-x-auto max-w-full no-scrollbar">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id
+                            className={`flex items-center gap-3 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id
                                 ? 'bg-[#00F5FF]/10 text-[#00F5FF] border border-[#00F5FF]/20'
                                 : 'text-[#5F6B7A] hover:text-white hover:bg-white/5'
                                 }`}
@@ -226,7 +226,12 @@ export default function PublicProfilePage() {
                             {/* Documents (élève) */}
                             {isStudent && stats.docsStatus && (
                                 <div className="premium-card p-6">
-                                    <h3 className="card-title mb-4 flex items-center gap-2"><FileText size={16} className="text-blue-400" /> Dossier Administratif</h3>
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div>
+                                            <h3 className="card-title flex items-center gap-2"><FileText size={16} className="text-blue-400" /> Dossier Administratif</h3>
+                                            <p className="text-[9px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-1">Conformité documents (CNI, Photos, etc.)</p>
+                                        </div>
+                                    </div>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
                                             <div className="text-lg font-black text-white">{stats.docsStatus.total}</div>

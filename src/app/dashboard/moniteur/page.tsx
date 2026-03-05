@@ -32,6 +32,7 @@ export default function MoniteurDashboard() {
     const [actionFeedback, setActionFeedback] = useState<string | null>(null);
     const [startLessonModal, setStartLessonModal] = useState(false);
     const [signingLessonId, setSigningLessonId] = useState<string | null>(null);
+    const [todayFilter, setTodayFilter] = useState<'all' | 'done' | 'pending'>('all');
 
     const triggerFeedback = (msg: string) => {
         setActionFeedback(msg);
@@ -139,15 +140,21 @@ export default function MoniteurDashboard() {
         { label: 'Taux Succès', value: `${successRate}%`, sub: 'Mov. réussite', icon: <TrendingUp size={18} />, color: 'text-emerald-400' },
     ];
 
-    const todaySessions = todaySessionsAll.map((app: any) => ({
-        id: app.id,
-        studentId: app.student?.id || '',
-        name: app.student?.name || 'Inconnu',
-        time: app.time,
-        type: app.type,
-        status: app.status === 'completed' ? 'done' : 'upcoming',
-        note: app.status === 'completed' ? 'Validé' : 'Prévu'
-    })) || [];
+    const todaySessions = todaySessionsAll
+        .filter((app: any) => {
+            if (todayFilter === 'done') return app.status === 'completed';
+            if (todayFilter === 'pending') return app.status === 'pending';
+            return true;
+        })
+        .map((app: any) => ({
+            id: app.id,
+            studentId: app.student?.id || '',
+            name: app.student?.name || 'Inconnu',
+            time: app.time,
+            type: app.type,
+            status: app.status === 'completed' ? 'done' : 'upcoming',
+            note: app.status === 'completed' ? 'Validé' : 'Prévu'
+        })) || [];
 
     const doneToday = todaySessionsAll.length - pendingToday;
 
@@ -204,9 +211,25 @@ export default function MoniteurDashboard() {
                     <div className="premium-card overflow-hidden">
                         <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
                             <h3 className="section-title">Sessions du jour</h3>
-                            <div className="flex gap-3">
-                                <span className="status-badge status-badge-cyan">{doneToday} Terminés</span>
-                                <span className="status-badge status-badge-gray">{pendingToday} En attente</span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setTodayFilter('all')}
+                                    className={`status-badge transition-all ${todayFilter === 'all' ? 'bg-white/10 text-white' : 'status-badge-gray opacity-40 hover:opacity-100'}`}
+                                >
+                                    Tout
+                                </button>
+                                <button
+                                    onClick={() => setTodayFilter('done')}
+                                    className={`status-badge transition-all ${todayFilter === 'done' ? 'status-badge-cyan' : 'status-badge-gray opacity-40 hover:opacity-100'}`}
+                                >
+                                    {doneToday} Terminés
+                                </button>
+                                <button
+                                    onClick={() => setTodayFilter('pending')}
+                                    className={`status-badge transition-all ${todayFilter === 'pending' ? 'bg-amber-500/10 text-amber-400' : 'status-badge-gray opacity-40 hover:opacity-100'}`}
+                                >
+                                    {pendingToday} En attente
+                                </button>
                             </div>
                         </div>
                         <div className="overflow-x-auto">
