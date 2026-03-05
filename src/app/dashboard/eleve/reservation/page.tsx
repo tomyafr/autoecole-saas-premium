@@ -78,7 +78,7 @@ export default function ReservationPage() {
             let current = new Date(today);
             current.setDate(current.getDate() + 1);
 
-            while (dates.length < 5) {
+            while (dates.length < 10) {
                 if (current.getDay() !== 0) {
                     const label = current.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }).replace('.', '');
                     dates.push({
@@ -164,29 +164,29 @@ export default function ReservationPage() {
                             <span className="text-sm font-bold text-white">Choisir un Formateur</span>
                             <div className="h-px flex-1 bg-white/5" />
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-3">
                             {INSTRUCTORS.map(inst => (
                                 <button
                                     key={inst.id}
                                     onClick={() => { setSelectedInstructorId(inst.id); setSelectedTime(null); }}
-                                    className={`premium-card p-2 px-3 flex items-center gap-3 transition-all relative overflow-hidden flex-1 min-w-[200px] max-w-[240px] ${selectedInstructorId === inst.id ? 'border-[#00F5FF] ring-1 ring-[#00F5FF]/20 bg-[#00F5FF]/[0.05] shadow-[0_0_20px_rgba(0,245,255,0.1)]' : 'hover:border-white/10'}`}
+                                    className={`premium-card p-4 flex items-center gap-4 transition-all relative overflow-hidden flex-1 min-w-[240px] max-w-[280px] ${selectedInstructorId === inst.id ? 'border-[#00F5FF] ring-2 ring-[#00F5FF]/20 bg-[#00F5FF]/[0.05] shadow-[0_0_20px_rgba(0,245,255,0.1)]' : 'hover:border-white/20'}`}
                                 >
                                     {selectedInstructorId === inst.id && (
-                                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-1 right-1 text-[#00F5FF]">
-                                            <CheckCircle2 size={12} fill="currentColor" className="text-[#0B0F14]" />
+                                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 text-[#00F5FF]">
+                                            <CheckCircle2 size={16} fill="currentColor" className="text-[#0B0F14]" />
                                         </motion.div>
                                     )}
-                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[10px] font-black text-[#5F6B7A]">
+                                    <div className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center text-sm font-black text-[#5F6B7A]">
                                         {inst.avatar}
                                     </div>
                                     <div className="text-left">
-                                        <p className="text-[11px] font-black text-white uppercase tracking-tight">{inst.name}</p>
-                                        <div className="flex items-center gap-2 mt-0">
-                                            <div className="flex items-center gap-1 bg-amber-500/10 px-1 py-0.5 rounded-md">
-                                                <Star size={7} className="text-amber-500 fill-amber-500" />
-                                                <span className="text-[7px] font-black text-amber-500">{inst.rating}</span>
+                                        <p className="text-sm font-black text-white uppercase tracking-tight">{inst.name}</p>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <div className="flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded-md">
+                                                <Star size={9} className="text-amber-500 fill-amber-500" />
+                                                <span className="text-[9px] font-black text-amber-500">{inst.rating}</span>
                                             </div>
-                                            <span className="text-[7px] text-[#5F6B7A] font-bold uppercase tracking-wider">{inst.exp}</span>
+                                            <span className="text-[9px] text-[#5F6B7A] font-bold uppercase tracking-wider">{inst.exp}</span>
                                         </div>
                                     </div>
                                 </button>
@@ -214,7 +214,8 @@ export default function ReservationPage() {
                                             <div className="relative">
                                                 <input
                                                     type="date"
-                                                    className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                                                    id="hidden-date-picker"
+                                                    className="absolute inset-0 opacity-0 pointer-events-none"
                                                     min={new Date().toISOString().split('T')[0]}
                                                     onChange={(e) => {
                                                         const d = new Date(e.target.value);
@@ -224,7 +225,14 @@ export default function ReservationPage() {
                                                         setWeekOffset(0);
                                                     }}
                                                 />
-                                                <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#00F5FF]/50 hover:text-[#00F5FF] transition-all">
+                                                <button
+                                                    onClick={() => {
+                                                        const el = document.getElementById('hidden-date-picker') as any;
+                                                        if (el.showPicker) el.showPicker();
+                                                        else el.click();
+                                                    }}
+                                                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#00F5FF]/50 hover:text-[#00F5FF] transition-all"
+                                                >
                                                     <CalendarIcon size={14} />
                                                     <span className="text-[10px] font-black uppercase tracking-wider">Calendrier</span>
                                                 </button>
