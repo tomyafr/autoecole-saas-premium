@@ -140,8 +140,8 @@ export default function ReservationPage() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
                 <div>
-                    <h1 className="page-title">Réserver une mission</h1>
-                    <p className="text-sm text-[#8A94A6] mt-1 font-medium">Configurez votre prochaine session d'apprentissage sur-mesure.</p>
+                    <h1 className="text-2xl font-black text-white uppercase tracking-tighter">Réserver une mission</h1>
+                    <p className="text-[11px] text-[#8A94A6] mt-0.5 font-medium">Configurez votre prochaine session d'apprentissage sur-mesure.</p>
                 </div>
                 {selectedInstructorId && (
                     <button
@@ -164,29 +164,29 @@ export default function ReservationPage() {
                             <span className="text-sm font-bold text-white">Choisir un Formateur</span>
                             <div className="h-px flex-1 bg-white/5" />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
                             {INSTRUCTORS.map(inst => (
                                 <button
                                     key={inst.id}
                                     onClick={() => { setSelectedInstructorId(inst.id); setSelectedTime(null); }}
-                                    className={`premium-card p-6 flex items-center gap-5 transition-all relative overflow-hidden ${selectedInstructorId === inst.id ? 'border-[#00F5FF] ring-2 ring-[#00F5FF]/20 bg-[#00F5FF]/[0.05] shadow-[0_0_30px_rgba(0,245,255,0.1)]' : 'hover:border-white/20'}`}
+                                    className={`premium-card p-3 flex items-center gap-4 transition-all relative overflow-hidden ${selectedInstructorId === inst.id ? 'border-[#00F5FF] ring-2 ring-[#00F5FF]/20 bg-[#00F5FF]/[0.05] shadow-[0_0_30px_rgba(0,245,255,0.1)]' : 'hover:border-white/20'}`}
                                 >
                                     {selectedInstructorId === inst.id && (
-                                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-3 right-3 text-[#00F5FF]">
-                                            <CheckCircle2 size={20} fill="currentColor" className="text-[#0B0F14]" />
+                                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 text-[#00F5FF]">
+                                            <CheckCircle2 size={16} fill="currentColor" className="text-[#0B0F14]" />
                                         </motion.div>
                                     )}
-                                    <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-lg font-black text-[#5F6B7A]">
+                                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-sm font-black text-[#5F6B7A]">
                                         {inst.avatar}
                                     </div>
                                     <div className="text-left">
-                                        <p className="text-lg font-black text-white uppercase tracking-tight">{inst.name}</p>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <div className="flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-lg">
-                                                <Star size={10} className="text-amber-500 fill-amber-500" />
-                                                <span className="text-[10px] font-black text-amber-500">{inst.rating}</span>
+                                        <p className="text-sm font-black text-white uppercase tracking-tight">{inst.name}</p>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <div className="flex items-center gap-1 bg-amber-500/10 px-1.5 py-0.5 rounded-md">
+                                                <Star size={8} className="text-amber-500 fill-amber-500" />
+                                                <span className="text-[8px] font-black text-amber-500">{inst.rating}</span>
                                             </div>
-                                            <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-wider">{inst.exp}</span>
+                                            <span className="text-[8px] text-[#5F6B7A] font-bold uppercase tracking-wider">{inst.exp}</span>
                                         </div>
                                     </div>
                                 </button>
@@ -214,7 +214,7 @@ export default function ReservationPage() {
                                             <div className="relative">
                                                 <input
                                                     type="date"
-                                                    className="absolute inset-0 opacity-0 cursor-pointer z-20 w-8"
+                                                    className="absolute inset-0 opacity-0 cursor-pointer z-20"
                                                     min={new Date().toISOString().split('T')[0]}
                                                     onChange={(e) => {
                                                         const d = new Date(e.target.value);
@@ -240,17 +240,17 @@ export default function ReservationPage() {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+                                    <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
                                         {availableDates.map((dayItem, idx) => {
                                             const isSelected = selectedDate.getDate() === dayItem.date.getDate() && selectedDate.getMonth() === dayItem.date.getMonth();
                                             return (
                                                 <button
                                                     key={idx}
                                                     onClick={() => { setSelectedDate(dayItem.date); setSelectedTime(null); }}
-                                                    className={`flex-1 min-w-[110px] p-5 rounded-[1.5rem] text-center border transition-all duration-300 ${isSelected ? 'bg-white/5 border-[#00F5FF] text-[#00F5FF] shadow-[0_10px_30px_rgba(0,245,255,0.1)] scale-105' : 'border-white/5 text-[#5F6B7A] bg-[#0B0F14] hover:border-white/20'}`}
+                                                    className={`flex-1 min-w-[80px] p-3 rounded-[1.25rem] text-center border transition-all duration-300 ${isSelected ? 'bg-white/5 border-[#00F5FF] text-[#00F5FF] shadow-[0_10px_30px_rgba(0,245,255,0.1)] scale-105' : 'border-white/5 text-[#5F6B7A] bg-[#0B0F14] hover:border-white/20'}`}
                                                 >
-                                                    <p className="text-[10px] font-black uppercase tracking-[0.2em]">{dayItem.label.split(' ')[0]}</p>
-                                                    <p className={`text-2xl font-black mt-1 ${isSelected ? 'text-white' : ''}`}>{dayItem.label.split(' ')[1]}</p>
+                                                    <p className="text-[9px] font-black uppercase tracking-[0.2em]">{dayItem.label.split(' ')[0]}</p>
+                                                    <p className={`text-xl font-black mt-1 ${isSelected ? 'text-white' : ''}`}>{dayItem.label.split(' ')[1]}</p>
                                                 </button>
                                             );
                                         })}
@@ -265,22 +265,22 @@ export default function ReservationPage() {
                                         <div className="h-px flex-1 bg-white/5" />
                                     </div>
 
-                                    <div className="flex gap-4 mb-6">
+                                    <div className="flex gap-3 mb-6">
                                         <button
                                             onClick={() => { setSelectedDuration(1); setSelectedTime(null); }}
-                                            className={`flex-1 py-3 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all ${selectedDuration === 1 ? 'border-[#00F5FF] bg-[#00F5FF]/10 text-white shadow-[0_0_20px_rgba(0,245,255,0.1)]' : 'border-white/5 text-[#5F6B7A] hover:bg-white/5'}`}
+                                            className={`flex-1 py-2.5 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${selectedDuration === 1 ? 'border-[#00F5FF] bg-[#00F5FF]/10 text-white shadow-[0_0_20px_rgba(0,245,255,0.1)]' : 'border-white/5 text-[#5F6B7A] hover:bg-white/5'}`}
                                         >
                                             Session 1 Heure
                                         </button>
                                         <button
                                             onClick={() => { setSelectedDuration(2); setSelectedTime(null); }}
-                                            className={`flex-1 py-3 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all ${selectedDuration === 2 ? 'border-[#00F5FF] bg-[#00F5FF]/10 text-white shadow-[0_0_20px_rgba(0,245,255,0.1)]' : 'border-white/5 text-[#5F6B7A] hover:bg-white/5'}`}
+                                            className={`flex-1 py-2.5 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${selectedDuration === 2 ? 'border-[#00F5FF] bg-[#00F5FF]/10 text-white shadow-[0_0_20px_rgba(0,245,255,0.1)]' : 'border-white/5 text-[#5F6B7A] hover:bg-white/5'}`}
                                         >
                                             Session 2 Heures
                                         </button>
                                     </div>
 
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                         {ALL_HOURS.map((time, idx) => {
                                             let isBooked = bookedSlots.includes(time);
                                             if (!isBooked && selectedDuration === 2) {
@@ -293,17 +293,17 @@ export default function ReservationPage() {
                                                     key={idx}
                                                     disabled={isBooked}
                                                     onClick={() => !isBooked && setSelectedTime(time)}
-                                                    className={`premium-card p-5 group transition-all duration-300 ${isBooked ? 'opacity-20 cursor-not-allowed grayscale' : selectedTime === time ? 'border-[#00F5FF] bg-[#00F5FF]/5 shadow-[0_0_25px_rgba(0,245,255,0.05)] scale-[1.02]' : 'hover:border-white/20 hover:bg-white/[0.02]'}`}
+                                                    className={`premium-card p-3.5 group transition-all duration-300 ${isBooked ? 'opacity-20 cursor-not-allowed grayscale' : selectedTime === time ? 'border-[#00F5FF] bg-[#00F5FF]/5 shadow-[0_0_25px_rgba(0,245,255,0.05)] scale-[1.02]' : 'hover:border-white/20 hover:bg-white/[0.02]'}`}
                                                 >
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <span className={`text-2xl font-black ${selectedTime === time ? 'text-white' : 'text-[#8A94A6]'}`}>{time}</span>
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <span className={`text-xl font-black ${selectedTime === time ? 'text-white' : 'text-[#8A94A6]'}`}>{time}</span>
                                                         {selectedTime === time ? (
-                                                            <CheckCircle2 size={16} className="text-[#00F5FF]" />
+                                                            <CheckCircle2 size={14} className="text-[#00F5FF]" />
                                                         ) : (
-                                                            <Clock size={16} className="text-[#5F6B7A] opacity-20 group-hover:opacity-100 transition-opacity" />
+                                                            <Clock size={14} className="text-[#5F6B7A] opacity-20 group-hover:opacity-100 transition-opacity" />
                                                         )}
                                                     </div>
-                                                    <span className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest">{selectedDuration}H DISPONIBLE</span>
+                                                    <span className="text-[8px] font-black text-[#5F6B7A] uppercase tracking-widest">{selectedDuration}H DISPONIBLE</span>
                                                 </button>
                                             );
                                         })}
@@ -352,7 +352,7 @@ export default function ReservationPage() {
                                 key="selection"
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="premium-card p-8 flex flex-col justify-between space-y-8 min-h-[450px] border-l-4 border-l-[#00F5FF] shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
+                                className="premium-card p-6 flex flex-col justify-between space-y-6 min-h-[400px] border-l-4 border-l-[#00F5FF] shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
                             >
                                 <div className="space-y-8">
                                     <div className="flex items-center gap-3">
@@ -360,26 +360,26 @@ export default function ReservationPage() {
                                         <h3 className="text-xs font-black text-white uppercase tracking-widest">Confirmation</h3>
                                     </div>
 
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-5">
-                                            <div className="w-14 h-14 rounded-2xl bg-[#00F5FF]/10 flex items-center justify-center text-[#00F5FF]">
-                                                <CalendarIcon size={28} />
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-[#00F5FF]/10 flex items-center justify-center text-[#00F5FF]">
+                                                <CalendarIcon size={20} />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest mb-1">Date & Heure</p>
-                                                <p className="text-lg font-black text-white leading-tight">
+                                                <p className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest mb-0.5">Date & Heure</p>
+                                                <p className="text-sm font-black text-white leading-tight">
                                                     {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' }).replace(/^\w/, (c) => c.toUpperCase())}
                                                     <br /><span className="text-[#00F5FF]">{selectedTime}</span>
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-5">
-                                            <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-[#8A94A6]">
-                                                <User size={28} />
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-[#8A94A6]">
+                                                <User size={20} />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest mb-1">Formateur</p>
-                                                <p className="text-lg font-black text-white">{selectedInstructor?.name}</p>
+                                                <p className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest mb-0.5">Formateur</p>
+                                                <p className="text-sm font-black text-white">{selectedInstructor?.name}</p>
                                             </div>
                                         </div>
                                     </div>
