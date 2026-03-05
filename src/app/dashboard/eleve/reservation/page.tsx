@@ -36,12 +36,7 @@ export default function ReservationPage() {
 
     // Multi-step state
     const [selectedInstructorId, setSelectedInstructorId] = useState<string | null>(null);
-    const [selectedDate, setSelectedDate] = useState<Date>(() => {
-        const d = new Date();
-        d.setHours(12, 0, 0, 0);
-        d.setDate(d.getDate() + 1); // Demain par défaut
-        return d;
-    });
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [weekOffset, setWeekOffset] = useState(0);
     const [availableDates, setAvailableDates] = useState<{ label: string, date: Date }[]>([]);
 
@@ -62,6 +57,8 @@ export default function ReservationPage() {
     useEffect(() => {
         if (selectedInstructor && selectedDate) {
             getBookedSlots(selectedInstructor.name, selectedDate).then(slots => setBookedSlots(slots));
+        } else if (!selectedDate) {
+            setBookedSlots([]);
         }
     }, [selectedInstructor, selectedDate]);
 
@@ -89,9 +86,9 @@ export default function ReservationPage() {
                 current.setDate(current.getDate() + 1);
             }
             setAvailableDates(dates);
-            if (weekOffset !== 0 || !selectedDate || dates.findIndex(d => d.date.toDateString() === selectedDate.toDateString()) === -1) {
-                // Only auto-select if we shifted weeks and the current selection is lost
-                if (weekOffset !== 0) setSelectedDate(dates[0].date);
+            if (weekOffset !== 0) {
+                // If we shifted weeks, we don't necessarily select anything anymore
+                // setSelectedDate(null);
             }
 
         } else {
@@ -169,7 +166,7 @@ export default function ReservationPage() {
                                 <button
                                     key={inst.id}
                                     onClick={() => { setSelectedInstructorId(inst.id); setSelectedTime(null); }}
-                                    className={`premium-card p-4 flex items-center gap-4 transition-all relative overflow-hidden flex-1 min-w-[240px] max-w-[280px] ${selectedInstructorId === inst.id ? 'border-[#00F5FF] ring-4 ring-[#00F5FF]/10 bg-[#00F5FF]/[0.08] shadow-[0_0_40px_rgba(0,245,255,0.15)]' : 'border-white/10 hover:border-white/30'}`}
+                                    className={`p-4 flex items-center gap-4 transition-all relative overflow-hidden flex-1 min-w-[240px] max-w-[280px] rounded-2xl border-[4px] ${selectedInstructorId === inst.id ? 'border-[#00F5FF]/80 bg-[#00F5FF]/10 shadow-[0_0_50px_rgba(0,245,255,0.4)] ring-4 ring-[#00F5FF]/10' : 'border-white/5 hover:border-white/20 bg-white/[0.02]'}`}
                                 >
                                     {selectedInstructorId === inst.id && (
                                         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 text-[#00F5FF]">
@@ -217,10 +214,16 @@ export default function ReservationPage() {
                                                     id="hidden-date-picker"
                                                     className="absolute inset-0 opacity-0 pointer-events-none"
                                                     min={new Date().toISOString().split('T')[0]}
+                                                    value={selectedDate ? selectedDate.toISOString().split('T')[0] : ''}
                                                     onChange={(e) => {
-                                                        const d = new Date(e.target.value);
-                                                        d.setHours(12, 0, 0, 0);
-                                                        setSelectedDate(d);
+                                                        const val = e.target.value;
+                                                        if (!val) {
+                                                            setSelectedDate(null);
+                                                        } else {
+                                                            const d = new Date(val);
+                                                            d.setHours(12, 0, 0, 0);
+                                                            setSelectedDate(d);
+                                                        }
                                                         setSelectedTime(null);
                                                         setWeekOffset(0);
                                                     }}
@@ -250,12 +253,19 @@ export default function ReservationPage() {
                                     </div>
                                     <div className="flex gap-2.5 overflow-x-auto pb-4 no-scrollbar">
                                         {availableDates.map((dayItem, idx) => {
-                                            const isSelected = selectedDate.getDate() === dayItem.date.getDate() && selectedDate.getMonth() === dayItem.date.getMonth();
+                                            const isSelected = selectedDate?.toDateString() === dayItem.date.toDateString();
                                             return (
                                                 <button
                                                     key={idx}
-                                                    onClick={() => { setSelectedDate(dayItem.date); setSelectedTime(null); }}
-                                                    className={`w-[70px] h-20 flex flex-col items-center justify-center rounded-2xl border transition-all duration-300 ${isSelected ? 'bg-white/10 border-[#00F5FF] text-[#00F5FF] shadow-[0_5px_15px_rgba(0,245,255,0.1)]' : 'border-white/5 text-[#5F6B7A] bg-white/[0.01] hover:border-white/10'}`}
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            setSelectedDate(null);
+                                                        } else {
+                                                            setSelectedDate(dayItem.date);
+                                                        }
+                                                        setSelectedTime(null);
+                                                    }}
+                                                    className={`w-[70px] h-20 flex flex-col items-center justify-center rounded-2xl border transition-all duration-300 ${isSelected ? 'bg-[#00F5FF]/10 border-[#00F5FF] text-[#00F5FF] shadow-[0_5px_15px_rgba(0,245,255,0.15)]' : 'border-white/5 text-[#5F6B7A] bg-white/[0.01] hover:border-white/10'}`}
                                                 >
                                                     <p className="text-[8px] font-black uppercase tracking-[0.2em]">{dayItem.label.split(' ')[0]}</p>
                                                     <p className={`text-lg font-black mt-0.5 ${isSelected ? 'text-white' : ''}`}>{dayItem.label.split(' ')[1]}</p>
