@@ -223,31 +223,7 @@ export default function PublicProfilePage() {
                                 </div>
                             )}
 
-                            {/* Documents (élève) */}
-                            {isStudent && stats.docsStatus && (
-                                <div className="premium-card p-6">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div>
-                                            <h3 className="card-title flex items-center gap-2"><FileText size={16} className="text-blue-400" /> Dossier Administratif</h3>
-                                            <p className="text-[9px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-1">Conformité documents (CNI, Photos, etc.)</p>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
-                                            <div className="text-lg font-black text-white">{stats.docsStatus.total}</div>
-                                            <div className="text-[9px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-1">Total</div>
-                                        </div>
-                                        <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-center">
-                                            <div className="text-lg font-black text-emerald-400">{stats.docsStatus.valid}</div>
-                                            <div className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest mt-1">Validés</div>
-                                        </div>
-                                        <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-center">
-                                            <div className="text-lg font-black text-amber-400">{stats.docsStatus.pending}</div>
-                                            <div className="text-[9px] text-amber-400 font-bold uppercase tracking-widest mt-1">En attente</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+
 
                             {/* Avis (moniteur) */}
                             {isMoniteur && profile.reviews && profile.reviews.length > 0 && (
@@ -356,9 +332,9 @@ export default function PublicProfilePage() {
                                     </div>
                                     <div className="space-y-3">
                                         {comps.map((comp: any, i: number) => (
-                                            <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.03] transition-colors">
-                                                <span className="text-sm font-medium text-white">{comp.title}</span>
-                                                <div className="flex items-center gap-2">
+                                            <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.03] transition-colors gap-3">
+                                                <span className="text-sm font-medium text-white text-center sm:text-left">{comp.title}</span>
+                                                <div className="flex items-center justify-center gap-2">
                                                     <div className="flex gap-1">
                                                         {[0, 1, 2, 3].map(lvl => (
                                                             <div key={lvl} className={`w-6 h-2 rounded-full transition-colors ${lvl < comp.level ? getLevelColor(comp.level) : 'bg-white/10'}`} />

@@ -33,6 +33,7 @@ export default function MoniteurDashboard() {
     const [startLessonModal, setStartLessonModal] = useState(false);
     const [signingLessonId, setSigningLessonId] = useState<string | null>(null);
     const [todayFilter, setTodayFilter] = useState<'all' | 'done' | 'pending'>('all');
+    const [selectedSessionDetails, setSelectedSessionDetails] = useState<any | null>(null);
 
     const triggerFeedback = (msg: string) => {
         setActionFeedback(msg);
@@ -121,12 +122,14 @@ export default function MoniteurDashboard() {
         );
     }
 
-    const today = new Date().toISOString().split('T')[0];
-    const todaySessionsAll = dbData.appointmentsAsInstructor?.filter((app: any) => app.date && new Date(app.date).toISOString().split('T')[0] === today) || [];
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const todaySessionsAll = dbData.appointmentsAsInstructor?.filter((app: any) => app.date === today) || [];
 
     const pendingToday = todaySessionsAll.filter((app: any) => app.status === 'pending').length;
+    const completedToday = todaySessionsAll.filter((app: any) => app.status === 'completed' || app.status === 'done').length;
     const studentsCount = dbData.totalStudents || 0;
-    const hoursTotal = dbData.lessons?.length || 0;
+    const hoursTotal = (dbData.lessons?.length || 0) + (dbData.appointmentsAsInstructor?.filter((a: any) => a.status === 'completed' || a.status === 'done').length || 0);
 
     const lessonsWithScores = dbData.lessons?.filter((l: any) => l.score != null) || [];
     const avgScoreInst = lessonsWithScores.length > 0
@@ -143,7 +146,7 @@ export default function MoniteurDashboard() {
 
     const todaySessions = todaySessionsAll
         .filter((app: any) => {
-            if (todayFilter === 'done') return app.status === 'completed';
+            if (todayFilter === 'done') return app.status === 'completed' || app.status === 'done';
             if (todayFilter === 'pending') return app.status === 'pending';
             return true;
         })
@@ -153,11 +156,11 @@ export default function MoniteurDashboard() {
             name: app.student?.name || 'Inconnu',
             time: app.time,
             type: app.type,
-            status: app.status === 'completed' ? 'done' : 'upcoming',
-            note: app.status === 'completed' ? 'Validé' : 'Prévu'
+            status: (app.status === 'completed' || app.status === 'done') ? 'done' : 'upcoming',
+            note: (app.status === 'completed' || app.status === 'done') ? 'Validé' : 'Prévu'
         })) || [];
 
-    const doneToday = todaySessionsAll.length - pendingToday;
+    const doneToday = completedToday;
 
     return (
         <div className="space-y-10 group/moniteur">
@@ -215,7 +218,7 @@ export default function MoniteurDashboard() {
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setTodayFilter('all')}
-                                    className={`status-badge transition-all ${todayFilter === 'all' ? 'bg-white/10 text-white' : 'status-badge-gray opacity-40 hover:opacity-100'}`}
+                                    className={`status-badge transition-all ${todayFilter === 'all' ? 'bg-white/20 text-white border-white/20' : 'status-badge-gray opacity-40 hover:opacity-100'}`}
                                 >
                                     Tout
                                 </button>
@@ -227,7 +230,7 @@ export default function MoniteurDashboard() {
                                 </button>
                                 <button
                                     onClick={() => setTodayFilter('pending')}
-                                    className={`status-badge transition-all ${todayFilter === 'pending' ? 'bg-amber-500/10 text-amber-400' : 'status-badge-gray opacity-40 hover:opacity-100'}`}
+                                    className={`status-badge transition-all ${todayFilter === 'pending' ? 'bg-amber-500/20 text-amber-400 border-amber-500/20' : 'status-badge-gray opacity-40 hover:opacity-100'}`}
                                 >
                                     {pendingToday} En attente
                                 </button>
@@ -280,9 +283,16 @@ export default function MoniteurDashboard() {
                                             </td>
                                             <td>
                                                 {session.status === 'done' ? (
-                                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-400 bg-emerald-400/5">
+                                                    <button
+                                                        onClick={() => {
+                                                            // Chercher la leçon correspondante pour avoir les détails (note, commentaires)
+                                                            const lessonDetails = dbData.lessons?.find((l: any) => l.appointment_id === session.id || (l.student_id === session.studentId && l.date === today && l.time === session.time));
+                                                            setSelectedSessionDetails(lessonDetails || session);
+                                                        }}
+                                                        className="w-10 h-10 rounded-xl flex items-center justify-center text-emerald-400 bg-emerald-400/5 hover:bg-emerald-400/10 transition-all border border-emerald-400/10"
+                                                    >
                                                         <CheckCircle2 size={18} />
-                                                    </div>
+                                                    </button>
                                                 ) : (
                                                     <button
                                                         onClick={() => router.push(`/dashboard/moniteur/evaluations?student_id=${session.studentId}&lesson_id=${session.id}`)}
@@ -441,6 +451,81 @@ export default function MoniteurDashboard() {
                                     className="btn-primary w-full justify-center"
                                 >
                                     Accéder au planning
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* SESSION DETAILS MODAL */}
+            <AnimatePresence>
+                {selectedSessionDetails && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setSelectedSessionDetails(null)} />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 30 }}
+                            className="relative w-full max-w-lg bg-[#0B0F14] border border-[#00F5FF]/30 rounded-[2.5rem] shadow-[0_0_100px_rgba(0,245,255,0.15)] overflow-hidden"
+                        >
+                            <div className="p-8 pb-6 border-b border-white/5 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                                        <CheckCircle2 size={24} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-black text-white uppercase tracking-tighter">Détails de la séance</h2>
+                                        <p className="text-[10px] font-bold text-[#8A94A6] uppercase tracking-[0.2em]">{selectedSessionDetails.time} — {selectedSessionDetails.type || 'Leçon'}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setSelectedSessionDetails(null)} className="p-2 text-[#5F6B7A] hover:text-white transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="p-8 space-y-6">
+                                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5">
+                                    <label className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest block mb-1">Élève</label>
+                                    <p className="text-lg font-bold text-white uppercase">{selectedSessionDetails.name || selectedSessionDetails.student?.name}</p>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                        <label className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest block mb-1">Note</label>
+                                        <p className="text-xl font-black text-emerald-400">{selectedSessionDetails.score || selectedSessionDetails.note || '-'}/20</p>
+                                    </div>
+                                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                        <label className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest block mb-1">Date</label>
+                                        <p className="text-sm font-bold text-white">{new Date().toLocaleDateString('fr-FR')}</p>
+                                    </div>
+                                </div>
+
+                                {selectedSessionDetails.note && (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest block">Commentaires</label>
+                                        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 italic text-sm text-[#8A94A6]">
+                                            "{selectedSessionDetails.note}"
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedSessionDetails.negative_points && (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-[#5F6B7A] uppercase tracking-widest block">Axes de progression</label>
+                                        <div className="p-4 rounded-2xl bg-amber-500/[0.02] border border-amber-500/10 text-sm text-[#8A94A6]">
+                                            {selectedSessionDetails.negative_points}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-8 pt-0 flex justify-center">
+                                <button
+                                    onClick={() => setSelectedSessionDetails(null)}
+                                    className="w-full py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                                >
+                                    Fermer
                                 </button>
                             </div>
                         </motion.div>

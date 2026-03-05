@@ -55,20 +55,26 @@ export default function MoniteurStudentsPage() {
                                 });
                             }
                             const s = stuMap.get(item.student.id);
-                            if (item.score !== undefined) {
+
+                            // On compte une heure si c'est une leçon validée OU un RDV complété
+                            const isDone = item.status === 'completed' || item.status === 'done';
+                            if (isDone || item.score !== undefined) {
                                 s.lessonsCount++;
-                                s.totalScore += item.score;
-                                if (!s.lastSession || new Date(item.date) > new Date(s.lastSession)) {
+                                if (item.score != null) {
+                                    s.totalScore += item.score;
+                                    s.hasScoreCount = (s.hasScoreCount || 0) + 1;
+                                }
+                                if (item.date && (!s.lastSession || new Date(item.date) > new Date(s.lastSessionDate || 0))) {
+                                    s.lastSessionDate = new Date(item.date);
                                     s.lastSession = new Date(item.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
                                 }
                             }
                         }
                     });
 
-                    const finalStudents = await Promise.all(Array.from(stuMap.values()).map(async s => {
-                        const score = s.lessonsCount > 0 ? (s.totalScore / s.lessonsCount).toFixed(1) : '-';
+                    const finalStudents = await Promise.all(Array.from(stuMap.values()).map(async (s: any) => {
+                        const score = (s.hasScoreCount || 0) > 0 ? (s.totalScore / s.hasScoreCount).toFixed(1) : '-';
 
-                        // Récupérer la VRAIE progression pédagogique depuis la DB
                         const { getStudentPedagogyData } = await import('@/app/actions/pedagogie');
                         const peda = await getStudentPedagogyData(s.id);
                         const progress = peda?.globalProgress || 0;
@@ -78,7 +84,7 @@ export default function MoniteurStudentsPage() {
                             score,
                             progress,
                             hours: `${s.lessonsCount}/35h`,
-                            status: progress > 80 ? 'Prêt examen' : (progress < 20 ? 'Débutant' : 'En cours')
+                            status: progress > 80 ? 'Prêt examen' : (progress < 25 ? 'Débutant' : 'En cours')
                         };
                     }));
                     setStudents(finalStudents);

@@ -310,7 +310,15 @@ function MoniteurEvaluationsContent() {
                                                     min="0"
                                                     max="20"
                                                     value={evalNote}
-                                                    onChange={e => setEvalNote(e.target.value)}
+                                                    onChange={e => {
+                                                        const val = e.target.value;
+                                                        if (val === '') {
+                                                            setEvalNote('');
+                                                        } else {
+                                                            const num = parseInt(val);
+                                                            if (!isNaN(num)) setEvalNote(num.toString());
+                                                        }
+                                                    }}
                                                     className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-white focus:border-[#00F5FF]/30 transition-colors"
                                                 />
                                             </div>
