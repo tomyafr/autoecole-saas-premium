@@ -46,7 +46,7 @@ export function buildReminderEmail(studentName: string, date: string, time: stri
             .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 24px 0; }
             h2 { color: #ffffff; font-size: 20px; margin: 0 0 8px; }
             .subtitle { color: #8A94A6; font-size: 14px; margin: 0 0 24px; }
-            .info-row { display: flex; justify-content: space-between; padding: 12px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 8px; }
+            .info-row { padding: 12px 16px; background: #161F28; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 8px; }
             .info-label { color: #5F6B7A; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
             .info-value { color: #ffffff; font-size: 14px; font-weight: 600; }
             .highlight { background: linear-gradient(135deg, rgba(0,245,255,0.1), rgba(0,245,255,0.02)); border: 1px solid rgba(0,245,255,0.2); border-radius: 12px; padding: 16px; text-align: center; margin-top: 24px; }
@@ -66,20 +66,36 @@ export function buildReminderEmail(studentName: string, date: string, time: stri
                 <p class="subtitle">Bonjour ${studentName}, voici un rappel pour votre prochaine session.</p>
                 
                 <div class="info-row">
-                    <span class="info-label">Type</span>
-                    <span class="info-value">${type}</span>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td align="left" class="info-label" width="30%">Type</td>
+                            <td align="right" class="info-value" width="70%">${type}</td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Date</span>
-                    <span class="info-value">${date}</span>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td align="left" class="info-label" width="30%">Date</td>
+                            <td align="right" class="info-value" width="70%">${date}</td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Heure</span>
-                    <span class="info-value">${time}</span>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td align="left" class="info-label" width="30%">Heure</td>
+                            <td align="right" class="info-value" width="70%">${time}</td>
+                        </tr>
+                    </table>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Formateur</span>
-                    <span class="info-value">${instructorName}</span>
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td align="left" class="info-label" width="30%">Formateur</td>
+                            <td align="right" class="info-value" width="70%">${instructorName}</td>
+                        </tr>
+                    </table>
                 </div>
                 
                 <div class="highlight">
