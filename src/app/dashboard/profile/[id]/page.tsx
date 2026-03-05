@@ -289,39 +289,45 @@ export default function PublicProfilePage() {
 
                             {canSeeHistory ? (
                                 <div className="space-y-4">
-                                    {profile.history.map((item: any, i: number) => (
-                                        <div
-                                            key={i}
-                                            onClick={() => (item.note || item.score || item.negative_points) && setSelectedHistoryItem(item)}
-                                            className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] transition-colors group gap-4 ${(item.note || item.score || item.negative_points) ? 'cursor-pointer' : ''}`}
-                                        >
-                                            <div className="flex items-center gap-5">
-                                                <div className="text-center w-14 shrink-0 opacity-60 font-mono">
-                                                    <div className="text-[10px] font-bold uppercase tracking-widest text-[#8A94A6]">{new Date(item.date).toLocaleDateString('fr-FR', { month: 'short' })}</div>
-                                                    <div className="text-lg font-black text-white">{new Date(item.date).getDate()}</div>
+                                    {profile.history.map((item: any, i: number) => {
+                                        const isLesson = item.typeName?.toLowerCase().includes('leçon');
+                                        const isDone = item.statusDisplay?.toLowerCase().includes('terminé') || item.statusDisplay?.toLowerCase().includes('complété');
+                                        const clickable = isLesson && isDone;
+
+                                        return (
+                                            <div
+                                                key={i}
+                                                onClick={() => clickable && setSelectedHistoryItem(item)}
+                                                className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] transition-colors group gap-4 ${clickable ? 'cursor-pointer' : ''}`}
+                                            >
+                                                <div className="flex items-center gap-5">
+                                                    <div className="text-center w-14 shrink-0 opacity-60 font-mono">
+                                                        <div className="text-[10px] font-bold uppercase tracking-widest text-[#8A94A6]">{new Date(item.date).toLocaleDateString('fr-FR', { month: 'short' })}</div>
+                                                        <div className="text-lg font-black text-white">{new Date(item.date).getDate()}</div>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-white group-hover:text-[#00F5FF] transition-colors">{item.typeName}</h4>
+                                                        <p className="text-xs text-[#8A94A6] mt-1 flex items-center gap-2">
+                                                            <UserIcon size={12} className="opacity-50" />
+                                                            {isStudent ? 'Formateur' : 'Élève'} : <span className="text-white font-medium">{item.person}</span>
+                                                            {item.time && <span className="text-[#5F6B7A]">— {item.time}</span>}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <h4 className="text-sm font-bold text-white group-hover:text-[#00F5FF] transition-colors">{item.typeName}</h4>
-                                                    <p className="text-xs text-[#8A94A6] mt-1 flex items-center gap-2">
-                                                        <UserIcon size={12} className="opacity-50" />
-                                                        {isStudent ? 'Formateur' : 'Élève'} : <span className="text-white font-medium">{item.person}</span>
-                                                        {item.time && <span className="text-[#5F6B7A]">— {item.time}</span>}
-                                                    </p>
+                                                <div className="flex items-center gap-3 shrink-0">
+                                                    {item.score && (
+                                                        <span className="text-sm font-bold text-amber-400">{item.score}/20</span>
+                                                    )}
+                                                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${item.statusDisplay === 'Terminé' || item.statusDisplay === 'Terminée' || item.statusDisplay === 'Complété' || item.statusDisplay === 'Complétée' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                                        item.statusDisplay === 'À venir' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                                            'bg-white/5 text-[#5F6B7A] border border-white/10'
+                                                        }`}>
+                                                        {item.statusDisplay}
+                                                    </span>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3 shrink-0">
-                                                {item.score && (
-                                                    <span className="text-sm font-bold text-amber-400">{item.score}/20</span>
-                                                )}
-                                                <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap ${item.statusDisplay === 'Terminé' || item.statusDisplay === 'Terminée' || item.statusDisplay === 'Complété' || item.statusDisplay === 'Complétée' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                                    item.statusDisplay === 'À venir' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                                                        'bg-white/5 text-[#5F6B7A] border border-white/10'
-                                                    }`}>
-                                                    {item.statusDisplay}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <div className="text-center py-16 text-[#5F6B7A] border-2 border-dashed border-white/5 rounded-2xl">
@@ -383,7 +389,20 @@ export default function PublicProfilePage() {
                                     </div>
                                     <div>
                                         <h2 className="text-xl font-black text-white uppercase tracking-tighter">Détails de la séance</h2>
-                                        <p className="text-[10px] text-[#8A94A6] uppercase font-bold tracking-widest">{new Date(selectedHistoryItem.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                            <p className="text-[10px] text-[#8A94A6] uppercase font-bold tracking-widest leading-none">
+                                                {new Date(selectedHistoryItem.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                                {selectedHistoryItem.time && ` — ${selectedHistoryItem.time}`}
+                                            </p>
+                                            {selectedHistoryItem.signed_at && (
+                                                <>
+                                                    <div className="w-1 h-1 rounded-full bg-white/20" />
+                                                    <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest leading-none">
+                                                        Réalisée à {new Date(selectedHistoryItem.signed_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                                    </p>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 <button onClick={() => setSelectedHistoryItem(null)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#5F6B7A] hover:text-white transition-colors">

@@ -69,12 +69,13 @@ export async function getUserProfile(targetId: string, requestorId: string, requ
                     .eq('student_id', targetId);
 
                 // Stats - On n'utilise que les leçons validées pour les heures effectuées
-                const totalLessons = (lessons || [])?.filter((l: any) => l.status === 'done').length;
-                const totalHours = totalLessons; // On considère 1 leçon = 1 heure ici, à affiner si besoin
+                const completedLessons = (lessons || [])?.filter((l: any) => l.status === 'done') || [];
+                const totalLessons = completedLessons.length;
+                const totalHours = totalLessons; // On considère 1 leçon = 1 heure ici
                 const pendingAppts = (appts || []).filter((a: any) => a.status === 'pending').length;
 
                 const avgScore = totalLessons > 0
-                    ? Math.round((lessons || []).reduce((sum: number, l: any) => sum + (l.score || 0), 0) / totalLessons * 10) / 10
+                    ? Math.round(completedLessons.reduce((sum: number, l: any) => sum + (l.score || 0), 0) / totalLessons * 10) / 10
                     : null;
 
                 // Compétences regroupées par catégorie
@@ -128,6 +129,8 @@ export async function getUserProfile(targetId: string, requestorId: string, requ
                     statusDisplay: l.status === 'done' ? 'Terminé' : l.status,
                     score: l.score,
                     title: l.title,
+                    time: l.time,
+                    signed_at: l.signed_at,
                     note: l.note,
                     negative_points: l.negative_points,
                     signature: l.signature,
@@ -209,6 +212,8 @@ export async function getUserProfile(targetId: string, requestorId: string, requ
                     statusDisplay: 'Terminée',
                     score: l.score,
                     title: l.title,
+                    time: l.time,
+                    signed_at: l.signed_at,
                     note: l.note,
                     negative_points: l.negative_points,
                     signature: l.signature,

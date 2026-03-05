@@ -154,6 +154,7 @@ export async function completeAppointmentWithEvaluation(
                 student_id: studentId,
                 instructor_id: instructorId,
                 date: apt.date,
+                time: apt.time,
                 title: 'Leçon de conduite',
                 score: score,
                 note: typeof comment === 'string' ? comment : '',
