@@ -140,7 +140,6 @@ export default function PublicProfilePage() {
                                     <InfoRow icon={<Building2 size={16} />} label="Centre" value={profile.centerName} />
                                     {profile.centerCity && <InfoRow icon={<Target size={16} />} label="Ville" value={profile.centerCity} />}
                                     <InfoRow icon={<Calendar size={16} />} label="Inscrit le" value={new Date(profile.createdAt).toLocaleDateString('fr-FR')} />
-                                    {profile.username && <InfoRow icon={<UserIcon size={16} />} label="Identifiant" value={profile.username} />}
                                     {profile.phone && <InfoRow icon={<Phone size={16} />} label="Téléphone" value={profile.phone} />}
                                 </div>
                             </div>

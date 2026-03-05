@@ -16,7 +16,6 @@ export async function getUserProfile(targetId: string, requestorId: string, requ
         const profile: any = {
             name: targetUser.name,
             role: targetUser.role,
-            username: targetUser.username,
             createdAt: targetUser.created_at,
             phone: targetUser.phone || null,
             avatar: targetUser.avatar || null,

@@ -239,7 +239,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <span className="text-[#5F6B7A]">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
                             <span className="text-[var(--color-text-primary)] text-opacity-50 mx-2">/</span>
                             <span className="text-[var(--color-text-primary)]">
-                                {pathname === '/dashboard/settings' ? 'Paramètres' : (navItems.find(n => n.href === pathname)?.label || pathname.split('/').pop()?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Tableau de bord')}
+                                {pathname === '/dashboard/settings' ? 'Paramètres' : pathname.startsWith('/dashboard/profile/') ? 'Profil' : (navItems.find(n => n.href === pathname)?.label || pathname.split('/').pop()?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Tableau de bord')}
                             </span>
                         </div>
                     </div>
