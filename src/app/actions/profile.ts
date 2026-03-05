@@ -51,6 +51,11 @@ export async function getUserProfile(targetId: string, requestorId: string, requ
                     .select('*, ref:competencies_reference!competency_code(title, category)')
                     .eq('student_id', targetId);
 
+                // Nombre total de compétences de RÉFÉRENCE (source de vérité)
+                const { count: totalRefComps } = await supabase
+                    .from('competencies_reference')
+                    .select('*', { count: 'exact', head: true });
+
                 // Paiements
                 const { data: payments } = await supabase
                     .from('payments')
@@ -80,8 +85,9 @@ export async function getUserProfile(targetId: string, requestorId: string, requ
                     competenciesByCategory[cat].push({ title: c.ref?.title || c.competency_code, level: c.level || 0 });
                 });
 
-                // Avancement global (% compétences >= 2 sur total)
-                const totalComps = (competencies || []).length;
+                // Avancement global — même calcul que getStudentPedagogyData
+                // On divise par le TOTAL de compétences de référence, pas par le nombre d'entrées élève
+                const totalComps = totalRefComps || 15;
                 const validatedComps = (competencies || []).filter((c: any) => c.level >= 2).length;
                 const progressPercent = totalComps > 0 ? Math.round((validatedComps / totalComps) * 100) : 0;
 
