@@ -33,6 +33,7 @@ export default function SettingsPage() {
     const [activeSection, setActiveSection] = useState('profile');
     const [isSaving, setIsSaving] = useState(false);
     const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [currentTime, setCurrentTime] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +52,8 @@ export default function SettingsPage() {
         if (u) {
             setUser(u);
             setName(u.name || '');
-            setPhone((u as any).phone || '');
+            setEmail(u.username || '');
+            setPhone(u.phone || '');
             setLoading(false);
         } else {
             // If No user found in Settings, layout will handle logout but let's be safe
@@ -72,9 +74,16 @@ export default function SettingsPage() {
         if (!user) return;
         setIsSaving(true);
         try {
-            const res = await updateUserProfile(user.id, { name, phone });
+            const res = await updateUserProfile(user.id, { name, phone, username: email });
             if (res.success) {
+                // IMPORTANT: Mettre à jour le localStorage pour que les changements persistent au refresh
+                const updatedUser = { ...user, name, phone, username: email };
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('autodrive_user', JSON.stringify(updatedUser));
+                }
+                setUser(updatedUser);
                 toast.success("Profil mis à jour !");
+                window.dispatchEvent(new Event('user-updated'));
             } else {
                 toast.error("Erreur: " + res.error);
             }
@@ -282,6 +291,8 @@ export default function SettingsPage() {
                                                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-[#5F6B7A] transition-colors group-focus-within/input:text-[#00F5FF]" size={18} />
                                                 <input
                                                     type="email"
+                                                    value={email}
+                                                    onChange={(e) => setEmail(e.target.value)}
                                                     placeholder="lucas.b@autodrive.pro"
                                                     className="w-full pl-14 pr-6 py-5 bg-[var(--color-card)] border border-[var(--color-border-subtle)] rounded-2xl text-sm font-bold text-[var(--color-text-primary)] focus:outline-none focus:border-[#00F5FF]/20 transition-all focus:bg-[var(--color-sidebar)]"
                                                 />

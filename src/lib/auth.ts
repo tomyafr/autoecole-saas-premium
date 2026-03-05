@@ -5,6 +5,8 @@ export interface User {
     name: string;
     role: UserRole;
     avatar: string;
+    username?: string;
+    phone?: string;
 }
 
 export function getDashboardPath(role: UserRole): string {

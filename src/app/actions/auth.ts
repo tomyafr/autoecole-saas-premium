@@ -45,6 +45,8 @@ export async function authenticateServer(
             name: found.name,
             role: found.role as UserRole,
             avatar: found.avatar || (found.name ? found.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : '??'),
+            username: found.username,
+            phone: found.phone,
         };
     } catch (globalError: any) {
         console.error("CRITICAL AUTH SERVER ERROR:", globalError);
@@ -76,7 +78,7 @@ export async function logoutServer() {
     await deleteSession();
 }
 
-export async function updateUserProfile(userId: string, data: { name?: string, phone?: string }) {
+export async function updateUserProfile(userId: string, data: { name?: string, phone?: string, username?: string }) {
     try {
         const { error } = await supabase
             .from('users')
@@ -84,6 +86,19 @@ export async function updateUserProfile(userId: string, data: { name?: string, p
             .eq('id', userId);
 
         if (error) throw error;
+
+        // Si le nom a changé, on met à jour la session (le cookie HttpOnly)
+        if (data.name) {
+            const { data: found } = await supabase.from('users').select('role').eq('id', userId).single();
+            if (found) {
+                await createSession({
+                    id: userId,
+                    role: found.role as UserRole,
+                    name: data.name,
+                });
+            }
+        }
+
         return { success: true };
     } catch (error: any) {
         console.error("Update profile error:", error);
