@@ -26,7 +26,7 @@ export async function getStudentDashboard(studentId: string) {
             .select('*, instructor:users!instructor_id(*)')
             .eq('student_id', studentId)
             .eq('status', 'pending')
-            .order('date', { ascending: false });
+            .order('date', { ascending: true });
 
         // Obtenir les paiements
         const { data: payments } = await supabase

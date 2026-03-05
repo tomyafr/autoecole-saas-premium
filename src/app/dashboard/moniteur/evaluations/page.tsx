@@ -45,7 +45,7 @@ function MoniteurEvaluationsContent() {
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
     // Formulaire d'évaluation
-    const [evalNote, setEvalNote] = useState<number>(20);
+    const [evalNote, setEvalNote] = useState<number | string>(20);
     const [evalComment, setEvalComment] = useState('');
     const [evalNegatives, setEvalNegatives] = useState('');
 
@@ -168,7 +168,7 @@ function MoniteurEvaluationsContent() {
                 lessonId,
                 selectedStudentId,
                 moniteur.id,
-                evalNote,
+                Number(evalNote),
                 evalComment,
                 evalNegatives,
                 stuStr,
@@ -310,7 +310,7 @@ function MoniteurEvaluationsContent() {
                                                     min="0"
                                                     max="20"
                                                     value={evalNote}
-                                                    onChange={e => setEvalNote(Number(e.target.value))}
+                                                    onChange={e => setEvalNote(e.target.value)}
                                                     className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-white focus:border-[#00F5FF]/30 transition-colors"
                                                 />
                                             </div>
