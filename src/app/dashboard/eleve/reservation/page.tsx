@@ -169,14 +169,14 @@ export default function ReservationPage() {
                                 <button
                                     key={inst.id}
                                     onClick={() => { setSelectedInstructorId(inst.id); setSelectedTime(null); }}
-                                    className={`premium-card p-4 flex items-center gap-4 transition-all relative overflow-hidden flex-1 min-w-[240px] max-w-[280px] ${selectedInstructorId === inst.id ? 'border-[#00F5FF] ring-2 ring-[#00F5FF]/20 bg-[#00F5FF]/[0.05] shadow-[0_0_20px_rgba(0,245,255,0.1)]' : 'hover:border-white/20'}`}
+                                    className={`premium-card p-4 flex items-center gap-4 transition-all relative overflow-hidden flex-1 min-w-[240px] max-w-[280px] ${selectedInstructorId === inst.id ? 'border-[#00F5FF] ring-4 ring-[#00F5FF]/10 bg-[#00F5FF]/[0.08] shadow-[0_0_40px_rgba(0,245,255,0.15)]' : 'border-white/10 hover:border-white/30'}`}
                                 >
                                     {selectedInstructorId === inst.id && (
                                         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-2 right-2 text-[#00F5FF]">
                                             <CheckCircle2 size={16} fill="currentColor" className="text-[#0B0F14]" />
                                         </motion.div>
                                     )}
-                                    <div className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center text-sm font-black text-[#5F6B7A]">
+                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black transition-all ${selectedInstructorId === inst.id ? 'bg-[#00F5FF]/10 text-[#00F5FF] border border-[#00F5FF]/30' : 'bg-white/5 text-[#5F6B7A]'}`}>
                                         {inst.avatar}
                                     </div>
                                     <div className="text-left">
