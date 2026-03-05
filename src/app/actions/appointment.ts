@@ -156,9 +156,8 @@ export async function completeAppointmentWithEvaluation(
                 date: apt.date,
                 title: 'Leçon de conduite',
                 score: score,
-                note: typeof comment === 'string' ? comment : '', // some schema use note, some use comment. Assuming comment is mapped to "comment" properly or just stored
-                // Actually, we saw dbData.lessons[0].score and dbData.lessons[0].title
-                // So score and title are definitely there. Let's just pass comment as well.
+                note: typeof comment === 'string' ? comment : '',
+                negative_points: negativePoints || '',
                 status: 'done',
                 signature: signatureJson,
                 signed_at: new Date().toISOString()

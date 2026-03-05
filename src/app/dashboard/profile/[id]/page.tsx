@@ -9,7 +9,7 @@ import {
     User as UserIcon, Calendar, Clock, ArrowLeft, Building2,
     GraduationCap, History, Star, BookOpen, CreditCard,
     FileText, Award, Target, TrendingUp, CheckCircle2,
-    Phone, Shield, ChevronRight, Users
+    Phone, Shield, ChevronRight, Users, X, PenTool, AlertTriangle
 } from 'lucide-react';
 
 export default function PublicProfilePage() {
@@ -22,7 +22,7 @@ export default function PublicProfilePage() {
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'overview' | 'history' | 'competencies'>('overview');
-
+    const [selectedHistoryItem, setSelectedHistoryItem] = useState<any | null>(null);
     useEffect(() => {
         const u = getUser();
         if (!u) {
@@ -285,7 +285,11 @@ export default function PublicProfilePage() {
                             {canSeeHistory ? (
                                 <div className="space-y-4">
                                     {profile.history.map((item: any, i: number) => (
-                                        <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] transition-colors group gap-4">
+                                        <div
+                                            key={i}
+                                            onClick={() => (item.note || item.score || item.negative_points) && setSelectedHistoryItem(item)}
+                                            className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] transition-colors group gap-4 ${(item.note || item.score || item.negative_points) ? 'cursor-pointer' : ''}`}
+                                        >
                                             <div className="flex items-center gap-5">
                                                 <div className="text-center w-14 shrink-0 opacity-60 font-mono">
                                                     <div className="text-[10px] font-bold uppercase tracking-widest text-[#8A94A6]">{new Date(item.date).toLocaleDateString('fr-FR', { month: 'short' })}</div>
@@ -358,6 +362,112 @@ export default function PublicProfilePage() {
                             ))}
                         </div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* MODAL DÉTAILS LEÇON */}
+            <AnimatePresence>
+                {selectedHistoryItem && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedHistoryItem(null)} />
+                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-2xl bg-[#0B0F14] border border-[#00F5FF]/20 rounded-[2rem] p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-2xl bg-[#00F5FF]/10 flex items-center justify-center text-[#00F5FF]">
+                                        <FileText size={20} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-black text-white uppercase tracking-tighter">Détails de la séance</h2>
+                                        <p className="text-[10px] text-[#8A94A6] uppercase font-bold tracking-widest">{new Date(selectedHistoryItem.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setSelectedHistoryItem(null)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#5F6B7A] hover:text-white transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                                    <p className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest mb-1 text-center">Note</p>
+                                    <p className="text-2xl font-black text-white text-center">{selectedHistoryItem.score ? `${selectedHistoryItem.score}/20` : 'N/A'}</p>
+                                </div>
+                                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 md:col-span-2">
+                                    <p className="text-[9px] font-black text-[#5F6B7A] uppercase tracking-widest mb-1">{isStudent ? 'Moniteur' : 'Élève'}</p>
+                                    <p className="text-sm font-bold text-white uppercase">{selectedHistoryItem.person}</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                {selectedHistoryItem.note && (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <Star size={14} className="text-[#00F5FF]" />
+                                            <label className="text-xs font-black text-[#5F6B7A] tracking-widest uppercase">Commentaire Global</label>
+                                        </div>
+                                        <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 border-l-2 border-l-[#00F5FF]/50 text-sm italic text-[#8A94A6] leading-relaxed">
+                                            "{selectedHistoryItem.note}"
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedHistoryItem.negative_points && (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <AlertTriangle size={14} className="text-amber-400" />
+                                            <label className="text-xs font-black text-[#5F6B7A] tracking-widest uppercase">Points à améliorer</label>
+                                        </div>
+                                        <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 border-l-2 border-l-amber-500/50 text-sm text-[#8A94A6] leading-relaxed">
+                                            {selectedHistoryItem.negative_points}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedHistoryItem.signature && (
+                                    <div className="space-y-4 pt-4 border-t border-white/5">
+                                        <div className="flex items-center gap-2">
+                                            <PenTool size={14} className="text-emerald-400" />
+                                            <label className="text-xs font-black text-[#5F6B7A] tracking-widest uppercase">Signatures formation</label>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <p className="text-[8px] font-bold text-[#5F6B7A] uppercase text-center">Élève</p>
+                                                <div className="h-24 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
+                                                    {(() => {
+                                                        try {
+                                                            if (!selectedHistoryItem.signature) return <span className="text-[10px]">Indisponible</span>;
+                                                            // Si c'est un objet stringifié (format récent)
+                                                            if (selectedHistoryItem.signature.startsWith('{')) {
+                                                                const sig = JSON.parse(selectedHistoryItem.signature);
+                                                                return <img src={sig.student} alt="Signature Eleve" className="max-h-full max-w-full opacity-80 invert brightness-200" />;
+                                                            }
+                                                            // Si c'est directement un dataURL (format ancien ou pedagogie.ts)
+                                                            return <img src={selectedHistoryItem.signature} alt="Signature Eleve" className="max-h-full max-w-full opacity-80 invert brightness-200" />;
+                                                        } catch (e) { return <span className="text-[10px]">Image corrompue</span>; }
+                                                    })()}
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <p className="text-[8px] font-bold text-[#5F6B7A] uppercase text-center">Moniteur</p>
+                                                <div className="h-24 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
+                                                    {(() => {
+                                                        try {
+                                                            if (!selectedHistoryItem.signature) return <span className="text-[10px]">Indisponible</span>;
+                                                            if (selectedHistoryItem.signature.startsWith('{')) {
+                                                                const sig = JSON.parse(selectedHistoryItem.signature);
+                                                                return <img src={sig.instructor} alt="Signature Moniteur" className="max-h-full max-w-full opacity-80 invert brightness-200" />;
+                                                            }
+                                                            // Dans l'ancien format, on n'a qu'une seule signature
+                                                            return <span className="text-[9px] text-[#5F6B7A]">Non spécifié</span>;
+                                                        } catch (e) { return <span className="text-[10px]">Image corrompue</span>; }
+                                                    })()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>

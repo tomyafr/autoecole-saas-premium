@@ -128,6 +128,9 @@ export async function getUserProfile(targetId: string, requestorId: string, requ
                     statusDisplay: l.status === 'done' ? 'Terminé' : l.status,
                     score: l.score,
                     title: l.title,
+                    note: l.note,
+                    negative_points: l.negative_points,
+                    signature: l.signature,
                 }));
                 (appts || []).forEach((a: any) => history.push({
                     date: a.date,
@@ -206,6 +209,9 @@ export async function getUserProfile(targetId: string, requestorId: string, requ
                     statusDisplay: 'Terminée',
                     score: l.score,
                     title: l.title,
+                    note: l.note,
+                    negative_points: l.negative_points,
+                    signature: l.signature,
                 }));
                 (givenAppts || []).forEach((a: any) => history.push({
                     date: a.date,
