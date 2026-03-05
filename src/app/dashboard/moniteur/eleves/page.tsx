@@ -64,9 +64,14 @@ export default function MoniteurStudentsPage() {
                         }
                     });
 
-                    const finalStudents = Array.from(stuMap.values()).map(s => {
+                    const finalStudents = await Promise.all(Array.from(stuMap.values()).map(async s => {
                         const score = s.lessonsCount > 0 ? (s.totalScore / s.lessonsCount).toFixed(1) : '-';
-                        const progress = Math.min(Math.round((s.lessonsCount / 35) * 100), 100);
+
+                        // Récupérer la VRAIE progression pédagogique depuis la DB
+                        const { getStudentPedagogyData } = await import('@/app/actions/pedagogie');
+                        const peda = await getStudentPedagogyData(s.id);
+                        const progress = peda?.globalProgress || 0;
+
                         return {
                             ...s,
                             score,
@@ -74,7 +79,7 @@ export default function MoniteurStudentsPage() {
                             hours: `${s.lessonsCount}/35h`,
                             status: progress > 80 ? 'Prêt examen' : (progress < 20 ? 'Débutant' : 'En cours')
                         };
-                    });
+                    }));
                     setStudents(finalStudents);
                 }
             } catch (err) {
@@ -200,14 +205,18 @@ export default function MoniteurStudentsPage() {
                         </thead>
                         <tbody>
                             {students.filter((s: any) => s.name.toLowerCase().includes(searchQuery.toLowerCase())).map((student: any) => (
-                                <tr key={student.id} className="group cursor-pointer">
+                                <tr
+                                    key={student.id}
+                                    className="group cursor-pointer hover:bg-white/[0.02] transition-colors"
+                                    onClick={() => router.push(`/dashboard/profile/${student.id}`)}
+                                >
                                     <td>
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-[#8A94A6] group-hover:text-[#00F5FF] transition-colors">
                                                 {student.name.split(' ').map((n: string) => n[0]).join('')}
                                             </div>
                                             <div className="flex flex-col min-w-0">
-                                                <span className="text-sm font-semibold text-white truncate">{student.name}</span>
+                                                <span className="text-sm font-semibold text-white group-hover:text-[#00F5FF] transition-colors truncate">{student.name}</span>
                                                 <span className="text-[10px] text-[#5F6B7A] font-bold uppercase tracking-widest mt-0.5">{student.hours} validées</span>
                                             </div>
                                         </div>
@@ -251,7 +260,7 @@ export default function MoniteurStudentsPage() {
                                         </div>
                                     </td>
                                     <td className="text-right">
-                                        <button onClick={() => handleAction(`Ouverture du profil complet de ${student.name}`)} className="w-9 h-9 rounded-lg flex items-center justify-center text-[#5F6B7A] hover:bg-[#00F5FF]/10 hover:text-[#00F5FF] transition-all">
+                                        <button className="w-9 h-9 rounded-lg flex items-center justify-center text-[#5F6B7A] hover:bg-[#00F5FF]/10 hover:text-[#00F5FF] transition-all">
                                             <ChevronRight size={18} />
                                         </button>
                                     </td>

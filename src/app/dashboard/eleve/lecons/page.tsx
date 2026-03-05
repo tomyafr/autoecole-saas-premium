@@ -18,37 +18,66 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUser, type User as UserType } from '@/lib/auth';
+import { getStudentDashboard } from '@/app/actions/dashboard';
+import { cancelAppointment } from '@/app/actions/appointment';
 import { AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Calendar as CalendarIcon, Edit3, Trash2 } from 'lucide-react';
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().toLocaleDateString('fr-FR', { month: 'short' });
-
-const LESSONS: any[] = [];
 
 export default function LeconsPage() {
     const router = useRouter();
     const [user, setUser] = useState<UserType | null>(null);
     const [loading, setLoading] = useState(true);
+    const [lessons, setLessons] = useState<any[]>([]);
+    const [pendingAppointments, setPendingAppointments] = useState<any[]>([]);
 
     const [selectedLesson, setSelectedLesson] = useState<any>(null);
     const [iaReportModal, setIaReportModal] = useState(false);
     const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+    const [isCanceling, setIsCanceling] = useState<string | null>(null);
 
     const triggerFeedback = (msg: string) => {
         setActionFeedback(msg);
         setTimeout(() => setActionFeedback(null), 3000);
     };
 
+    const fetchData = async (uId: string) => {
+        try {
+            const res = await getStudentDashboard(uId);
+            const parsed = typeof res === 'string' ? JSON.parse(res) : res;
+            if (parsed.success && parsed.data) {
+                setLessons(parsed.data.lessons || []);
+                setPendingAppointments(parsed.data.appointmentsAsStudent || []);
+            }
+        } catch (e) {
+            console.error('Erreur chargement données', e);
+        }
+    };
+
     useEffect(() => {
         const u = getUser();
         if (u) {
             setUser(u);
-            setLoading(false);
+            fetchData(u.id).then(() => setLoading(false));
         } else {
             router.replace('/login');
         }
     }, [router]);
+
+    const handleCancel = async (id: string) => {
+        if (!confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?')) return;
+        setIsCanceling(id);
+        const res = await cancelAppointment(id);
+        if (res.success) {
+            triggerFeedback('Rendez-vous annulé avec succès');
+            if (user) await fetchData(user.id);
+        } else {
+            triggerFeedback('Erreur lors de l\'annulation');
+        }
+        setIsCanceling(null);
+    };
 
     if (loading || !user) {
         return (
@@ -115,78 +144,151 @@ export default function LeconsPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {LESSONS.length === 0 ? (
+                            {pendingAppointments.length === 0 && lessons.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="text-center py-10 text-[var(--color-text-muted)] text-sm font-medium">
-                                        Aucune leçon récente trouvée.
+                                        Aucune leçon planifiée ou récente trouvée.
                                     </td>
                                 </tr>
-                            ) : LESSONS.map((lesson, idx) => (
-                                <motion.tr
-                                    key={lesson.id}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    className="group"
-                                >
-                                    <td>
-                                        <div className="flex flex-col">
-                                            <span className="text-[var(--color-text-primary)] font-semibold">
-                                                {lesson.date}
-                                            </span>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] group-hover:text-[var(--color-accent)] transition-colors">{lesson.id}</span>
-                                                <div className="w-1 h-1 rounded-full bg-white/10" />
-                                                <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{lesson.time}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-[var(--color-card)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[10px] font-black text-[var(--color-text-muted)] group-hover:bg-[var(--color-accent)]/10 group-hover:text-[var(--color-accent)] transition-all">
-                                                {lesson.moniteur.split(' ').map((n: string) => n[0]).join('')}
-                                            </div>
-                                            <span className="text-sm font-medium text-[var(--color-text-muted)]">{lesson.moniteur}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-1.5 rounded-lg bg-[var(--color-card)] border border-[var(--color-border-subtle)] text-[var(--color-text-muted)]">
-                                                <Car size={14} />
-                                            </div>
-                                            <span className="text-xs font-semibold text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)] transition-colors">{lesson.vehicule}</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        {lesson.score ? (
-                                            <div className="flex flex-col gap-1.5 min-w-[120px]">
-                                                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                                                    <span className="text-[var(--color-text-muted)]">Maîtrise Globale</span>
-                                                    <span className="text-emerald-400 font-mono">{lesson.score}</span>
+                            ) : (
+                                <>
+                                    {/* RDV EN ATTENTE */}
+                                    {pendingAppointments.map((appt, idx) => (
+                                        <motion.tr
+                                            key={`appt-${appt.id}`}
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: idx * 0.05 }}
+                                            className="group bg-[var(--color-accent)]/[0.02] hover:bg-[var(--color-accent)]/[0.05] transition-colors border-l-2 border-[var(--color-accent)]"
+                                        >
+                                            <td>
+                                                <div className="flex flex-col pl-4">
+                                                    <span className="text-[var(--color-text-primary)] font-semibold">
+                                                        {new Date(appt.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{appt.time}</span>
+                                                        <div className="w-1 h-1 rounded-full bg-white/10" />
+                                                        <span className="text-[9px] font-bold text-[var(--color-accent)] uppercase tracking-widest font-mono">À Venir</span>
+                                                    </div>
                                                 </div>
-                                                <div className="h-1 w-full bg-[var(--color-card)] rounded-full overflow-hidden">
-                                                    <div className="h-full bg-emerald-400 opacity-60 rounded-full" style={{ width: `${(parseInt(lesson.score) / 20) * 100}%` }} />
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-[var(--color-card)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[10px] font-black text-[var(--color-text-muted)]">
+                                                        {appt.instructor?.name ? appt.instructor.name.split(' ').map((n: string) => n[0]).join('') : '?'}
+                                                    </div>
+                                                    <span className="text-sm font-medium text-[var(--color-text-muted)]">{appt.instructor?.name || 'Non assigné'}</span>
                                                 </div>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
-                                                <div className="w-1 h-1 rounded-full bg-white/20" />
-                                                <span className="text-[10px] font-semibold uppercase tracking-widest">Données en attente</span>
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <span className={`status-badge ${lesson.status === 'Effectué' ? 'status-badge-cyan' : 'status-badge-gray'}`}>
-                                            {lesson.status}
-                                        </span>
-                                    </td>
-                                    <td className="text-right">
-                                        <button onClick={() => setSelectedLesson(lesson)} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">
-                                            <ArrowUpRight size={18} />
-                                        </button>
-                                    </td>
-                                </motion.tr>
-                            ))}
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="p-1.5 rounded-lg bg-[var(--color-card)] border border-[var(--color-accent)]/20 text-[var(--color-accent)]">
+                                                        <CalendarIcon size={14} />
+                                                    </div>
+                                                    <span className="text-xs font-semibold text-[var(--color-text-primary)]">{appt.type || 'Session conduite'}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] animate-pulse" />
+                                                    <span className="text-[10px] font-semibold uppercase tracking-widest">Programmée</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className="status-badge status-badge-cyan bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+                                                    En attente
+                                                </span>
+                                            </td>
+                                            <td className="text-right flex items-center justify-end gap-2 pr-4 pt-4">
+                                                <button
+                                                    onClick={() => triggerFeedback('Modification bientôt disponible')}
+                                                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[var(--color-text-muted)] hover:text-white transition-colors"
+                                                    title="Modifier"
+                                                >
+                                                    <Edit3 size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleCancel(appt.id)}
+                                                    disabled={isCanceling === appt.id}
+                                                    className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                                                    title="Annuler"
+                                                >
+                                                    {isCanceling === appt.id ? <Clock size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                                                </button>
+                                            </td>
+                                        </motion.tr>
+                                    ))}
+
+                                    {/* LEÇONS EFFECTUÉES */}
+                                    {lessons.map((lesson, idx) => (
+                                        <motion.tr
+                                            key={`lesson-${lesson.id}`}
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: (pendingAppointments.length + idx) * 0.05 }}
+                                            className="group"
+                                        >
+                                            <td>
+                                                <div className="flex flex-col pl-4">
+                                                    <span className="text-[var(--color-text-primary)] font-semibold">
+                                                        {new Date(lesson.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">{lesson.time || 'N/A'}</span>
+                                                        <div className="w-1 h-1 rounded-full bg-white/10" />
+                                                        <span className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em] group-hover:text-[var(--color-accent)] transition-colors">#{lesson.id.substring(0, 8)}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-[var(--color-card)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[10px] font-black text-[var(--color-text-muted)] group-hover:bg-[var(--color-accent)]/10 group-hover:text-[var(--color-accent)] transition-all">
+                                                        {lesson.instructor?.name ? lesson.instructor.name.split(' ').map((n: string) => n[0]).join('') : '?'}
+                                                    </div>
+                                                    <span className="text-sm font-medium text-[var(--color-text-muted)]">{lesson.instructor?.name || 'Nom inconnu'}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="p-1.5 rounded-lg bg-[var(--color-card)] border border-[var(--color-border-subtle)] text-[var(--color-text-muted)]">
+                                                        <Car size={14} />
+                                                    </div>
+                                                    <span className="text-xs font-semibold text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)] transition-colors">Véhicule standard</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {lesson.score ? (
+                                                    <div className="flex flex-col gap-1.5 min-w-[120px]">
+                                                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                                                            <span className="text-[var(--color-text-muted)]">Maîtrise Globale</span>
+                                                            <span className="text-emerald-400 font-mono">{lesson.score}/20</span>
+                                                        </div>
+                                                        <div className="h-1 w-full bg-[var(--color-card)] rounded-full overflow-hidden">
+                                                            <div className="h-full bg-emerald-400 opacity-60 rounded-full" style={{ width: `${(parseInt(lesson.score) / 20) * 100}%` }} />
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                                                        <div className="w-1 h-1 rounded-full bg-white/20" />
+                                                        <span className="text-[10px] font-semibold uppercase tracking-widest">Non notée</span>
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <span className="status-badge status-badge-gray text-white">
+                                                    Effectuée
+                                                </span>
+                                            </td>
+                                            <td className="text-right pr-4">
+                                                <button onClick={() => setSelectedLesson({ ...lesson, moniteur: lesson.instructor?.name || 'Inconnu', vehicule: 'Standard' })} className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">
+                                                    <ArrowUpRight size={18} />
+                                                </button>
+                                            </td>
+                                        </motion.tr>
+                                    ))}
+                                </>
+                            )}
                         </tbody>
                     </table>
                 </div>

@@ -41,6 +41,45 @@ export async function createAppointment(studentId: string, instructorName: strin
     }
 }
 
+export async function cancelAppointment(appointmentId: string) {
+    try {
+        const { error } = await supabase
+            .from('appointments')
+            .delete()
+            .eq('id', appointmentId)
+            .eq('status', 'pending'); // On ne peut annuler QUE si c'est en attente
+
+        if (error) throw error;
+
+        revalidatePath('/dashboard/eleve/lecons');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Failed to cancel appointment:', error);
+        return { success: false, error: error.message || 'Database error' };
+    }
+}
+
+export async function rescheduleAppointment(appointmentId: string, newDate: Date, newTime: string) {
+    try {
+        const { error } = await supabase
+            .from('appointments')
+            .update({
+                date: newDate.toISOString(),
+                time: newTime
+            })
+            .eq('id', appointmentId)
+            .eq('status', 'pending'); // On ne peut modifier QUE si c'est en attente
+
+        if (error) throw error;
+
+        revalidatePath('/dashboard/eleve/lecons');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Failed to reschedule appointment:', error);
+        return { success: false, error: error.message || 'Database error' };
+    }
+}
+
 export async function getAppointmentsForStudent(studentId: string) {
     const { data, error } = await supabase
         .from('appointments')
